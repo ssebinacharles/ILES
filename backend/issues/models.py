@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -23,6 +25,23 @@ class InternshipPlacement(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("Please end date must be after start date")
+        
+        overlapping = InternshipPlacement.objects.filter(
+            student=self.student
+        ).filter(
+            Q(start_date__lt=self.end_date) &
+            Q(end_date__gt=self.start_date)
+        ).exclude(id=self.id)
+        
+        if overlapping.exists():
+            raise ValidationError("This placement overlaps with anotherexisting placement")
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+        
     
     class Meta:
         ordering = ["-created_at"]
@@ -47,6 +66,32 @@ class InternshipPlacement(models.Model):
             on_delete=models.CASCADE,
             related_name="weekly_logs"
         )
+        
+        def save(self, *args, **kwargs):
+            if self.pk:
+                old_log = WeeklyLog.objects.get(pk=self.pk)
+                
+                if old_log.status == "approved":
+                    raise ValidationError("Approved logs cannot be edited.")
+            super().save(*args, **kwargs)
+            
+        def submit(self):
+            if self.status != "draft":
+                raise ValidationError("Only draft logs can be submitted")
+            self.status = "submitted"
+            self.save()
+            
+        def review(self):
+            if self.status != "submitted":
+                raise ValidationError("Only submitted logs can be reviewed")
+            self.status = "reviewed"
+            self.save()
+            
+        def approved(self):
+            if self.status != "reviewed":
+                raise ValidationError("Only reviewed logs can be approved ")
+            self.status = "approved"
+            self.save()
         
         student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="logs", help_text="Must match placement.student")
         week_number = models.PositiveIntegerField(
