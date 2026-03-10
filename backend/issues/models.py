@@ -184,21 +184,9 @@ class Evaluation(models.Model):
 
     def save(self, *args, **kwargs):
 
-        if all([
-            self.supervisor_score is not None,
-            self.academic_score is not None,
-            self.logbook_score is not None,
-        ]):
-
+        if all(score is not None for score in [self.supervisor_score, self.academic_score, self.logbook_score]):
             self.total_score = (
-                (self.supervisor_score * 0.4)
-                + (self.academic_score * 0.3)
-                + (self.logbook_score * 0.3)
-            )
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        student = self.placement.student
-        student_name = student.get_full_name() or student.username
-        return f"Evaluation for {student_name} - {self.total_score:.1f}%"
+                self.supervisor_score * 0.5 +
+                self.academic_score * 0.3 +
+                self.logbook_score * 0.2
+            )                                                                               
