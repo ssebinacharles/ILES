@@ -1,0 +1,83 @@
+WORKPLACE SUPERVISOR USER STORIES
+1.	Review student weekly logs:
+              As a workplace supervisor , I want to view and review weekly logs submitted by interns     so that I can monitor their progress during the internship
+            Functional requirements
+•	The system shall allow the supervisor to log into the system
+•	The system shall allow the supervisor to view a list of assigned interns
+•	The system shall allow the supervisor to open and read weekly log submissions
+•	The system shall allow the supervisor to approve or reject weekly logs 
+            Non functional requirements
+•	The system shall load weekly logs within 2 seconds
+•	Only authorized supervisors can access intern logs 
+•	The system shall ensure data security and confidentiality
+2.	Provide feedback to interns
+As a workplace supervisor , I want to comment on intern weekly logs so that I can guide them on improving their work
+Functional requirements
+•	The system shall allow the supervisor to add comments to weekly logs 
+•	The system shall allow the supervisor to edit feedback before submission 
+•	The system shall notify the student when feedback is provided
+             Non functional requirements
+•	Feedback should be stored securely in the database
+•	The system shall support 24/7 availability
+•	The system shall maintain data integrity
+3.	Evaluate intern performance
+As a workplace supervisor , I want to evaluate intern performance so that the intern admin  can access the student’s internship performance
+Functional requirements 
+•	The system shall allow supervisors to fill an evaluation form
+•	The system shall allow supervisors to assign performance scores
+•	The system shall allow supervisors to submit the evaluation to the university
+              Non functional requirements
+•	Evaluation data must be accurate and reliable 
+•	The system must prevent unauthorized editing after submission
+•	The system shall provide high system reliability
+4.	Update weighted score calculation
+As a workplace supervisor I want the system to calculate a student’s final internship score using weighted evaluation criteria so that the final result fairly reflects performance across all required assessment components
+Functional requirements 
+•	The system shall allow supervisors to enter scores for each criterion
+•	The system shall compute the final internship score by summing all weighted scores the final internship score converted to 15% out of the total score after assessment of the submitted reported from the student 
+•	The system shall send this 15% score to the internship admin
+•	The system shall display the final score on the student evaluation dashboard
+              Non functional requirements
+•	The score calculation must be accurate and automatic 
+•	The system should compute results instantly after score submission
+•	The system should securely store evaluation results
+
+Workflow states
+Typical workflow of the system
+Log submitted – student submits weekly report
+Pending review – waiting for the supervisor review
+Criteria created 
+Scores entered
+Weighted scores calculated
+Final score generated
+Approved – supervisor approves report
+Rejected – supervisor rejects report with feedback
+Evaluation submitted – final evaluation completed 
+
+
+Identified Entities
+1.	Student:
+•	Student_ID
+•	Registration_number
+•	Department
+•	Placement_ID 
+2.	Workplace supervisor
+•	Log_ID
+•	Student_ID
+•	Week_number
+•	Description
+•	Status 
+3.	Feedback 
+•	Feedback_ID
+•	Supervisor_ID
+•	Log_ID
+•	Comment
+•	Date
+4.	Evaluation
+•	Evaluation_ID
+•	Supervisor_ID 
+•	Student_ID
+•	Score
+•	Remarks 
+
+
