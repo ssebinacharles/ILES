@@ -1,0 +1,52 @@
+USER STORIES FOR STUDENT
+
+1. As as tudent, I want to submit my weekly internship log so that my supervisor and university can track my progress.
+2. As a student, I want to view feedback from my supervisor so that I can improve my performance during the internship.
+3. As a student, I want to see my evaluation scores so that I can understand how my internship performance is graded.
+4. As a student, I want to update my internship placement details so that the university has accurate information about where I am working.
+5. As a student, I want to view my internship progress dashboard so that I can monitor my submitted logs, evaluations, and overall performance.
+
+FUNCTIONAL REQUIREMENTS
+
+1. The system shall allow students to submit weekly internship logs containing activities performed during the internship period.
+2. The system shall allow supervisors to review submitted logs and provide feedback to students.
+3. The system shall allow students to view supervisor feedback on their internship logs.
+4. The system shall allow supervisors or the university to assign evaluation scores to students based on internship performance.
+5. The system shall allow students to view their evaluation scores for transparency in grading.
+6. The system shall allow students to update their internship placement details such as organization name, supervisor, and location.
+7. The system shall provide a dashboard for students displaying internship progress including logs submitted, feedback received, and evaluation results.
+8. The system shall maintain a record of all submitted internship logs and evaluations for tracking and reporting.
+
+NON FUNCTIONAL REQUIREMENTS
+
+1. Usability: The system interface shall be simple and easy for students and supervisors to navigate with minimal training.
+2. Security: The system shall restrict access so that only authorized users (students, supervisors, administrators) can view or modify internship data.
+3. Performance: The system shall load dashboards, logs, and feedback within an acceptable response time (e.g under 3 seconds)
+4. Availability: The system shall be accessible online and available at least 99% of the time during internship periods.
+5. Data Integrity: The system shall ensure submitted logs and evaluations are stored accurately without data loss.
+6. Scalability: The system shall support multiple students and supervisors accessing the platform simultaneously.
+
+WORKFLOW STATES
+
+1. Placement Registered
+The student records or updates their internship placement details (organization, supervisor, location).
+2. Log Drafted
+The student writes their weekly internship activities but has not yet submitted the log.
+3. Log Submitted
+The student submits the completed weekly log to the system for supervisor review.
+4. Feedback Reviewed
+The student views comments or feedback provided by the supervisor on the submitted log.
+5. Evaluation Viewed
+The student checks their internship evaluation scores assigned by the supervisor or university.
+6. Progress Monitored
+The student views their internship progress dashboard showing submitted logs, feedback, and performance status.
+
+IDENTIFIED ENTITIES
+
+Student – The user performing the internship and submitting logs.
+Supervisor – The workplace or academic supervisor responsible for reviewing logs and giving feedback.
+Internship Placement – Information about the organization where the student is placed.
+Weekly Log – Records of tasks and activities performed during the internship each week.
+Feedback – Comments provided by the supervisor on submitted logs.
+Evaluation – Performance scores or grading assigned to the student.
+Dashboard – Aggregated view of internship progress including logs, feedback, and scores.
