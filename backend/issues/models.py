@@ -186,12 +186,10 @@ class Evaluation(models.Model):
 
         if all(score is not None for score in [self.supervisor_score, self.academic_score, self.logbook_score]):
             self.total_score = (
-<<<<<<< HEAD
                 self.supervisor_score * 0.5 +
                 self.academic_score * 0.3 +
                 self.logbook_score * 0.2
             )                                                                               
-=======
                 (self.supervisor_score * 0.4)
                 + (self.academic_score * 0.3)
                 + (self.logbook_score * 0.3)
@@ -300,4 +298,4 @@ class IssueLog(models.Model):
     def __str__(self):
         return f"Issue #{self.issue.id}: {self.action} by {self.performed_by}"
     
->>>>>>> 4e8acd3ef75c92fd8715f667afaf4ae380ef3d9d
+
