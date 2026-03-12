@@ -1,0 +1,76 @@
+USER STORIES FOR ACADEMIC SUPERVISOR.
+- As an academic supervisor, I want to review submitted weekly logs, so that I can monitor the student’s internship progress.
+
+- As an academic supervisor, I want to add comments and feedback on a student’s work, so that the student can improve performance and correct mistakes early.
+
+- As an academic supervisor, I want to evaluate and approve internship records, so that the institution can record fair academic assessment results.
+
+FUNCTIONAL REQUIREMENTS.
+A) View assigned students.
+The system shall allow an academic supervisor to see the list of students assigned to them.
+
+B) View submitted weekly logs.
+The system shall allow an academic supervisor to open and read weekly logs submitted by assigned students.
+
+C) Review student submissions.
+The system shall allow an academic supervisor to mark a weekly log as reviewed.
+
+D) Add comments and feedback.
+The system shall allow an academic supervisor to enter review comments for a weekly log.
+
+E) Approve or reject records.
+The system shall allow an academic supervisor to approve a reviewed log or send it back for correction.
+
+F) Perform academic evaluation.
+The system shall allow an academic supervisor to score or evaluate a student based on defined criteria.
+
+G) View evaluation criteria.
+The system shall display evaluation criteria to the academic supervisor during assessment.
+
+H) Save evaluation results.
+The system shall store submitted academic evaluations for each student.
+
+I) Track workflow status.
+The system shall show whether a record is in draft, submitted, reviewed or approved state.
+
+J) Restrict access by role.
+The system shall ensure that only users with the academic supervisor role can perform academic review and evaluation functions.
+
+NON-FUNCTIONAL REQUIREMENTS.
+Non-functional requirements describe how the system should behave.
+
+a] Security.Only authenticated academic supervisors should access supervisor dashboards and student evaluation pages.
+
+b] Usability.The review and evaluation interface should be simple and easy to understand.
+
+c] Performance.Weekly logs, assigned students and evaluations should load quickly.
+
+d] Reliability.Saved comments and evaluations should not be lost during normal use.
+
+e] Data integrity. The system should prevent duplicate evaluations for the same student and internship period.
+
+f] Maintainability.The frontend and backend should be modular so roles, workflows and evaluation logic can be updated later.
+
+g] Role-based access control.The system should enforce permissions based on role.
+
+WORKFLOW STATES FOR ACADEMIC SUPERVISOR.
+The academic supervisor workflow states should be;
+
+- Submitted results after assessing weekly logs sent to the administrator. submitted state displayed to the academic supervisor upon successfully sending weekly log results or supervision evaluation result or final report  results to the ADMINISTRATOR who will use a weighted criteria together with assessment results from workplace supervisor to compute student final grade or mark.
+
+- Reviewed and approved. This is sent to the student portal section after assessment after a particular weekly log or the final report of a student's submission has been accepted.
+
+- Reviewed and rejected. This is sent to the student portal section after assessment after a particular weekly log or the  final report of a student's submission has been denied.
+
+IDENTIFIED ENTITIES.
+i) Custom-user.It stores users such as student intern, workplace supervisor, academic supervisor, and administrator.
+
+ii) Internship placement.Stores placement details linking a student to an organization, time period, department in organization and workplace supervisor.
+
+iii) Weekly log.Stores weekly activities submitted by the student.
+
+iv) Evaluation criteria. Stores the criteria used during academic evaluation. 
+
+v) Evaluation. It stores scores, comments, and final assessment results.
+
+vi) Supervisor assignment. To link an academic supervisor to one or more students with placements. 
