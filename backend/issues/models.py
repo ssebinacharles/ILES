@@ -76,7 +76,7 @@ class InternshipPlacement(models.Model):
         super().save(*args, **kwargs) 
 
     def __str__(self):
-        student_name = self.students.get_full_name() or self.student.username 
+        student_name = self.student.get_full_name() or self.student.username 
         return f"{student_name} @ {self.company}"
      
 class WeeklyLog(models.Model):
@@ -119,7 +119,7 @@ class WeeklyLog(models.Model):
         if self.placement and self.student:
             if self.placement.student != self.student:
                 raise ValidationError({
-                    "student": "The log students must match the placement student."
+                    "student": "The log student must match the placement student."
                 })
         if self.placement and self.week_number:
             pass
@@ -160,4 +160,57 @@ class WeeklyLog(models.Model):
         }
 
         weekly_logs_score = models.DecimalField(**score_params)
-        supervisor_evaluation
+        supervisor_evaluation_score = models.DecimalField(**score_params)
+        work_supervisor_score = models.DecimalField(**score_params)
+        final_report_score = models.DecimalField(**score_params)
+        final_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+        grade = models.CharField(max_length=2, blank=True)
+        status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+        created_at = models.DateTimeField(auto_now_add=True)
+        history = HistoricalRecords()
+
+        class Meta:
+            ordering = ["-created_at"]
+
+        def compute_results(self):
+            self.final_score = (
+                (self.weekly_logs_score * 20 /100) +
+                (self.supervisor_evaluation_score *40 / 100) +
+                (self.final_report_score * 25 / 100) +
+                (self.work_supervisor_score * 15 / 100)
+            )
+
+            if self.final_score >= 80:
+                self.grade = "A"
+            elif self.final_score >= 70:
+                self.grade = "B"
+            elif self.final_score >= 60:
+                self.grade = "C"
+            elif self.final_score >= 50:
+                self.grade = "D"
+            else:
+                self.grade = "F"
+        def clean(self):
+            if self.pk:
+                old = Evaluation.objects.only('status').get(pk=self.pk)
+                if old.status == "approved":
+                    raise ValidationError("Approved evaluations cannot be edited. ")
+                super().clean()
+
+        def save(self, *args, **kwargs):
+            self.full_clean()
+            self.compute_results()
+            super().save(*args, **kwargs)
+
+        def __str__(self):
+            student = self.placement.student
+            student_name = student.get_full_name() or student.username
+            return f"Evaluation for {student_name} - {self.final} % ({self.grade})"
+
+@receiver(post_save, sender=Evaluation)
+def update_placement_status(sender, instance, **kwargs):
+    if instance.status == "approved" and instance.placement.status != "completed":
+          instance.placement.status = "completed"
+          instance.placement.save()
+
+        
