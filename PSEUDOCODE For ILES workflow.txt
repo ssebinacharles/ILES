@@ -1,0 +1,95 @@
+　　　　　　　　　　　　　　　PSEUDOCODE 
+
+START OF ILES WORKFLOW
+
+    STUDENT logs in
+
+    STUDENT updates internship placement details
+    STUDENT submits placement request
+    SET system_state = "Placement Pending Approval"
+
+    ADMINISTRATOR reviews placement request
+
+    IF placement is approved THEN
+        SET system_state = "Placement Approved"
+
+        ADMINISTRATOR assigns workplace supervisor
+        ADMINISTRATOR assigns academic supervisor
+
+        SET system_state = "Internship In Progress"
+
+        WHILE internship is still active DO
+
+            STUDENT drafts weekly log
+            STUDENT submits weekly log
+
+            SET system_state = "Log Submitted"
+            SET system_state = "Pending Review"
+
+            WORKPLACE_SUPERVISOR reviews submitted weekly log
+
+            IF workplace supervisor approves log THEN
+                workplace_log_status = "Approved"
+            ELSE
+                workplace_log_status = "Rejected"
+                WORKPLACE_SUPERVISOR adds comments / feedback
+                SET system_state = "Reviewed and Rejected"
+
+                STUDENT views feedback
+                STUDENT revises log
+                STUDENT resubmits weekly log
+
+                CONTINUE loop
+            ENDIF
+
+
+            ACADEMIC_SUPERVISOR reviews submitted weekly log
+
+            IF academic supervisor approves log THEN
+                academic_log_status = "Approved"
+            ELSE
+                academic_log_status = "Rejected"
+                ACADEMIC_SUPERVISOR adds comments / feedback
+                SET system_state = "Reviewed and Rejected"
+
+                STUDENT views feedback
+                STUDENT revises log
+                STUDENT resubmits weekly log
+
+                CONTINUE loop
+            ENDIF
+
+
+            IF workplace_log_status = "Approved"
+               AND academic_log_status = "Approved" THEN
+
+                SET system_state = "Reviewed and Approved"
+                STUDENT views progress dashboard
+            ENDIF
+
+        ENDWHILE
+
+
+        WORKPLACE_SUPERVISOR completes workplace evaluation
+        WORKPLACE_SUPERVISOR submits 15 percent workplace assessment
+
+        ACADEMIC_SUPERVISOR performs academic evaluation / final report review
+        ACADEMIC_SUPERVISOR submits academic results
+
+        SET system_state = "Evaluation Submitted"
+
+        ADMINISTRATOR receives evaluation components
+        ADMINISTRATOR computes weighted final score
+        ADMINISTRATOR publishes final result
+
+        SET system_state = "Final Grade Published"
+
+        STUDENT views evaluation scores and final result
+
+    ELSE
+        STUDENT returns to placement details
+        STUDENT updates internship placement details
+        STUDENT resubmits placement request
+    ENDIF
+
+END ILES_WORKFLOW
