@@ -1,8 +1,5 @@
 from django.contrib import admin
- HEAD
-from __future__ import annotations
 
-Django admin configuration for the ILES project
 
 
 from __future__ import annotations
@@ -146,10 +143,14 @@ class AdministratorProfileAdmin(admin.ModelAdmin):
         "office_name",
     )
     readonly_fields = ("created_at", "updated_at")
+ 
+  
 
 
- 0e66723 (Implement admin configurations for user profiles)
 
+from __future__ import annotations
+
+ 09a1c48 (add admin.py files)
 from typing import Any, Dict, List
 
 from django.contrib import admin
