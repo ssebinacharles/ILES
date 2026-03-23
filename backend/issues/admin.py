@@ -4,7 +4,6 @@ from __future__ import annotations
 
 Django admin configuration for the ILES project
 
-"""
 
 from __future__ import annotations
 
