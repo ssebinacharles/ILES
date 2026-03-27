@@ -1,6 +1,156 @@
 from django.contrib import admin
+
+
+
 from __future__ import annotations
 
+from typing import Any, Dict, List
+
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.utils.translation import gettext_lazy as _
+
+from .models import (
+    User,
+    StudentProfile,
+    SupervisorProfile,
+    AdministratorProfile,
+    Company,
+    InternshipPlacement,
+    SupervisorAssignment,
+    WeeklyLog,
+    Feedback,
+    EvaluationCriterion,
+    Evaluation,
+    EvaluationScore,
+    FinalResult,
+    AuditLog,
+    ReportDefinition,
+    GeneratedReport,
+)
+
+# Custom User Admin
+
+@admin.register(User)
+class CustomUserAdmin(BaseUserAdmin):
+    """Admin configuration for the custom User model.
+
+    Extends Django's built-in ``UserAdmin`` to include extra fields such
+    as ``role``, ``phone_number`` and ``is_verified``.  Provides
+    additional search and list configuration to make it easier to find
+    users by name or email and filter by role.
+    """
+
+    model = User
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "role",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("role", "is_staff", "is_active", "is_superuser")
+    search_fields = ("username", "email", "first_name", "last_name")
+    ordering = ("username",)
+
+    # Add extra fields to the default fieldsets
+    fieldsets = BaseUserAdmin.fieldsets + (
+        (
+            _("Additional information"),
+            {
+                "fields": ("role", "phone_number", "is_verified"),
+            },
+        ),
+    )
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        (
+            _("Additional information"),
+            {
+                "classes": ("wide",),
+                "fields": ("role", "phone_number", "is_verified"),
+            },
+        ),
+    )
+
+
+# Profile Admins
+
+@admin.register(StudentProfile)
+class StudentProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for student profiles."""
+
+    list_display = (
+        "user",
+        "registration_number",
+        "course",
+        "year_of_study",
+        "department",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "registration_number",
+        "course",
+        "department",
+    )
+    list_filter = ("course", "year_of_study", "department")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(SupervisorProfile)
+class SupervisorProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for supervisor profiles."""
+
+    list_display = (
+        "user",
+        "supervisor_type",
+        "organization_name",
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    list_filter = ("supervisor_type", "organization_name")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "organization_name",
+        "title",
+    )
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(AdministratorProfile)
+class AdministratorProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for administrator profiles."""
+
+    list_display = (
+        "user",
+        "office_name",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "office_name",
+    )
+    readonly_fields = ("created_at", "updated_at")
+ 
+  
+
+
+
+from __future__ import annotations
+
+ 09a1c48 (add admin.py files)
 from typing import Any, Dict, List
 
 from django.contrib import admin
