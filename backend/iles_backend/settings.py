@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'issues',
-
 ]
 
 MIDDLEWARE = [
@@ -82,8 +81,8 @@ WSGI_APPLICATION = 'iles_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'iles_db',
-        'USER': 'iles_user',
+        'NAME': 'iles2026',
+        'USER': 'ilesuser',
         'PASSWORD': '2026@iles',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -126,6 +125,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Use the custom user model from the issues app
+AUTH_USER_MODEL = 'issues.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

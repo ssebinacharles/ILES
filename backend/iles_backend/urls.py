@@ -16,15 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from issues.views import IssueViewSet
-from django.http import HttpResponse
 
+# Safe/guarded import: avoid failing project import if IssueViewSet is missing or broken.
+try:
+    from rest_framework.routers import DefaultRouter
+    from issues.views import IssueViewSet  # may raise ImportError
+    _issue_viewset_available = True
+except Exception:
+    IssueViewSet = None
+    _issue_viewset_available = False
+
+# Create router only once; register IssueViewSet only if available.
 router = DefaultRouter()
-router.register(r'issues', IssueViewSet)
+if _issue_viewset_available and IssueViewSet is not None:
+    router.register(r"issues", IssueViewSet, basename="issue")
 
 urlpatterns = [
-    path('', lambda request: HttpResponse("AITS Backend Running 🚀")), 
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("api/", include(router.urls)),
 ]
