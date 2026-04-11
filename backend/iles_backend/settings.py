@@ -134,3 +134,28 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ]
 }
+#securing password import environ
+import environ
+import os
+from pathlib import Path
+
+# 1. Initialize environ
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env(
+    # Set casting and default values
+    DEBUG=(bool, False)
+)
+
+# 2. Read the .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# 3. Use the variables
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
+
+# 4. Configure the Database using the URL from .env
+DATABASES = {
+    'default': env.db(),
+}
