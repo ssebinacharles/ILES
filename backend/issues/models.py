@@ -10,17 +10,13 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-# ============================================================
-# ABSTRACT BASE MODELS
-# ============================================================
+
 class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         abstract = True
-# ============================================================
-# USER / RBSE
-# ============================================================
+
 class UserRole(models.TextChoices):
     STUDENT = "STUDENT", _("Student")
     SUPERVISOR = "SUPERVISOR", _("Supervisor")
@@ -104,9 +100,7 @@ class AdministratorProfile(TimeStampedModel):
             raise ValidationError("AdministratorProfile can only be linked to an ADMINISTRATOR user.")
     def __str__(self):
         return self.user.get_full_name() or self.user.username
-# ============================================================
-# CORE ENTITIES
-# ============================================================
+
 class Company(TimeStampedModel):
     company_name = models.CharField(max_length=255, unique=True)
     location = models.CharField(max_length=255)
@@ -224,9 +218,7 @@ class SupervisorAssignment(TimeStampedModel):
             raise ValidationError("Supervisor type must match assignment role.")
     def __str__(self):
         return f"{self.placement} - {self.assignment_role} - {self.supervisor}"
-# ============================================================
-# WEEKLY LOGS + FEEDBACK
-# ============================================================
+
 class WeeklyLogStatus(models.TextChoices):
     DRAFT = "DRAFT", _("Draft")
     SUBMITTED = "SUBMITTED", _("Submitted")
@@ -309,9 +301,7 @@ class Feedback(TimeStampedModel):
             raise ValidationError("Only an assigned supervisor can review this weekly log.")
     def __str__(self):
         return f"{self.weekly_log} - {self.supervisor} - {self.decision}"
-# ============================================================
-# EVALUATION + CRITERIA + SCORES
-# ============================================================
+
 class CriterionGroup(models.TextChoices):
     WEEKLY_LOG = "WEEKLY_LOG", _("Weekly Log")
     SUPERVISOR_EVALUATION = "SUPERVISOR_EVALUATION", _("Supervisor Evaluation")
@@ -449,9 +439,7 @@ class EvaluationScore(TimeStampedModel):
         super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.evaluation} - {self.criterion}"
-# ============================================================
-# FINAL RESULT
-# ============================================================
+
 class FinalResult(TimeStampedModel):
     placement = models.OneToOneField(
         InternshipPlacement,
@@ -511,9 +499,7 @@ class FinalResult(TimeStampedModel):
         super().save(*args, **kwargs)
     def __str__(self):
         return f"Final Result - {self.placement}"
-# ============================================================
-# AUDIT TRAIL
-# ============================================================
+
 class AuditAction(models.TextChoices):
     CREATE = "CREATE", _("Create")
     UPDATE = "UPDATE", _("Update")
@@ -546,9 +532,7 @@ class AuditLog(models.Model):
         ]
     def __str__(self):
         return f"{self.action} - {self.model_label} - {self.object_id}"
-# ============================================================
-# AUTOMATED REPORTING
-# ============================================================
+
 class ReportType(models.TextChoices):
     INTERNSHIP_PROGRESS = "INTERNSHIP_PROGRESS", _("Internship Progress")
     STUDENT_PERFORMANCE = "STUDENT_PERFORMANCE", _("Student Performance")
