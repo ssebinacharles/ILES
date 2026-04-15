@@ -212,3 +212,4 @@ class PlacementPermission(BasePermission):
                 return False
             return obj.status in {"PENDING", "REJECTED"}
         return False
+......
