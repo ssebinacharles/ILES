@@ -17,3 +17,31 @@ from .models import (
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin): 
 # Register your models here.
+    model = User
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "role",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("role", "is_staff", "is_active", "is_superuser")
+    search_fields = ("username", "email", "first_name", "last_name")
+    ordering = ("username",)
+
+    # Extend the default fieldsets to expose our custom fields when
+    # editing an existing user.
+    fieldsets = BaseUserAdmin.fieldsets + (
+        (
+            _("Additional information"),
+            {
+                "fields": (
+                    "role",
+                    "phone_number",
+                    "is_verified",
+                ),
+            },
+        ),
+    )
