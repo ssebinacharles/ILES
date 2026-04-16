@@ -61,3 +61,20 @@ add_fieldsets = BaseUserAdmin.add_fieldsets + (
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
     """Admin configuration for student profiles."""
+    list_display = (
+        "user",
+        "registration_number",
+        "course",
+        "year_of_study",
+        "department",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "user__username",
+        "registration_number",
+        "course",
+        "department",
+    )
+    list_filter = ("course", "year_of_study", "department")
+    readonly_fields = ("created_at", "updated_at")
