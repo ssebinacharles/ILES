@@ -45,3 +45,19 @@ class CustomUserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+    
+add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        (
+            _("Additional information"),
+            {
+                "classes": ("wide",),
+                "fields": ("role", "phone_number"),
+            },
+        ),
+    )
+
+
+@admin.register(StudentProfile)
+class StudentProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for student profiles."""
