@@ -18,17 +18,13 @@ from .models import (
     UserRole,
     WeeklyLog,
 )
-
-
 def get_student_profile(user: User):
     """Return the student's profile if available, otherwise ``None``."""
     return getattr(user, "student_profile", None)
 
-
 def get_supervisor_profile(user: User):
     """Return the supervisor's profile if available, otherwise ``None``."""
     return getattr(user, "supervisor_profile", None)
-
 
 def get_admin_profile(user: User):
     """Return the administrator profile if available, otherwise ``None``."""
@@ -212,4 +208,87 @@ class PlacementPermission(BasePermission):
                 return False
             return obj.status in {"PENDING", "REJECTED"}
         return False
-......
+        
+class SupervisorAssignmentPermission(BasePermission):
+    """Assignments are managed by admins; assignees and owners may read them."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj: SupervisorAssignment) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_placement(request.user, obj.placement)
+        return is_administrator(request.user)
+
+class WeeklyLogPermission(BasePermission):
+    """Students manage their own logs, supervisors/admins review them."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        if request.method == "POST":
+            return is_student(request.user) or is_administrator(request.user)
+        return True
+
+    def has_object_permission(self, request, view, obj: WeeklyLog) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_weekly_log(request.user, obj)
+        if is_administrator(request.user):
+            return True
+        if is_student(request.user):
+            profile = get_student_profile(request.user)
+            if not profile or obj.placement.student_id != profile.id:
+                return False
+            return obj.status in {"DRAFT", "REJECTED", "SUBMITTED"}
+        return False
+
+class FeedbackPermission(BasePermission):
+    """Assigned supervisors/admins create feedback; students may view it."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return is_supervisor(request.user) or is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj: Feedback) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_feedback(request.user, obj)
+        if is_administrator(request.user):
+            return True
+        if is_supervisor(request.user):
+            profile = get_supervisor_profile(request.user)
+            return bool(profile and obj.supervisor_id == profile.id)
+        return False
+
+class EvaluationCriterionPermission(BasePermission):
+    """Evaluation criteria are readable by authenticated users, writable by admins."""
+
+    def has_permission(self, request, view) -> bool:
+        if request.method in SAFE_METHODS:
+            return bool(request.user and request.user.is_authenticated)
+        return is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj) -> bool:
+        if request.method in SAFE_METHODS:
+            return bool(request.user and request.user.is_authenticated)
+        return is_administrator(request.user)
+
+class EvaluationPermission(BasePermission):
+    """Evaluations are created by assigned supervisors and managed by admins."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        if request.method == "POST":
+            return is_supervisor(request.user) or is_administrator(request.user)
+        return True
