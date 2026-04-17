@@ -292,3 +292,43 @@ class EvaluationPermission(BasePermission):
         if request.method == "POST":
             return is_supervisor(request.user) or is_administrator(request.user)
         return True
+
+def has_object_permission(self, request, view, obj: Evaluation) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_evaluation(request.user, obj)
+        if is_administrator(request.user):
+            return True
+        if is_supervisor(request.user):
+            profile = get_supervisor_profile(request.user)
+            return bool(profile and obj.evaluator_id == profile.id and obj.status == "DRAFT")
+        return False
+
+class EvaluationScorePermission(BasePermission):
+    """Evaluation scores follow the parent evaluation's access rules."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return is_supervisor(request.user) or is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj: EvaluationScore) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_evaluation_score(request.user, obj)
+        if is_administrator(request.user):
+            return True
+        if is_supervisor(request.user):
+            profile = get_supervisor_profile(request.user)
+            return bool(profile and obj.evaluation.evaluator_id == profile.id and obj.evaluation.status == "DRAFT")
+        return False
+
+class FinalResultPermission(BasePermission):
+    """Final results are published by admins and viewable by related users."""
+
+    def has_permission(self, request, view) -> bool:
+        if not (request.user and request.user.is_authenticated):
+            return False
+        if request.method in SAFE_METHODS:
+            return True
+        return is_administrator(request.user)
