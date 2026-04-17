@@ -78,3 +78,18 @@ class StudentProfileAdmin(admin.ModelAdmin):
     )
     list_filter = ("course", "year_of_study", "department")
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(SupervisorProfile)
+class SupervisorProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for supervisor profiles."""
+
+    list_display = (
+        "user",
+        "supervisor_type",
+        "organization_name",
+        "title",
+        "created_at",
+        "updated_at",
+    )
+    
