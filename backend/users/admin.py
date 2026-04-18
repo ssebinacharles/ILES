@@ -100,3 +100,11 @@ class SupervisorProfileAdmin(admin.ModelAdmin):
 @admin.register(AdministratorProfile)
 class AdministratorProfileAdmin(admin.ModelAdmin):
     """Admin configuration for administrator profiles."""
+    list_display = (
+        "user",
+        "office_name",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = ("user__username", "office_name")
+    readonly_fields = ("created_at", "updated_at")
