@@ -332,3 +332,27 @@ class FinalResultPermission(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return is_administrator(request.user)
+
+def has_object_permission(self, request, view, obj: FinalResult) -> bool:
+        if request.method in SAFE_METHODS:
+            return can_access_final_result(request.user, obj)
+        return is_administrator(request.user)
+
+
+class AuditLogPermission(BasePermission):
+    """Audit logs are restricted to administrators."""
+
+    def has_permission(self, request, view) -> bool:
+        return is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj) -> bool:
+        return is_administrator(request.user)
+
+class ReportPermission(BasePermission):
+    """Reporting endpoints are restricted to administrators."""
+
+    def has_permission(self, request, view) -> bool:
+        return is_administrator(request.user)
+
+    def has_object_permission(self, request, view, obj) -> bool:
+        return is_administrator(request.user)
