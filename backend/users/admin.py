@@ -92,4 +92,11 @@ class SupervisorProfileAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    
+    list_filter = ("supervisor_type", "organization_name")
+    search_fields = ("user__username", "organization_name", "title")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(AdministratorProfile)
+class AdministratorProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for administrator profiles."""
