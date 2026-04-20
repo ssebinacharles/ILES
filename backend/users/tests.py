@@ -47,3 +47,43 @@ class UserModelTests(TestCase):
                 password="Pass1234!",
                 role=UserRole.SUPERVISOR,
             )
+
+class ProfileModelTests(TestCase):
+    """Tests ensuring that profiles enforce correct user roles."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.student_user = User.objects.create_user(
+            username="student",
+            email="student@example.com",
+            password="Pass1234!",
+            role=UserRole.STUDENT,
+        )
+        self.supervisor_user = User.objects.create_user(
+            username="supervisor",
+            email="supervisor@example.com",
+            password="Pass1234!",
+            role=UserRole.SUPERVISOR,
+        )
+        self.admin_user = User.objects.create_user(
+            username="admin",
+            email="admin@example.com",
+            password="Pass1234!",
+            role=UserRole.ADMINISTRATOR,
+        )
+
+    def test_student_profile_role_validation(self):
+        # Valid linkage to student user
+        profile = StudentProfile(
+            user=self.student_user,
+            registration_number="2026/001",
+            course="BIT",
+            year_of_study=3,
+            department="Computing",
+        )
+        profile.full_clean()  # should not raise
+        profile.save()
+        # Invalid linkage to a non‑student user
+        profile.user = self.supervisor_user
+        with self.assertRaises(ValidationError):
+            profile.full_clean()
