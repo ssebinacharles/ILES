@@ -87,3 +87,49 @@ class ProfileModelTests(TestCase):
         profile.user = self.supervisor_user
         with self.assertRaises(ValidationError):
             profile.full_clean()
+
+def test_supervisor_profile_role_validation(self):
+        # Valid linkage to supervisor user
+        profile = SupervisorProfile(
+            user=self.supervisor_user,
+            supervisor_type=SupervisorType.ACADEMIC,
+            organization_name="Acme University",
+            title="Lecturer",
+        )
+        profile.full_clean()
+        profile.save()
+        # Invalid linkage to a non‑supervisor user
+        profile.user = self.student_user
+        with self.assertRaises(ValidationError):
+            profile.full_clean()
+
+    def test_admin_profile_role_validation(self):
+        # Valid linkage to administrator user
+        profile = AdministratorProfile(user=self.admin_user, office_name="Internship Office")
+        profile.full_clean()
+        profile.save()
+        # Invalid linkage to a non‑admin user
+        profile.user = self.student_user
+        with self.assertRaises(ValidationError):
+            profile.full_clean()
+
+
+class UserViewSetAPITests(APITestCase):
+    """API tests for the user listing endpoint."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.admin_user = User.objects.create_user(
+            username="admin",
+            email="admin@example.com",
+            password="Pass1234!",
+            role=UserRole.ADMINISTRATOR,
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.student_user = User.objects.create_user(
+            username="student",
+            email="student@example.com",
+            password="Pass1234!",
+            role=UserRole.STUDENT,
+        )
