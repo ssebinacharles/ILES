@@ -109,3 +109,4 @@ class AdministratorProfileAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "office_name")
     readonly_fields = ("created_at", "updated_at")
 admin.site.site_header = _("Internship Learning Evaluation System")
+admin.site.site_title = _("ILES Admin Portal")
