@@ -110,3 +110,4 @@ class AdministratorProfileAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 admin.site.site_header = _("Internship Learning Evaluation System")
 admin.site.site_title = _("ILES Admin Portal")
+admin.site.site_title = _("Administration")
