@@ -1,13 +1,10 @@
 from __future__ import annotations
-
 from decimal import Decimal
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
 from .models import (
     AdministratorProfile,
     Company,
@@ -31,7 +28,6 @@ User = get_user_model()
 
 class BaseILESTestDataMixin:
     """Reusable setup data for API and model tests."""
-
     def setUp(self):
         super().setUp()
 
@@ -66,7 +62,6 @@ class BaseILESTestDataMixin:
             role=UserRole.ADMINISTRATOR,
             is_staff=True,
         )
-
         self.student_profile = StudentProfile.objects.create(
             user=self.student_user,
             registration_number="2026/001",
@@ -102,7 +97,6 @@ class BaseILESTestDataMixin:
             location="Kampala",
             contact_email="info@acme.com",
         )
-
         self.placement = InternshipPlacement.objects.create(
             student=self.student_profile,
             company=self.company,
@@ -121,7 +115,6 @@ class BaseILESTestDataMixin:
             end_date="2026-08-31",
             status=PlacementStatus.APPROVED,
         )
-
         self.academic_assignment = SupervisorAssignment.objects.create(
             placement=self.placement,
             supervisor=self.academic_profile,
@@ -136,7 +129,6 @@ class BaseILESTestDataMixin:
             assignment_role=SupervisorType.WORKPLACE,
             is_active=True,
         )
-
         self.weekly_log = WeeklyLog.objects.create(
             placement=self.placement,
             week_number=1,
@@ -169,7 +161,6 @@ class PlacementModelTests(BaseILESTestDataMixin, TestCase):
             raw_score=Decimal("80.00"),
         )
         self.assertEqual(score.weighted_score, Decimal("40.00"))
-
     def test_final_result_recalculates_total_mark_on_save(self):
         final_result = FinalResult.objects.create(
             placement=self.placement,
@@ -180,18 +171,14 @@ class PlacementModelTests(BaseILESTestDataMixin, TestCase):
             workplace_assessment_score=Decimal("15.00"),
         )
         self.assertEqual(final_result.final_mark, Decimal("90.00"))
-
-
 class PlacementAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for placements and role-based access."""
-
     def test_student_sees_only_own_placements(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get(reverse("placements-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.placement.id)
-
     def test_student_cannot_view_other_student_placement_detail(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get(reverse("placements-detail", args=[self.other_placement.id]))
