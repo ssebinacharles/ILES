@@ -97,3 +97,102 @@ class BaseILESTestDataMixin:
             user=self.admin_user,
             office_name="Internship Office",
         )
+       self.company = Company.objects.create(
+            company_name="Acme Corp",
+            location="Kampala",
+            contact_email="info@acme.com",
+        )
+
+        self.placement = InternshipPlacement.objects.create(
+            student=self.student_profile,
+            company=self.company,
+            approved_by=self.admin_profile,
+            org_department="IT",
+            start_date="2026-06-01",
+            end_date="2026-08-31",
+            status=PlacementStatus.APPROVED,
+        )
+        self.other_placement = InternshipPlacement.objects.create(
+            student=self.other_student_profile,
+            company=self.company,
+            approved_by=self.admin_profile,
+            org_department="Finance",
+            start_date="2026-06-01",
+            end_date="2026-08-31",
+            status=PlacementStatus.APPROVED,
+        )
+
+        self.academic_assignment = SupervisorAssignment.objects.create(
+            placement=self.placement,
+            supervisor=self.academic_profile,
+            assigned_by=self.admin_profile,
+            assignment_role=SupervisorType.ACADEMIC,
+            is_active=True,
+        )
+        self.workplace_assignment = SupervisorAssignment.objects.create(
+            placement=self.placement,
+            supervisor=self.workplace_profile,
+            assigned_by=self.admin_profile,
+            assignment_role=SupervisorType.WORKPLACE,
+            is_active=True,
+        )
+
+        self.weekly_log = WeeklyLog.objects.create(
+            placement=self.placement,
+            week_number=1,
+            title="Week 1",
+            activities="Installed software and configured systems.",
+            challenges="Limited internet connectivity.",
+            lessons_learned="Improved troubleshooting skills.",
+            status=WeeklyLogStatus.DRAFT,
+        )
+
+        self.criterion = EvaluationCriterion.objects.create(
+            criterion_name="Professionalism",
+            criterion_group="SUPERVISOR_EVALUATION",
+            weight_percent=Decimal("50.00"),
+            is_active=True,
+        )
+        self.evaluation = Evaluation.objects.create(
+            placement=self.placement,
+            evaluator=self.academic_profile,
+            evaluation_type=EvaluationType.ACADEMIC_EVALUATION,
+            remarks="Good progress.",
+        )
+class PlacementModelTests(BaseILESTestDataMixin, TestCase):
+    """Model-focused tests for score and result calculations."""
+
+    def test_evaluation_score_save_updates_weighted_score(self):
+        score = EvaluationScore.objects.create(
+            evaluation=self.evaluation,
+            criterion=self.criterion,
+            raw_score=Decimal("80.00"),
+        )
+        self.assertEqual(score.weighted_score, Decimal("40.00"))
+
+    def test_final_result_recalculates_total_mark_on_save(self):
+        final_result = FinalResult.objects.create(
+            placement=self.placement,
+            published_by=self.admin_profile,
+            weekly_logs_score=Decimal("20.00"),
+            supervisor_evaluation_score=Decimal("25.00"),
+            final_report_score=Decimal("30.00"),
+            workplace_assessment_score=Decimal("15.00"),
+        )
+        self.assertEqual(final_result.final_mark, Decimal("90.00"))
+
+
+class PlacementAPITests(BaseILESTestDataMixin, APITestCase):
+    """API tests for placements and role-based access."""
+
+    def test_student_sees_only_own_placements(self):
+        self.client.force_authenticate(user=self.student_user)
+        response = self.client.get(reverse("placements-list"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.placement.id)
+
+    def test_student_cannot_view_other_student_placement_detail(self):
+        self.client.force_authenticate(user=self.student_user)
+        response = self.client.get(reverse("placements-detail", args=[self.other_placement.id]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
