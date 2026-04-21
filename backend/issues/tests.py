@@ -185,19 +185,16 @@ class PlacementAPITests(BaseILESTestDataMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 class PlacementAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for placements and role-based access."""
-
     def test_student_sees_only_own_placements(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get(reverse("placements-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.placement.id)
-
     def test_student_cannot_view_other_student_placement_detail(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get(reverse("placements-detail", args=[self.other_placement.id]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
     def test_admin_can_approve_placement(self):
         pending = InternshipPlacement.objects.create(
             student=self.student_profile,
@@ -213,11 +210,8 @@ class PlacementAPITests(BaseILESTestDataMixin, APITestCase):
         pending.refresh_from_db()
         self.assertEqual(pending.status, PlacementStatus.APPROVED)
         self.assertEqual(pending.approved_by_id, self.admin_profile.id)
-
-
 class WeeklyLogAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for weekly logs and supervisor visibility."""
-
     def test_student_can_submit_own_weekly_log(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.post(reverse("weekly-logs-submit", args=[self.weekly_log.id]))
@@ -225,18 +219,14 @@ class WeeklyLogAPITests(BaseILESTestDataMixin, APITestCase):
         self.weekly_log.refresh_from_db()
         self.assertEqual(self.weekly_log.status, WeeklyLogStatus.SUBMITTED)
         self.assertIsNotNone(self.weekly_log.submitted_at)
-
     def test_assigned_supervisor_can_list_related_weekly_logs(self):
         self.client.force_authenticate(user=self.academic_user)
         response = self.client.get(reverse("weekly-logs-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], self.weekly_log.id)
-
-
 class FeedbackAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for feedback creation."""
-
     def test_supervisor_can_create_feedback_for_assigned_log(self):
         self.client.force_authenticate(user=self.academic_user)
         response = self.client.post(
@@ -250,11 +240,8 @@ class FeedbackAPITests(BaseILESTestDataMixin, APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(self.weekly_log.feedback_entries.count(), 1)
-
-
 class EvaluationAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for evaluations and scores."""
-
     def test_supervisor_can_create_evaluation_score_for_own_evaluation(self):
         self.client.force_authenticate(user=self.academic_user)
         response = self.client.post(
@@ -269,7 +256,6 @@ class EvaluationAPITests(BaseILESTestDataMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.evaluation.refresh_from_db()
         self.assertEqual(self.evaluation.scores.count(), 1)
-
     def test_supervisor_can_submit_own_evaluation(self):
         self.client.force_authenticate(user=self.academic_user)
         response = self.client.post(reverse("evaluations-submit", args=[self.evaluation.id]))
@@ -277,11 +263,8 @@ class EvaluationAPITests(BaseILESTestDataMixin, APITestCase):
         self.evaluation.refresh_from_db()
         self.assertEqual(self.evaluation.status, EvaluationStatus.SUBMITTED)
         self.assertIsNotNone(self.evaluation.submitted_at)
-
-
 class FinalResultAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for final result publication and audit visibility."""
-
     def setUp(self):
         super().setUp()
         self.final_result = FinalResult.objects.create(
@@ -292,7 +275,6 @@ class FinalResultAPITests(BaseILESTestDataMixin, APITestCase):
             final_report_score=Decimal("30.00"),
             workplace_assessment_score=Decimal("15.00"),
         )
-
     def test_admin_can_publish_final_result(self):
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.post(reverse("final-results-publish", args=[self.final_result.id]))
@@ -300,16 +282,12 @@ class FinalResultAPITests(BaseILESTestDataMixin, APITestCase):
         self.final_result.refresh_from_db()
         self.assertEqual(self.final_result.published_by_id, self.admin_profile.id)
         self.assertIsNotNone(self.final_result.published_at)
-
     def test_student_cannot_access_audit_logs(self):
         self.client.force_authenticate(user=self.student_user)
         response = self.client.get(reverse("audit-logs-list"))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-
 class ReportingAPITests(BaseILESTestDataMixin, APITestCase):
     """API tests for reporting endpoints."""
-
     def test_admin_can_trigger_report_generation(self):
         report_definition = ReportDefinition.objects.create(
             name="Weekly Summary",
