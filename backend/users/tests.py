@@ -133,3 +133,18 @@ class UserViewSetAPITests(APITestCase):
             password="Pass1234!",
             role=UserRole.STUDENT,
         )
+def test_admin_can_list_all_users(self):
+        self.client.force_authenticate(user=self.admin_user)
+        # The default router will register the UserViewSet under the basename "user"
+        url = reverse("user-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_non_admin_sees_only_self(self):
+        self.client.force_authenticate(user=self.student_user)
+        url = reverse("user-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["username"], self.student_user.username)
