@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
 from .views import (
     AdministratorProfileViewSet,
     AuditLogViewSet,
@@ -21,9 +19,7 @@ from .views import (
     UserViewSet,
     WeeklyLogViewSet,
 )
-
 app_name = "issues"
-
 router = DefaultRouter()
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"student-profiles", StudentProfileViewSet, basename="student-profiles")
@@ -41,7 +37,6 @@ router.register(r"final-results", FinalResultViewSet, basename="final-results")
 router.register(r"audit-logs", AuditLogViewSet, basename="audit-logs")
 router.register(r"report-definitions", ReportDefinitionViewSet, basename="report-definitions")
 router.register(r"generated-reports", GeneratedReportViewSet, basename="generated-reports")
-
 urlpatterns = [
     path("", include(router.urls)),
 ]
