@@ -69,3 +69,64 @@ class StudentProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
         "department",
         "user__username",
     )
+     def get_queryset(self):
+        user = self.request.user
+        if is_administrator(user):
+            return self.queryset
+        if is_student(user):
+            # A student may only see their own profile
+            profile = get_student_profile(user)
+            if profile is not None:
+                return self.queryset.filter(user=user)
+        return self.queryset.none()
+    def perform_create(self, serializer):
+        user = self.request.user
+        # If a student is creating their own profile, automatically link it
+        if is_student(user):
+            serializer.save(user=user)
+        else:
+            serializer.save()
+
+
+class SupervisorProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
+    """Viewset for CRUD operations on :class:`SupervisorProfile` instances."""
+
+    queryset = SupervisorProfile.objects.select_related("user").all()
+    serializer_class = SupervisorProfileSerializer
+    permission_classes = [IsAuthenticated, SupervisorProfilePermission]
+    search_fields = (
+        "organization_name",
+        "title",
+        "user__username",
+    )
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_administrator(user):
+            return self.queryset
+        if is_supervisor(user):
+            # Supervisors only see their own profile
+            return self.queryset.filter(user=user)
+        return self.queryset.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if is_supervisor(user):
+            serializer.save(user=user)
+        else:
+            serializer.save()
+
+
+class AdministratorProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
+    """Viewset for CRUD operations on :class:`AdministratorProfile` instances."""
+
+    queryset = AdministratorProfile.objects.select_related("user").all()
+    serializer_class = AdministratorProfileSerializer
+    permission_classes = [IsAuthenticated, AdministratorProfilePermission]
+    search_fields = ("office_name", "user__username")
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_administrator(user):
+            return self.queryset
+        return self.queryset.none()
