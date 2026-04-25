@@ -6,3 +6,7 @@ function StudentWeeklyLogsPage() {
       <h1>Weekly Internship Logs</h1>
       <p>Here you will submit and view your weekly internship activity logs. Each week, you should describe your tasks, challenges, and lessons learned.</p>
     </div>
+  );
+}
+
+export default StudentWeeklyLogsPage;
