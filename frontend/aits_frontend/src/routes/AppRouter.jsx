@@ -4,3 +4,6 @@ import ProtectedRoute from './ProtectedRoute';
 import { AuthProvider } from './AuthContext';
 import DashboardLayout from './DashboardLayout';
 
+import LoginPage from '../LoginPage';
+import NotFoundPage from '../NotFoundPage';
+
