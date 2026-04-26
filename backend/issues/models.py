@@ -10,6 +10,14 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from users.models import (
+    User,
+    UserRole,
+    StudentProfile,
+    SupervisorProfile,
+    SupervisorType, 
+    AdministratorProfile,
+)
 # ============================================================
 # ABSTRACT BASE MODELS
 # ============================================================
@@ -18,92 +26,7 @@ class TimeStampedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         abstract = True
-# ============================================================
-# USER / RBSE
-# ============================================================
-class UserRole(models.TextChoices):
-    STUDENT = "STUDENT", _("Student")
-    SUPERVISOR = "SUPERVISOR", _("Supervisor")
-    ADMINISTRATOR = "ADMINISTRATOR", _("Administrator")
-class User(AbstractUser):
-    """
-    Custom user for RBSE.
-    Keep username for simplicity, but make email unique as well.
-    """
-    email = models.EmailField(unique=True)
-    role = models.CharField(max_length=20, choices=UserRole.choices)
-    phone_number = models.CharField(max_length=20, blank=True)
-    is_verified = models.BooleanField(default=False)
-    class Meta:
-        ordering = ["username"]
-        permissions = [
-            ("can_view_audit_logs", "Can view audit logs"),
-            ("can_generate_reports", "Can generate reports"),
-            ("can_manage_roles", "Can manage user roles"),
-        ]
-    def __str__(self):
-        return f"{self.get_full_name() or self.username} ({self.role})"
-    @property
-    def is_student(self):
-        return self.role == UserRole.STUDENT
-    @property
-    def is_supervisor(self):
-        return self.role == UserRole.SUPERVISOR
-    @property
-    def is_administrator(self):
-        return self.role == UserRole.ADMINISTRATOR
-class StudentProfile(TimeStampedModel):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="student_profile",
-    )
-    registration_number = models.CharField(max_length=50, unique=True)
-    course = models.CharField(max_length=150)
-    year_of_study = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
-    )
-    department = models.CharField(max_length=150)
-    class Meta:
-        ordering = ["registration_number"]
-    def clean(self):
-        if self.user and self.user.role != UserRole.STUDENT:
-            raise ValidationError("StudentProfile can only be linked to a STUDENT user.")
-    def __str__(self):
-        return f"{self.registration_number} - {self.user.get_full_name() or self.user.username}"
-class SupervisorType(models.TextChoices):
-    ACADEMIC = "ACADEMIC", _("Academic Supervisor")
-    WORKPLACE = "WORKPLACE", _("Workplace Supervisor")
-class SupervisorProfile(TimeStampedModel):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="supervisor_profile",
-    )
-    supervisor_type = models.CharField(max_length=20, choices=SupervisorType.choices)
-    organization_name = models.CharField(max_length=255, blank=True)
-    title = models.CharField(max_length=150, blank=True)
-    class Meta:
-        ordering = ["user__username"]
-    def clean(self):
-        if self.user and self.user.role != UserRole.SUPERVISOR:
-            raise ValidationError("SupervisorProfile can only be linked to a SUPERVISOR user.")
-    def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} - {self.supervisor_type}"
-class AdministratorProfile(TimeStampedModel):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="administrator_profile",
-    )
-    office_name = models.CharField(max_length=150, default="Internship Office")
-    class Meta:
-        ordering = ["user__username"]
-    def clean(self):
-        if self.user and self.user.role != UserRole.ADMINISTRATOR:
-            raise ValidationError("AdministratorProfile can only be linked to an ADMINISTRATOR user.")
-    def __str__(self):
-        return self.user.get_full_name() or self.user.username
+
 # ============================================================
 # CORE ENTITIES
 # ============================================================

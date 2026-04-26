@@ -7,9 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-
 class TimeStampedModel(models.Model):
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -18,14 +16,12 @@ class TimeStampedModel(models.Model):
 
 class UserRole(models.TextChoices):
     """Enumeration of the roles supported by the system."""
-
     STUDENT = "STUDENT", _("Student")
     SUPERVISOR = "SUPERVISOR", _("Supervisor")
     ADMINISTRATOR = "ADMINISTRATOR", _("Administrator")
 
 
 class User(AbstractUser):
-
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=UserRole.choices)
     phone_number = models.CharField(max_length=20, blank=True)
@@ -37,7 +33,7 @@ class User(AbstractUser):
             ("can_manage_roles", "Can manage user roles"),
         ]
 
-    def __str__(self) -> str:  # pragma: no cover - trivial representation
+    def __str__(self) -> str:
         return f"{self.get_full_name() or self.username} ({self.role})"
 
     @property
@@ -72,18 +68,18 @@ class StudentProfile(TimeStampedModel):
         ordering = ["registration_number"]
 
     def clean(self) -> None:
-        """Ensure that this profile is linked to a student user."""
+        if not self.user_id:
+            raise ValidationError("Please select a user for this student profile.")
 
-        if self.user and self.user.role != UserRole.STUDENT:
+        if self.user.role != UserRole.STUDENT:
             raise ValidationError("StudentProfile can only be linked to a STUDENT user.")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial representation
+    def __str__(self) -> str:
         return f"{self.registration_number} - {self.user.get_full_name() or self.user.username}"
 
 
 class SupervisorType(models.TextChoices):
     """Type of supervisor assignment."""
-
     ACADEMIC = "ACADEMIC", _("Academic Supervisor")
     WORKPLACE = "WORKPLACE", _("Workplace Supervisor")
 
@@ -104,12 +100,13 @@ class SupervisorProfile(TimeStampedModel):
         ordering = ["user__username"]
 
     def clean(self) -> None:
-        """Ensure that this profile is linked to a supervisor user."""
+        if not self.user_id:
+            raise ValidationError("Please select a user for this supervisor profile.")
 
-        if self.user and self.user.role != UserRole.SUPERVISOR:
+        if self.user.role != UserRole.SUPERVISOR:
             raise ValidationError("SupervisorProfile can only be linked to a SUPERVISOR user.")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial representation
+    def __str__(self) -> str:
         return f"{self.user.get_full_name() or self.user.username} - {self.supervisor_type}"
 
 
@@ -127,12 +124,10 @@ class AdministratorProfile(TimeStampedModel):
         ordering = ["user__username"]
 
     def clean(self) -> None:
-        """Ensure that this profile is linked to an administrator user."""
+        if not self.user_id:
+            raise ValidationError("Please select a user for this administrator profile.")
+        if self.user.role != UserRole.ADMINISTRATOR:
+            raise ValidationError("AdministratorProfile can only be linked to an ADMINISTRATOR user.")
 
-        if self.user and self.user.role != UserRole.ADMINISTRATOR:
-            raise ValidationError(
-                "AdministratorProfile can only be linked to an ADMINISTRATOR user."
-            )
-
-    def __str__(self) -> str:  # pragma: no cover - trivial representation
+    def __str__(self) -> str:
         return self.user.get_full_name() or self.user.username

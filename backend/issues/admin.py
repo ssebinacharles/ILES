@@ -1,18 +1,10 @@
-# ...existing code...
 from __future__ import annotations
-
-from typing import Any, Iterable
-
+from typing import Any
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.translation import gettext_lazy as _
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
 
 from .models import (
-    User,
-    StudentProfile,
-    SupervisorProfile,
-    AdministratorProfile,
     Company,
     InternshipPlacement,
     SupervisorAssignment,
@@ -25,64 +17,27 @@ from .models import (
     AuditLog,
     ReportDefinition,
     GeneratedReport,
-    # Note: Issue intentionally not imported because it is not defined in models.py
 )
-
-
-# Custom User Admin
-@admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
-    model = User
-    list_display = (
-        "username",
-        "email",
-        "first_name",
-        "last_name",
-        "is_staff",
-        "is_active",
-    )
-    list_filter = ("is_staff", "is_active", "is_superuser")
-    search_fields = ("username", "email", "first_name", "last_name")
-    ordering = ("username",)
-
-    fieldsets = BaseUserAdmin.fieldsets + (
-        (_("Additional information"), {"fields": ("phone_number", "is_verified")}),
-    )
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (_("Additional information"), {"classes": ("wide",), "fields": ("phone_number",)}),
-    )
-
-
-# Profile Admins
-@admin.register(StudentProfile)
-class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "registration_number", "course", "year_of_study", "department", "created_at", "updated_at")
-    search_fields = ("user__username", "registration_number", "course", "department")
-    list_filter = ("course", "year_of_study", "department")
-    readonly_fields = ("created_at", "updated_at")
-
-
-@admin.register(SupervisorProfile)
-class SupervisorProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "supervisor_type", "organization_name", "title", "created_at", "updated_at")
-    list_filter = ("supervisor_type", "organization_name")
-    search_fields = ("user__username", "organization_name", "title")
-    readonly_fields = ("created_at", "updated_at")
-
-
-@admin.register(AdministratorProfile)
-class AdministratorProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "office_name", "created_at", "updated_at")
-    search_fields = ("user__username", "office_name")
-    readonly_fields = ("created_at", "updated_at")
-
-
 # Company Admin
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ("company_name", "location", "contact_email", "contact_phone", "contact_person_name", "website", "created_at", "updated_at")
+    list_display = (
+        "company_name",
+        "location",
+        "contact_email",
+        "contact_phone",
+        "contact_person_name",
+        "website",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("location",)
-    search_fields = ("company_name", "location", "contact_email", "contact_person_name")
+    search_fields = (
+        "company_name",
+        "location",
+        "contact_email",
+        "contact_person_name",
+    )
     readonly_fields = ("created_at", "updated_at")
 
 
@@ -105,9 +60,22 @@ class WeeklyLogInline(admin.TabularInline):
 
 @admin.register(InternshipPlacement)
 class InternshipPlacementAdmin(admin.ModelAdmin):
-    list_display = ("student", "company", "start_date", "end_date", "status", "approved_by", "requested_at", "approved_at")
+    list_display = (
+        "student",
+        "company",
+        "start_date",
+        "end_date",
+        "status",
+        "approved_by",
+        "requested_at",
+        "approved_at",
+    )
     list_filter = ("status", "start_date", "end_date", "company")
-    search_fields = ("student__user__username", "student__registration_number", "company__company_name")
+    search_fields = (
+        "student__user__username",
+        "student__registration_number",
+        "company__company_name",
+    )
     readonly_fields = ("created_at", "updated_at", "requested_at", "approved_at")
     date_hierarchy = "start_date"
     inlines = [SupervisorAssignmentInline, WeeklyLogInline]
@@ -120,7 +88,14 @@ class InternshipPlacementAdmin(admin.ModelAdmin):
 # Supervisor Assignment Admin
 @admin.register(SupervisorAssignment)
 class SupervisorAssignmentAdmin(admin.ModelAdmin):
-    list_display = ("placement", "supervisor", "assignment_role", "assigned_by", "assigned_at", "is_active")
+    list_display = (
+        "placement",
+        "supervisor",
+        "assignment_role",
+        "assigned_by",
+        "assigned_at",
+        "is_active",
+    )
     list_filter = ("assignment_role", "is_active", "assigned_at")
     search_fields = (
         "placement__student__user__username",
@@ -133,7 +108,12 @@ class SupervisorAssignmentAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request: Any) -> QuerySet:
         qs = super().get_queryset(request)
-        return qs.select_related("placement__student__user", "placement__company", "supervisor__user", "assigned_by__user")
+        return qs.select_related(
+            "placement__student__user",
+            "placement__company",
+            "supervisor__user",
+            "assigned_by__user",
+        )
 
 
 # Weekly Log and Feedback
@@ -149,7 +129,11 @@ class FeedbackInline(admin.TabularInline):
 class WeeklyLogAdmin(admin.ModelAdmin):
     list_display = ("placement", "week_number", "title", "status", "submitted_at")
     list_filter = ("status", "week_number")
-    search_fields = ("placement__student__user__username", "placement__company__company_name", "title")
+    search_fields = (
+        "placement__student__user__username",
+        "placement__company__company_name",
+        "title",
+    )
     readonly_fields = ("created_at", "updated_at", "submitted_at")
     ordering = ("placement", "week_number")
     autocomplete_fields = ("placement",)
@@ -164,13 +148,22 @@ class WeeklyLogAdmin(admin.ModelAdmin):
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ("weekly_log", "supervisor", "decision", "is_latest", "created_at")
     list_filter = ("decision", "is_latest")
-    search_fields = ("weekly_log__placement__student__user__username", "weekly_log__placement__company__company_name", "supervisor__user__username", "comment")
+    search_fields = (
+        "weekly_log__placement__student__user__username",
+        "weekly_log__placement__company__company_name",
+        "supervisor__user__username",
+        "comment",
+    )
     readonly_fields = ("created_at",)
     autocomplete_fields = ("weekly_log", "supervisor")
 
     def get_queryset(self, request: Any) -> QuerySet:
         qs = super().get_queryset(request)
-        return qs.select_related("weekly_log__placement__student__user", "weekly_log__placement__company", "supervisor__user")
+        return qs.select_related(
+            "weekly_log__placement__student__user",
+            "weekly_log__placement__company",
+            "supervisor__user",
+        )
 
 
 # Evaluation and Scores
@@ -182,7 +175,6 @@ class EvaluationScoreInline(admin.TabularInline):
     autocomplete_fields = ("criterion",)
 
     def has_delete_permission(self, request: Any, obj: Any = None) -> bool:
-        # Default to allowing deletion unless object exists and is not draft.
         if obj is not None:
             status = getattr(obj, "status", None)
             if status is not None and str(status).upper() != "DRAFT":
@@ -192,7 +184,14 @@ class EvaluationScoreInline(admin.TabularInline):
 
 @admin.register(EvaluationCriterion)
 class EvaluationCriterionAdmin(admin.ModelAdmin):
-    list_display = ("criterion_name", "criterion_group", "weight_percent", "is_active", "created_at", "updated_at")
+    list_display = (
+        "criterion_name",
+        "criterion_group",
+        "weight_percent",
+        "is_active",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("criterion_group", "is_active")
     search_fields = ("criterion_name",)
     readonly_fields = ("created_at", "updated_at")
@@ -201,15 +200,33 @@ class EvaluationCriterionAdmin(admin.ModelAdmin):
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ("placement", "evaluator", "evaluation_type", "total_score", "weighted_score", "status", "submitted_at", "created_at")
+    list_display = (
+        "placement",
+        "evaluator",
+        "evaluation_type",
+        "total_score",
+        "weighted_score",
+        "status",
+        "submitted_at",
+        "created_at",
+    )
     list_filter = ("evaluation_type", "status")
-    search_fields = ("placement__student__user__username", "placement__company__company_name", "evaluator__user__username")
-    readonly_fields = ("created_at", "updated_at", "total_score", "weighted_score", "submitted_at")
+    search_fields = (
+        "placement__student__user__username",
+        "placement__company__company_name",
+        "evaluator__user__username",
+    )
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "total_score",
+        "weighted_score",
+        "submitted_at",
+    )
     autocomplete_fields = ("placement", "evaluator")
     inlines = [EvaluationScoreInline]
 
     def save_model(self, request: Any, obj: Evaluation, form: Any, change: bool) -> None:
-        # If your model defines recalculate_scores(), call it here safely
         if hasattr(obj, "recalculate_scores"):
             try:
                 obj.recalculate_scores()
@@ -219,14 +236,22 @@ class EvaluationAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request: Any) -> QuerySet:
         qs = super().get_queryset(request)
-        return qs.select_related("placement__student__user", "placement__company", "evaluator__user")
+        return qs.select_related(
+            "placement__student__user",
+            "placement__company",
+            "evaluator__user",
+        )
 
 
 @admin.register(EvaluationScore)
 class EvaluationScoreAdmin(admin.ModelAdmin):
     list_display = ("evaluation", "criterion", "raw_score", "weighted_score", "created_at")
     list_filter = ("criterion__criterion_group",)
-    search_fields = ("evaluation__placement__student__user__username", "evaluation__placement__company__company_name", "criterion__criterion_name")
+    search_fields = (
+        "evaluation__placement__student__user__username",
+        "evaluation__placement__company__company_name",
+        "criterion__criterion_name",
+    )
     readonly_fields = ("created_at", "weighted_score")
     autocomplete_fields = ("evaluation", "criterion")
 
@@ -253,14 +278,31 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_display = ("actor", "action", "model_label", "object_id", "ip_address", "created_at")
     list_filter = ("action", "model_label")
     search_fields = ("actor__username", "model_label", "object_id", "ip_address")
-    readonly_fields = ("actor", "action", "content_type", "object_id", "content_object", "model_label", "changes", "ip_address", "created_at")
+    readonly_fields = (
+        "actor",
+        "action",
+        "content_type",
+        "object_id",
+        "content_object",
+        "model_label",
+        "changes",
+        "ip_address",
+        "created_at",
+    )
     ordering = ("-created_at",)
-
 
 # Automated Reporting Admin
 @admin.register(ReportDefinition)
 class ReportDefinitionAdmin(admin.ModelAdmin):
-    list_display = ("name", "report_type", "frequency", "is_active", "next_run_at", "last_run_at", "created_by")
+    list_display = (
+        "name",
+        "report_type",
+        "frequency",
+        "is_active",
+        "next_run_at",
+        "last_run_at",
+        "created_by",
+    )
     list_filter = ("report_type", "frequency", "is_active")
     search_fields = ("name",)
     readonly_fields = ("created_at", "updated_at")
@@ -270,16 +312,21 @@ class ReportDefinitionAdmin(admin.ModelAdmin):
 
 @admin.register(GeneratedReport)
 class GeneratedReportAdmin(admin.ModelAdmin):
-    list_display = ("report_definition", "generated_by", "status", "output_format", "generated_at", "created_at")
+    list_display = (
+        "report_definition",
+        "generated_by",
+        "status",
+        "output_format",
+        "generated_at",
+        "created_at",
+    )
     list_filter = ("status", "output_format")
     search_fields = ("report_definition__name", "generated_by__username")
     readonly_fields = ("created_at", "updated_at", "generated_at", "summary")
     autocomplete_fields = ("report_definition", "generated_by")
     ordering = ("-created_at",)
 
-
 # Global admin configurations
 admin.site.site_header = _("Internship Learning Evaluation System")
 admin.site.site_title = _("ILES Admin Portal")
 admin.site.index_title = _("Administration")
-# ...existing code...

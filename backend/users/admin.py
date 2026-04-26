@@ -1,8 +1,4 @@
-from django.contrib import admin
 from __future__ import annotations
-
-from typing import Any
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -14,9 +10,9 @@ from .models import (
     AdministratorProfile,
 )
 
+
 @admin.register(User)
-class CustomUserAdmin(BaseUserAdmin): 
-# Register your models here.
+class CustomUserAdmin(BaseUserAdmin):
     model = User
     list_display = (
         "username",
@@ -31,8 +27,6 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ("username", "email", "first_name", "last_name")
     ordering = ("username",)
 
-    # Extend the default fieldsets to expose our custom fields when
-    # editing an existing user.
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             _("Additional information"),
@@ -46,8 +40,7 @@ class CustomUserAdmin(BaseUserAdmin):
         ),
     )
 
-    
-add_fieldsets = BaseUserAdmin.add_fieldsets + (
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (
             _("Additional information"),
             {
@@ -83,7 +76,6 @@ class StudentProfileAdmin(admin.ModelAdmin):
 @admin.register(SupervisorProfile)
 class SupervisorProfileAdmin(admin.ModelAdmin):
     """Admin configuration for supervisor profiles."""
-
     list_display = (
         "user",
         "supervisor_type",
@@ -92,4 +84,26 @@ class SupervisorProfileAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    
+    search_fields = (
+        "user__username",
+        "organization_name",
+        "title",
+    )
+    list_filter = ("supervisor_type", "organization_name")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(AdministratorProfile)
+class AdministratorProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for administrator profiles."""
+    list_display = (
+        "user",
+        "office_name",
+        "created_at",
+        "updated_at",
+    )
+    search_fields = (
+        "user__username",
+        "office_name",
+    )
+    readonly_fields = ("created_at", "updated_at")
