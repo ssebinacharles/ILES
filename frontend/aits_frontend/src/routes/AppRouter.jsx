@@ -7,3 +7,8 @@ import DashboardLayout from './DashboardLayout';
 import LoginPage from '../LoginPage';
 import NotFoundPage from '../NotFoundPage';
 
+import StudentDashboard from '../StudentDashboard';
+import StudentPlacementsPage from '../StudentPlacementsPage';
+import StudentWeeklyLogsPage from '../StudentWeeklyLogsPage';
+import StudentResultsPage from '../StudentResultsPage';
+
