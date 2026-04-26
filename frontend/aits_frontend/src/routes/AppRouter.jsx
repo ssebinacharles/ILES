@@ -21,4 +21,27 @@ import AdminPlacementsPage from '../AdminPlacementsPage';
 import AdminAssignmentsPage from '../AdminAssignmentsPage';
 import AdminReportsPage from '../AdminReportsPage';
 
+const AppRouter = () => {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Student routes */}
+          <Route
+            path="/student/*"
+            element={
+              <ProtectedRoute allowedRoles={['STUDENT']}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="placements" element={<StudentPlacementsPage />} />
+            <Route path="logs" element={<StudentWeeklyLogsPage />} />
+            <Route path="results" element={<StudentResultsPage />} />
+          </Route>
+
 
