@@ -16,4 +16,9 @@ import SupervisorDashboard from '../SupervisorDashboard';
 import SupervisorReviewsPage from '../SupervisorReviewsPage';
 import SupervisorEvaluationsPage from '../SupervisorEvaluationsPage';
 
+import AdminDashboard from '../AdminDashboard';
+import AdminPlacementsPage from '../AdminPlacementsPage';
+import AdminAssignmentsPage from '../AdminAssignmentsPage';
+import AdminReportsPage from '../AdminReportsPage';
+
 
