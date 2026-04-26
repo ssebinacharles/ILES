@@ -12,3 +12,8 @@ import StudentPlacementsPage from '../StudentPlacementsPage';
 import StudentWeeklyLogsPage from '../StudentWeeklyLogsPage';
 import StudentResultsPage from '../StudentResultsPage';
 
+import SupervisorDashboard from '../SupervisorDashboard';
+import SupervisorReviewsPage from '../SupervisorReviewsPage';
+import SupervisorEvaluationsPage from '../SupervisorEvaluationsPage';
+
+
