@@ -73,3 +73,13 @@ const AppRouter = () => {
             <Route path="reports" element={<AdminReportsPage />} />
           </Route>
 
+          {/* fallback */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+};
+
+export default AppRouter;
+
