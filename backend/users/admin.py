@@ -84,12 +84,18 @@ class SupervisorProfileAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
     search_fields = (
         "user__username",
         "organization_name",
         "title",
     )
     list_filter = ("supervisor_type", "organization_name")
+    search_fields = (
+        "user__username",
+        "organization_name",
+        "title",
+    )
     readonly_fields = ("created_at", "updated_at")
 
 
@@ -102,8 +108,14 @@ class AdministratorProfileAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
     search_fields = (
         "user__username",
         "office_name",
     )
     readonly_fields = ("created_at", "updated_at")
+
+
+admin.site.site_header = _("Internship Learning Evaluation System")
+admin.site.site_title = _("ILES Admin Portal")
+admin.site.index_title = _("Administration")
