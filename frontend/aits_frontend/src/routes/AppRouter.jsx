@@ -44,4 +44,18 @@ const AppRouter = () => {
             <Route path="results" element={<StudentResultsPage />} />
           </Route>
 
+          {/* Supervisor routes */}
+          <Route
+            path="/supervisor/*"
+            element={
+              <ProtectedRoute allowedRoles={['SUPERVISOR']}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<SupervisorDashboard />} />
+            <Route path="reviews" element={<SupervisorReviewsPage />} />
+            <Route path="evaluations" element={<SupervisorEvaluationsPage />} />
+          </Route>
+
 
