@@ -1,112 +1,87 @@
 from __future__ import annotations
-from django.utils import timezone  # noqa: F401  # imported for completeness
+
 from rest_framework import filters, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
 from .models import (
     User,
     StudentProfile,
     SupervisorProfile,
     AdministratorProfile,
 )
+
 from .serializers import (
     UserSerializer,
     StudentProfileSerializer,
     SupervisorProfileSerializer,
     AdministratorProfileSerializer,
 )
-from .permissions import (  # type: ignore  # these are expected to exist in the project
-    UserPermission,
-    StudentProfilePermission,
-    SupervisorProfilePermission,
-    AdministratorProfilePermission,
-    is_administrator,
-    is_student,
-    is_supervisor,
-    get_student_profile,
-    get_supervisor_profile,
-    get_admin_profile,
-)
+
+
 class SearchOrderingMixin:
     """Shared mixin to enable search and ordering in viewsets."""
+
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    # Default ordering can be overridden per viewset
     ordering = ("-id",)
+
+
 class UserViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    """Viewset for CRUD operations on :class:`User` instances."""
     queryset = User.objects.all().order_by("username")
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, UserPermission]
-    search_fields = ("username", "first_name", "last_name", "email")
+    permission_classes = [AllowAny]
+    search_fields = ("username", "first_name", "last_name", "email", "role")
     ordering = ("username",)
-    def get_queryset(self):
-        # Administrators can view all users, others can only see themselves
-        user = self.request.user
-        if is_administrator(user):
-            return self.queryset
-        return self.queryset.filter(pk=user.pk)
-class StudentProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    """Viewset for CRUD operations on :class:`StudentProfile` instances."""
 
+    def get_queryset(self):
+        return User.objects.all().order_by("username")
+
+
+class StudentProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     queryset = StudentProfile.objects.select_related("user").all()
     serializer_class = StudentProfileSerializer
-    permission_classes = [IsAuthenticated, StudentProfilePermission]
+    permission_classes = [AllowAny]
     search_fields = (
         "registration_number",
         "course",
         "department",
         "user__username",
+        "user__email",
     )
-     def get_queryset(self):
-        user = self.request.user
-        if is_administrator(user):
-            return self.queryset
-        if is_student(user):
-            # A student may only see their own profile
-            profile = get_student_profile(user)
-            if profile is not None:
-                return self.queryset.filter(user=user)
-        return self.queryset.none()
-    def perform_create(self, serializer):
-        user = self.request.user
-        # If a student is creating their own profile, automatically link it
-        if is_student(user):
-            serializer.save(user=user)
-        else:
-            serializer.save()
+    ordering = ("registration_number",)
+
+    def get_queryset(self):
+        return StudentProfile.objects.select_related("user").all().order_by(
+            "registration_number"
+        )
+
+
 class SupervisorProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    """Viewset for CRUD operations on :class:`SupervisorProfile` instances."""
     queryset = SupervisorProfile.objects.select_related("user").all()
     serializer_class = SupervisorProfileSerializer
-    permission_classes = [IsAuthenticated, SupervisorProfilePermission]
+    permission_classes = [AllowAny]
     search_fields = (
         "organization_name",
         "title",
         "user__username",
+        "user__email",
+        "supervisor_type",
     )
+    ordering = ("user__username",)
+
     def get_queryset(self):
-        user = self.request.user
-        if is_administrator(user):
-            return self.queryset
-        if is_supervisor(user):
-            # Supervisors only see their own profile
-            return self.queryset.filter(user=user)
-        return self.queryset.none()
-    def perform_create(self, serializer):
-        user = self.request.user
-        if is_supervisor(user):
-            serializer.save(user=user)
-        else:
-            serializer.save()
+        return SupervisorProfile.objects.select_related("user").all().order_by(
+            "user__username"
+        )
+
+
 class AdministratorProfileViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    """Viewset for CRUD operations on :class:`AdministratorProfile` instances."""
     queryset = AdministratorProfile.objects.select_related("user").all()
     serializer_class = AdministratorProfileSerializer
-    permission_classes = [IsAuthenticated, AdministratorProfilePermission]
-    search_fields = ("office_name", "user__username")
+    permission_classes = [AllowAny]
+    search_fields = ("office_name", "user__username", "user__email")
+    ordering = ("user__username",)
+
     def get_queryset(self):
-        user = self.request.user
-        if is_administrator(user):
-            return self.queryset
-        return self.queryset.none()
+        return AdministratorProfile.objects.select_related("user").all().order_by(
+            "user__username"
+        )

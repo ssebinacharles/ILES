@@ -1,2 +1,9 @@
 venv/
 __pycache__/
+.env
+backend/.env
+.venv/
+.venv-1/
+.venv-2/
+db.sqlite3
+node_modules/

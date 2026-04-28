@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import Any
-
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from .models import (
+from users.models import (
+    User,
+    UserRole,
+    StudentProfile,
+    SupervisorProfile,
     AdministratorProfile,
+)
+
+from .models import (
     AuditLog,
     Company,
     Evaluation,
@@ -17,17 +22,13 @@ from .models import (
     GeneratedReport,
     InternshipPlacement,
     ReportDefinition,
-    StudentProfile,
     SupervisorAssignment,
-    SupervisorProfile,
-    User,
-    UserRole,
     WeeklyLog,
 )
 
 
 class FullCleanModelSerializer(serializers.ModelSerializer):
-    """Run model ``full_clean()`` during create/update."""
+    """Run model full_clean() during create/update."""
 
     def _run_model_validation(self, instance):
         try:
@@ -46,19 +47,17 @@ class FullCleanModelSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
         self._run_model_validation(instance)
         return super().update(instance, validated_data)
 
 
+# ============================================================
+# USER / PROFILE SUMMARY SERIALIZERS
+# These models are from the users app, not issues app.
+# ============================================================
+
 class UserSummarySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "username", "first_name", "last_name", "email", "role")
-
-
-class UserSerializer(FullCleanModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-
     class Meta:
         model = User
         fields = (
@@ -68,28 +67,7 @@ class UserSerializer(FullCleanModelSerializer):
             "last_name",
             "email",
             "role",
-            "phone_number",
-            "is_verified",
-            "is_active",
-            "password",
         )
-        read_only_fields = ("id",)
-
-    def create(self, validated_data):
-        password = validated_data.pop("password", None)
-        user = super().create(validated_data)
-        if password:
-            user.set_password(password)
-            user.save(update_fields=["password"])
-        return user
-
-    def update(self, instance, validated_data):
-        password = validated_data.pop("password", None)
-        user = super().update(instance, validated_data)
-        if password:
-            user.set_password(password)
-            user.save(update_fields=["password"])
-        return user
 
 
 class StudentProfileSummarySerializer(serializers.ModelSerializer):
@@ -97,31 +75,14 @@ class StudentProfileSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ("id", "user", "registration_number", "course", "year_of_study", "department")
-
-
-class StudentProfileSerializer(FullCleanModelSerializer):
-    user = UserSummarySerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(
-        source="user",
-        queryset=User.objects.filter(role=UserRole.STUDENT),
-        write_only=True,
-    )
-
-    class Meta:
-        model = StudentProfile
         fields = (
             "id",
             "user",
-            "user_id",
             "registration_number",
             "course",
             "year_of_study",
             "department",
-            "created_at",
-            "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
 
 
 class SupervisorProfileSummarySerializer(serializers.ModelSerializer):
@@ -129,30 +90,13 @@ class SupervisorProfileSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SupervisorProfile
-        fields = ("id", "user", "supervisor_type", "organization_name", "title")
-
-
-class SupervisorProfileSerializer(FullCleanModelSerializer):
-    user = UserSummarySerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(
-        source="user",
-        queryset=User.objects.filter(role=UserRole.SUPERVISOR),
-        write_only=True,
-    )
-
-    class Meta:
-        model = SupervisorProfile
         fields = (
             "id",
             "user",
-            "user_id",
             "supervisor_type",
             "organization_name",
             "title",
-            "created_at",
-            "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
 
 
 class AdministratorProfileSummarySerializer(serializers.ModelSerializer):
@@ -160,29 +104,16 @@ class AdministratorProfileSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdministratorProfile
-        fields = ("id", "user", "office_name")
-
-
-class AdministratorProfileSerializer(FullCleanModelSerializer):
-    user = UserSummarySerializer(read_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(
-        source="user",
-        queryset=User.objects.filter(role=UserRole.ADMINISTRATOR),
-        write_only=True,
-    )
-
-    class Meta:
-        model = AdministratorProfile
         fields = (
             "id",
             "user",
-            "user_id",
             "office_name",
-            "created_at",
-            "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
 
+
+# ============================================================
+# COMPANY
+# ============================================================
 
 class CompanySerializer(FullCleanModelSerializer):
     class Meta:
@@ -198,21 +129,39 @@ class CompanySerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class CompanySummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ("id", "company_name", "location")
+        fields = (
+            "id",
+            "company_name",
+            "location",
+        )
 
+
+# ============================================================
+# INTERNSHIP PLACEMENT
+# ============================================================
 
 class SupervisorAssignmentSummarySerializer(serializers.ModelSerializer):
     supervisor = SupervisorProfileSummarySerializer(read_only=True)
 
     class Meta:
         model = SupervisorAssignment
-        fields = ("id", "supervisor", "assignment_role", "assigned_at", "is_active")
+        fields = (
+            "id",
+            "supervisor",
+            "assignment_role",
+            "assigned_at",
+            "is_active",
+        )
 
 
 class InternshipPlacementSerializer(FullCleanModelSerializer):
@@ -238,7 +187,11 @@ class InternshipPlacementSerializer(FullCleanModelSerializer):
         required=False,
         allow_null=True,
     )
-    supervisor_assignments = SupervisorAssignmentSummarySerializer(many=True, read_only=True)
+
+    supervisor_assignments = SupervisorAssignmentSummarySerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = InternshipPlacement
@@ -261,8 +214,18 @@ class InternshipPlacementSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "requested_at", "approved_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "requested_at",
+            "approved_at",
+            "created_at",
+            "updated_at",
+        )
 
+
+# ============================================================
+# SUPERVISOR ASSIGNMENT
+# ============================================================
 
 class SupervisorAssignmentSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
@@ -303,11 +266,21 @@ class SupervisorAssignmentSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "assigned_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "assigned_at",
+            "created_at",
+            "updated_at",
+        )
 
+
+# ============================================================
+# WEEKLY LOG + FEEDBACK
+# ============================================================
 
 class FeedbackSerializer(FullCleanModelSerializer):
     supervisor = SupervisorProfileSummarySerializer(read_only=True)
+
     weekly_log_id = serializers.PrimaryKeyRelatedField(
         source="weekly_log",
         queryset=WeeklyLog.objects.all(),
@@ -333,17 +306,26 @@ class FeedbackSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class WeeklyLogSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
+
     placement_id = serializers.PrimaryKeyRelatedField(
         source="placement",
         queryset=InternshipPlacement.objects.all(),
         write_only=True,
     )
-    feedback_entries = FeedbackSerializer(many=True, read_only=True)
+
+    feedback_entries = FeedbackSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = WeeklyLog
@@ -362,8 +344,17 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "submitted_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "submitted_at",
+            "created_at",
+            "updated_at",
+        )
 
+
+# ============================================================
+# EVALUATION CRITERIA + SCORES
+# ============================================================
 
 class EvaluationCriterionSerializer(FullCleanModelSerializer):
     class Meta:
@@ -377,11 +368,16 @@ class EvaluationCriterionSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class EvaluationScoreSerializer(FullCleanModelSerializer):
     criterion = EvaluationCriterionSerializer(read_only=True)
+
     criterion_id = serializers.PrimaryKeyRelatedField(
         source="criterion",
         queryset=EvaluationCriterion.objects.all(),
@@ -405,7 +401,12 @@ class EvaluationScoreSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "weighted_score", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "weighted_score",
+            "created_at",
+            "updated_at",
+        )
 
 
 class EvaluationSerializer(FullCleanModelSerializer):
@@ -423,7 +424,11 @@ class EvaluationSerializer(FullCleanModelSerializer):
         write_only=True,
         required=False,
     )
-    scores = EvaluationScoreSerializer(many=True, read_only=True)
+
+    scores = EvaluationScoreSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Evaluation
@@ -452,6 +457,10 @@ class EvaluationSerializer(FullCleanModelSerializer):
             "updated_at",
         )
 
+
+# ============================================================
+# FINAL RESULT
+# ============================================================
 
 class FinalResultSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
@@ -487,8 +496,18 @@ class FinalResultSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "final_mark", "published_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "final_mark",
+            "published_at",
+            "created_at",
+            "updated_at",
+        )
 
+
+# ============================================================
+# AUDIT LOG
+# ============================================================
 
 class AuditLogSerializer(serializers.ModelSerializer):
     actor = UserSummarySerializer(read_only=True)
@@ -507,13 +526,22 @@ class AuditLogSerializer(serializers.ModelSerializer):
             "ip_address",
             "created_at",
         )
+        read_only_fields = (
+            "id",
+            "created_at",
+        )
 
     def get_content_type_display(self, obj):
         return str(obj.content_type)
 
 
+# ============================================================
+# REPORTING
+# ============================================================
+
 class ReportDefinitionSerializer(FullCleanModelSerializer):
     created_by = UserSummarySerializer(read_only=True)
+
     created_by_id = serializers.PrimaryKeyRelatedField(
         source="created_by",
         queryset=User.objects.filter(role=UserRole.ADMINISTRATOR),
@@ -538,7 +566,11 @@ class ReportDefinitionSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class GeneratedReportSerializer(FullCleanModelSerializer):
@@ -574,4 +606,9 @@ class GeneratedReportSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "generated_at", "created_at", "updated_at")
+        read_only_fields = (
+            "id",
+            "generated_at",
+            "created_at",
+            "updated_at",
+        )

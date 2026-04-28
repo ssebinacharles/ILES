@@ -1,6 +1,5 @@
-from __future__ import annotations
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 from .models import (
@@ -12,40 +11,79 @@ from .models import (
 
 
 @admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
-    model = User
+class CustomUserAdmin(UserAdmin):
     list_display = (
+        "username",
+        "email",
+        "role",
+        "phone_number",
+        "is_active",
+        "is_staff",
+        "is_verified",
+    )
+
+    list_filter = (
+        "role",
+        "is_active",
+        "is_staff",
+        "is_verified",
+    )
+
+    search_fields = (
         "username",
         "email",
         "first_name",
         "last_name",
-        "role",
-        "is_staff",
-        "is_active",
+        "phone_number",
     )
-    list_filter = ("role", "is_staff", "is_active", "is_superuser")
-    search_fields = ("username", "email", "first_name", "last_name")
+
     ordering = ("username",)
 
-    fieldsets = BaseUserAdmin.fieldsets + (
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
         (
-            _("Additional information"),
+            _("Personal information"),
             {
                 "fields": (
-                    "role",
+                    "first_name",
+                    "last_name",
+                    "email",
                     "phone_number",
+                    "role",
                     "is_verified",
-                ),
+                )
             },
         ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
 
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+    add_fieldsets = (
         (
-            _("Additional information"),
+            None,
             {
                 "classes": ("wide",),
-                "fields": ("role", "phone_number"),
+                "fields": (
+                    "username",
+                    "email",
+                    "role",
+                    "phone_number",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_active",
+                ),
             },
         ),
     )
@@ -53,67 +91,78 @@ class CustomUserAdmin(BaseUserAdmin):
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
-    """Admin configuration for student profiles."""
     list_display = (
         "user",
         "registration_number",
         "course",
         "year_of_study",
         "department",
-        "created_at",
-        "updated_at",
     )
+
     search_fields = (
         "user__username",
+        "user__email",
         "registration_number",
         "course",
         "department",
     )
-    list_filter = ("course", "year_of_study", "department")
-    readonly_fields = ("created_at", "updated_at")
+
+    list_filter = (
+        "course",
+        "department",
+        "year_of_study",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
 
 
 @admin.register(SupervisorProfile)
 class SupervisorProfileAdmin(admin.ModelAdmin):
-    """Admin configuration for supervisor profiles."""
     list_display = (
         "user",
         "supervisor_type",
         "organization_name",
         "title",
-        "created_at",
-        "updated_at",
     )
 
     search_fields = (
         "user__username",
+        "user__email",
         "organization_name",
         "title",
     )
-    list_filter = ("supervisor_type", "organization_name")
-    search_fields = (
-        "user__username",
+
+    list_filter = (
+        "supervisor_type",
         "organization_name",
-        "title",
     )
-    readonly_fields = ("created_at", "updated_at")
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
 
 
 @admin.register(AdministratorProfile)
 class AdministratorProfileAdmin(admin.ModelAdmin):
-    """Admin configuration for administrator profiles."""
     list_display = (
         "user",
         "office_name",
-        "created_at",
-        "updated_at",
     )
 
     search_fields = (
         "user__username",
+        "user__email",
         "office_name",
     )
-    readonly_fields = ("created_at", "updated_at")
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
 
 
 admin.site.site_header = _("Internship Learning Evaluation System")

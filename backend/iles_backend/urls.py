@@ -34,4 +34,6 @@ if _issue_viewset_available and IssueViewSet is not None:
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("api/users/", include("users.urls")),
+    path("api/issues/", include("issues.urls")),
 ]
