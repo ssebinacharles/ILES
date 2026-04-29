@@ -1,26 +1,19 @@
-import apiClient from "./axios";
+import apiRequest from "./apiClient";
 
-/**
- * Sends a login request with user credentials.
- * Returns the response data.
- */
-export const login = async (credentials) => {
-  const response = await apiClient.post("/auth/login/", credentials);
-  return response.data;
-};
+export function loginUser({ username, password, requestedRole, supervisorType }) {
+  return apiRequest("/users/auth/login/", {
+    method: "POST",
+    body: JSON.stringify({
+      username,
+      password,
+      requested_role: requestedRole,
+      supervisor_type: supervisorType || "",
+    }),
+  });
+}
 
-/**
- * Fetches the currently authenticated user.
- */
-export const getCurrentUser = async () => {
-  const response = await apiClient.get("/auth/me/");
-  return response.data;
-};
-
-/**
- * Logs out the current user.
- */
-export const logout = async () => {
-  const response = await apiClient.post("/auth/logout/");
-  return response.data;
-};
+export function logoutUser() {
+  return apiRequest("/users/auth/logout/", {
+    method: "POST",
+  });
+}

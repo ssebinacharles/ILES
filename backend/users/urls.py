@@ -8,13 +8,18 @@ from .views import (
     AdministratorProfileViewSet,
 )
 
-router = DefaultRouter()
+from .auth_views import login_user, logout_user
 
+
+router = DefaultRouter()
 router.register(r"users", UserViewSet, basename="user")
-router.register(r"students", StudentProfileViewSet, basename="student-profile")
-router.register(r"supervisors", SupervisorProfileViewSet, basename="supervisor-profile")
-router.register(r"administrators", AdministratorProfileViewSet, basename="administrator-profile")
+router.register(r"students", StudentProfileViewSet, basename="student")
+router.register(r"supervisors", SupervisorProfileViewSet, basename="supervisor")
+router.register(r"administrators", AdministratorProfileViewSet, basename="administrator")
+
 
 urlpatterns = [
+    path("auth/login/", login_user, name="login-user"),
+    path("auth/logout/", logout_user, name="logout-user"),
     path("", include(router.urls)),
 ]

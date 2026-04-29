@@ -118,16 +118,16 @@ def recalculate_before_evaluation_save(sender: type[Evaluation], instance: Evalu
     except Exception:
         pass
 
-@receiver(post_save, sender=FinalResult)
+#@receiver(post_save, sender=FinalResult)
 @receiver(post_delete, sender=FinalResult)
-def recalculate_final_mark(sender: type[FinalResult], instance: FinalResult, **kwargs: Any) -> None:
-    """Recompute the ``final_mark`` on a ``FinalResult`` whenever it changes."""
-    try:
-        instance.recalculate_final_mark()
-    except Exception:
-        pass
+#def recalculate_final_mark(sender: type[FinalResult], instance: FinalResult, **kwargs: Any) -> None:
+#    """Recompute the ``final_mark`` on a ``FinalResult`` whenever it changes."""
+#   try:
+#        instance.recalculate_final_mark()
+#    except Exception:
+#        pass
     # Persist the new final mark
-    instance.save(update_fields=["final_mark"])
+#    instance.save(update_fields=["final_mark"])
 
 @receiver(pre_save, sender=WeeklyLog)
 def set_submitted_timestamp(sender: type[WeeklyLog], instance: WeeklyLog, **kwargs: Any) -> None:
