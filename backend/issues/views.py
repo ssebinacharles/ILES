@@ -1,9 +1,17 @@
 
 from __future__ import annotations
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny
+
+from rest_framework.exceptions import ValidationError
+
+from users.models import UserRole, StudentProfile
+
 from django.utils import timezone
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+
+#from rest_framework.exceptions import PermissionDenied
+from .utils import send_iles_email
 
 from rest_framework.response import Response
 
@@ -82,66 +90,63 @@ class CompanyViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
 
 
 class InternshipPlacementViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    queryset = InternshipPlacement.objects.select_related(
-        "student__user",
-        "company",
-        "approved_by__user",
-    ).prefetch_related("supervisor_assignments__supervisor__user").all()
-
     serializer_class = InternshipPlacementSerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated]
     search_fields = (
+        "company__company_name",
         "student__registration_number",
         "student__user__username",
-        "company__company_name",
-        "status",
+        "workplace_supervisor_name",
+        "workplace_supervisor_email",
+        "workplace_supervisor_phone",
     )
-
     ordering = ("-requested_at",)
 
     def get_queryset(self):
-        return InternshipPlacement.objects.select_related(
+        user = self.request.user
+
+        queryset = InternshipPlacement.objects.select_related(
+            "student",
             "student__user",
             "company",
+            "approved_by",
             "approved_by__user",
         ).prefetch_related(
-            "supervisor_assignments__supervisor__user"
-        ).all().order_by("-requested_at")
+            "supervisor_assignments",
+            "supervisor_assignments__supervisor",
+            "supervisor_assignments__supervisor__user",
+        )
+
+        if user.is_superuser or user.is_staff or getattr(user, "role", "") == UserRole.ADMINISTRATOR:
+            return queryset
+
+        if getattr(user, "role", "") == UserRole.STUDENT:
+            return queryset.filter(student__user=user)
+
+        if getattr(user, "role", "") == UserRole.SUPERVISOR:
+            return queryset.filter(
+                supervisor_assignments__supervisor__user=user,
+                supervisor_assignments__is_active=True,
+            ).distinct()
+
+        return InternshipPlacement.objects.none()
 
     def perform_create(self, serializer):
+        user = self.request.user
+
+        if getattr(user, "role", "") == UserRole.STUDENT:
+            student_profile = StudentProfile.objects.filter(user=user).first()
+
+            if not student_profile:
+                raise ValidationError("Student profile not found for this user.")
+
+            serializer.save(
+                student=student_profile,
+                status=PlacementStatus.PENDING,
+            )
+            return
+
         serializer.save()
-
-    @action(detail=True, methods=["post"])
-    def approve(self, request, pk=None):
-        placement = self.get_object()
-        placement.status = PlacementStatus.APPROVED
-        placement.approved_at = timezone.now()
-        placement.rejection_reason = ""
-        placement.save()
-        return Response(self.get_serializer(placement).data)
-
-    @action(detail=True, methods=["post"])
-    def reject(self, request, pk=None):
-        placement = self.get_object()
-        placement.status = PlacementStatus.REJECTED
-        placement.rejection_reason = request.data.get("rejection_reason", "")
-        placement.save()
-        return Response(self.get_serializer(placement).data)
-
-    @action(detail=True, methods=["post"])
-    def mark_in_progress(self, request, pk=None):
-        placement = self.get_object()
-        placement.status = PlacementStatus.IN_PROGRESS
-        placement.save()
-        return Response(self.get_serializer(placement).data)
-
-    @action(detail=True, methods=["post"])
-    def complete(self, request, pk=None):
-        placement = self.get_object()
-        placement.status = PlacementStatus.COMPLETED
-        placement.save()
-        return Response(self.get_serializer(placement).data)
 
 
 class SupervisorAssignmentViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
@@ -150,10 +155,10 @@ class SupervisorAssignmentViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
         "placement__company",
         "supervisor__user",
         "assigned_by__user",
-    ).all()
+    )
 
     serializer_class = SupervisorAssignmentSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     search_fields = (
         "placement__student__registration_number",
@@ -165,51 +170,85 @@ class SupervisorAssignmentViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     ordering = ("-assigned_at",)
 
     def get_queryset(self):
-        return SupervisorAssignment.objects.select_related(
-            "placement__student__user",
-            "placement__company",
-            "supervisor__user",
-            "assigned_by__user",
-        ).all().order_by("-assigned_at")
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser or is_administrator(user):
+            return self.queryset.all().order_by("-assigned_at")
+
+        if is_student(user):
+            profile = get_student_profile(user)
+            if profile:
+                return self.queryset.filter(placement__student=profile).order_by("-assigned_at")
+            return self.queryset.none()
+
+        if is_supervisor(user):
+            profile = get_supervisor_profile(user)
+            if profile:
+                return self.queryset.filter(supervisor=profile).order_by("-assigned_at")
+            return self.queryset.none()
+
+        return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save()
+        if not (self.request.user.is_staff or self.request.user.is_superuser or is_administrator(self.request.user)):
+            raise PermissionDenied("Only administrators can assign supervisors.")
+
+        assignment = serializer.save(assigned_by=get_admin_profile(self.request.user))
+
+        send_iles_email(
+            "Supervisor assigned",
+            f"You have been assigned as {assignment.assignment_role} supervisor for {assignment.placement.student.registration_number}.",
+            [assignment.supervisor.user.email],
+        )
+
+        send_iles_email(
+            "Supervisor assigned to your internship",
+            f"{assignment.supervisor.user.username} has been assigned as your {assignment.assignment_role} supervisor.",
+            [assignment.placement.student.user.email],
+        )
 
 
 class WeeklyLogViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
-    queryset = WeeklyLog.objects.select_related(
-        "placement__student__user",
-        "placement__company",
-    ).all()
-
     serializer_class = WeeklyLogSerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated]
     search_fields = (
         "title",
-        "status",
         "placement__student__registration_number",
+        "placement__student__user__username",
         "placement__company__company_name",
     )
-
     ordering = ("placement", "week_number")
 
     def get_queryset(self):
-        return WeeklyLog.objects.select_related(
+        user = self.request.user
+
+        queryset = WeeklyLog.objects.select_related(
+            "placement",
+            "placement__student",
             "placement__student__user",
             "placement__company",
-        ).all().order_by("placement", "week_number")
+        ).prefetch_related(
+            "feedback_entries",
+            "feedback_entries__supervisor",
+            "feedback_entries__supervisor__user",
+        )
+
+        if user.is_superuser or user.is_staff or getattr(user, "role", "") == UserRole.ADMINISTRATOR:
+            return queryset
+
+        if getattr(user, "role", "") == UserRole.STUDENT:
+            return queryset.filter(placement__student__user=user)
+
+        if getattr(user, "role", "") == UserRole.SUPERVISOR:
+            return queryset.filter(
+                placement__supervisor_assignments__supervisor__user=user,
+                placement__supervisor_assignments__is_active=True,
+            ).distinct()
+
+        return WeeklyLog.objects.none()
 
     def perform_create(self, serializer):
         serializer.save()
-
-    @action(detail=True, methods=["post"])
-    def submit(self, request, pk=None):
-        log = self.get_object()
-        log.status = WeeklyLogStatus.SUBMITTED
-        log.submitted_at = timezone.now()
-        log.save()
-        return Response(self.get_serializer(log).data)
 
 
 class FeedbackViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
@@ -217,10 +256,10 @@ class FeedbackViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
         "weekly_log__placement__student__user",
         "weekly_log__placement__company",
         "supervisor__user",
-    ).all()
+    )
 
     serializer_class = FeedbackSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     search_fields = (
         "decision",
@@ -232,14 +271,49 @@ class FeedbackViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     ordering = ("-created_at",)
 
     def get_queryset(self):
-        return Feedback.objects.select_related(
-            "weekly_log__placement__student__user",
-            "weekly_log__placement__company",
-            "supervisor__user",
-        ).all().order_by("-created_at")
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser or is_administrator(user):
+            return self.queryset.all().order_by("-created_at")
+
+        if is_student(user):
+            profile = get_student_profile(user)
+            if profile:
+                return self.queryset.filter(
+                    weekly_log__placement__student=profile
+                ).order_by("-created_at")
+            return self.queryset.none()
+
+        if is_supervisor(user):
+            profile = get_supervisor_profile(user)
+            if profile:
+                return self.queryset.filter(
+                    weekly_log__placement__supervisor_assignments__supervisor=profile,
+                    weekly_log__placement__supervisor_assignments__is_active=True,
+                ).distinct().order_by("-created_at")
+            return self.queryset.none()
+
+        return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save()
+        if not is_supervisor(self.request.user):
+            raise PermissionDenied("Only supervisors can submit feedback.")
+
+        feedback = serializer.save(supervisor=get_supervisor_profile(self.request.user))
+
+        if feedback.decision == FeedbackDecision.APPROVED:
+            feedback.weekly_log.status = WeeklyLogStatus.APPROVED
+            feedback.weekly_log.save()
+
+        if feedback.decision == FeedbackDecision.REJECTED:
+            feedback.weekly_log.status = WeeklyLogStatus.REJECTED
+            feedback.weekly_log.save()
+
+        send_iles_email(
+            "New supervisor feedback received",
+            f"Feedback has been added to Week {feedback.weekly_log.week_number}: {feedback.weekly_log.title}.",
+            [feedback.weekly_log.placement.student.user.email],
+        )
 
 
 class EvaluationCriterionViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
@@ -258,7 +332,7 @@ class EvaluationViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     ).prefetch_related("scores__criterion")
 
     serializer_class = EvaluationSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     search_fields = (
         "evaluation_type",
@@ -270,14 +344,45 @@ class EvaluationViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     ordering = ("-created_at",)
 
     def get_queryset(self):
-        return Evaluation.objects.select_related(
-            "placement__student__user",
-            "placement__company",
-            "evaluator__user",
-        ).prefetch_related("scores__criterion").all().order_by("-created_at")
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser or is_administrator(user):
+            return self.queryset.all().order_by("-created_at")
+
+        if is_student(user):
+            profile = get_student_profile(user)
+            if profile:
+                return self.queryset.filter(placement__student=profile).order_by("-created_at")
+            return self.queryset.none()
+
+        if is_supervisor(user):
+            profile = get_supervisor_profile(user)
+            if profile:
+                return self.queryset.filter(
+                    placement__supervisor_assignments__supervisor=profile,
+                    placement__supervisor_assignments__is_active=True,
+                ).distinct().order_by("-created_at")
+            return self.queryset.none()
+
+        return self.queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save()
+        if is_supervisor(self.request.user):
+            evaluation = serializer.save(evaluator=get_supervisor_profile(self.request.user))
+        elif self.request.user.is_staff or self.request.user.is_superuser or is_administrator(self.request.user):
+            evaluation = serializer.save()
+        else:
+            raise PermissionDenied("Only supervisors or administrators can create evaluations.")
+
+        admin_emails = User.objects.filter(
+            role=UserRole.ADMINISTRATOR,
+        ).exclude(email="").values_list("email", flat=True)
+
+        send_iles_email(
+            "Supervisor evaluation submitted",
+            f"An evaluation was submitted for {evaluation.placement.student.registration_number}.",
+            admin_emails,
+        )
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
@@ -321,10 +426,10 @@ class FinalResultViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
         "placement__student__user",
         "placement__company",
         "published_by__user",
-    ).all()
+    )
 
     serializer_class = FinalResultSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     search_fields = (
         "placement__student__registration_number",
@@ -334,17 +439,50 @@ class FinalResultViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     ordering = ("-published_at", "-created_at")
 
     def get_queryset(self):
-        return FinalResult.objects.select_related(
-            "placement__student__user",
-            "placement__company",
-            "published_by__user",
-        ).all().order_by("-published_at", "-created_at")
+        user = self.request.user
+
+        if user.is_staff or user.is_superuser or is_administrator(user):
+            return self.queryset.all().order_by("-published_at", "-created_at")
+
+        if is_student(user):
+            profile = get_student_profile(user)
+            if profile:
+                return self.queryset.filter(placement__student=profile).order_by(
+                    "-published_at", "-created_at"
+                )
+            return self.queryset.none()
+
+        if is_supervisor(user):
+            profile = get_supervisor_profile(user)
+            if profile:
+                return self.queryset.filter(
+                    placement__supervisor_assignments__supervisor=profile,
+                    placement__supervisor_assignments__is_active=True,
+                ).distinct().order_by("-published_at", "-created_at")
+            return self.queryset.none()
+
+        return self.queryset.none()
 
     @action(detail=True, methods=["post"])
     def publish(self, request, pk=None):
         final_result = self.get_object()
+
+        if not (request.user.is_staff or request.user.is_superuser or is_administrator(request.user)):
+            return Response(
+                {"detail": "Administrator access is required."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        final_result.published_by = get_admin_profile(request.user)
         final_result.published_at = timezone.now()
         final_result.save()
+
+        send_iles_email(
+            "Final internship result published",
+            f"Your final internship mark is {final_result.final_mark}.",
+            [final_result.placement.student.user.email],
+        )
+
         return Response(self.get_serializer(final_result).data)
 
 class AuditLogViewSet(SearchOrderingMixin, viewsets.ReadOnlyModelViewSet):

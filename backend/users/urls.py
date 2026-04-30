@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from .auth_views import login_view, logout_view, current_user_view
+
 from .views import (
     UserViewSet,
     StudentProfileViewSet,
@@ -8,18 +10,21 @@ from .views import (
     AdministratorProfileViewSet,
 )
 
-from .auth_views import login_user, logout_user
-
 
 router = DefaultRouter()
-router.register(r"users", UserViewSet, basename="user")
-router.register(r"students", StudentProfileViewSet, basename="student")
-router.register(r"supervisors", SupervisorProfileViewSet, basename="supervisor")
-router.register(r"administrators", AdministratorProfileViewSet, basename="administrator")
+
+router.register(r"users", UserViewSet, basename="users")
+router.register(r"students", StudentProfileViewSet, basename="students")
+router.register(r"supervisors", SupervisorProfileViewSet, basename="supervisors")
+router.register(r"administrators", AdministratorProfileViewSet, basename="administrators")
 
 
 urlpatterns = [
-    path("auth/login/", login_user, name="login-user"),
-    path("auth/logout/", logout_user, name="logout-user"),
+    # Authentication endpoints
+    path("auth/login/", login_view, name="login"),
+    path("auth/logout/", logout_view, name="logout"),
+    path("auth/me/", current_user_view, name="current-user"),
+
+    # ViewSet endpoints
     path("", include(router.urls)),
 ]

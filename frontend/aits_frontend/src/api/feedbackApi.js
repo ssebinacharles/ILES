@@ -4,7 +4,7 @@ export function getFeedback() {
   return apiRequest("/issues/feedback/");
 }
 
-export function getFeedbackItem(id) {
+export function getFeedbackEntry(id) {
   return apiRequest(`/issues/feedback/${id}/`);
 }
 
@@ -18,6 +18,13 @@ export function createFeedback(data) {
 export function updateFeedback(id, data) {
   return apiRequest(`/issues/feedback/${id}/`, {
     method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function patchFeedback(id, data) {
+  return apiRequest(`/issues/feedback/${id}/`, {
+    method: "PATCH",
     body: JSON.stringify(data),
   });
 }

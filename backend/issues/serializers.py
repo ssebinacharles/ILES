@@ -208,6 +208,12 @@ class InternshipPlacementSerializer(FullCleanModelSerializer):
             "end_date",
             "status",
             "requested_at",
+            "workplace_supervisor_name",
+            "workplace_supervisor_email",
+            "workplace_supervisor_phone",
+            "workplace_supervisor_title",
+            "workplace_supervisor_department",
+            "student_notes",
             "approved_at",
             "rejection_reason",
             "supervisor_assignments",
@@ -300,6 +306,7 @@ class FeedbackSerializer(FullCleanModelSerializer):
             "weekly_log_id",
             "supervisor",
             "supervisor_id",
+            "score",
             "decision",
             "comment",
             "is_latest",
@@ -336,6 +343,11 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
             "week_number",
             "title",
             "activities",
+            "monday_activities",
+            "tuesday_activities",
+            "wednesday_activities",
+            "thursday_activities",
+            "friday_activities",
             "challenges",
             "lessons_learned",
             "status",
@@ -351,6 +363,80 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
             "updated_at",
         )
 
+
+class WeeklyLogFeedbackSummarySerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    registration_number = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WeeklyLog
+        fields = (
+            "id",
+            "week_number",
+            "title",
+            "status",
+            "student_name",
+            "registration_number",
+            "company_name",
+            "created_at",
+            "updated_at",
+        )
+
+    def get_student_name(self, obj):
+        user = obj.placement.student.user
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        return full_name or user.username
+
+    def get_registration_number(self, obj):
+        return obj.placement.student.registration_number
+
+    def get_company_name(self, obj):
+        return obj.placement.company.company_name
+
+
+class FeedbackSerializer(FullCleanModelSerializer):
+    weekly_log = WeeklyLogFeedbackSummarySerializer(read_only=True)
+    supervisor = SupervisorProfileSummarySerializer(read_only=True)
+
+    weekly_log_id = serializers.PrimaryKeyRelatedField(
+        source="weekly_log",
+        queryset=WeeklyLog.objects.all(),
+        write_only=True,
+    )
+
+    supervisor_id = serializers.PrimaryKeyRelatedField(
+        source="supervisor",
+        queryset=SupervisorProfile.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Feedback
+        fields = (
+            "id",
+            "weekly_log",
+            "weekly_log_id",
+            "supervisor",
+            "supervisor_id",
+            "decision",
+            "comment",
+            "score",
+            "is_latest",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "weekly_log",
+            "supervisor",
+            "is_latest",
+            "created_at",
+            "updated_at",
+        )
 
 # ============================================================
 # EVALUATION CRITERIA + SCORES

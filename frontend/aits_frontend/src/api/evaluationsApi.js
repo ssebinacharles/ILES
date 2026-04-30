@@ -22,9 +22,10 @@ export function updateEvaluation(id, data) {
   });
 }
 
-export function submitEvaluation(id) {
-  return apiRequest(`/issues/evaluations/${id}/submit/`, {
-    method: "POST",
+export function patchEvaluation(id, data) {
+  return apiRequest(`/issues/evaluations/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 

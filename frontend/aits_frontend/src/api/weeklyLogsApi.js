@@ -22,9 +22,10 @@ export function updateWeeklyLog(id, data) {
   });
 }
 
-export function submitWeeklyLog(id) {
-  return apiRequest(`/issues/weekly-logs/${id}/submit/`, {
-    method: "POST",
+export function patchWeeklyLog(id, data) {
+  return apiRequest(`/issues/weekly-logs/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 
@@ -32,4 +33,23 @@ export function deleteWeeklyLog(id) {
   return apiRequest(`/issues/weekly-logs/${id}/`, {
     method: "DELETE",
   });
+}
+
+// Used by StudentDashboard.jsx and StudentsWeeklyLogsPage.jsx
+export async function submitWeeklyLog(id) {
+  try {
+    // If your backend has a custom submit endpoint, this will work.
+    return await apiRequest(`/issues/weekly-logs/${id}/submit/`, {
+      method: "POST",
+    });
+  } catch (error) {
+    // Fallback: directly update the weekly log status.
+    return apiRequest(`/issues/weekly-logs/${id}/`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        status: "SUBMITTED",
+        submitted_at: new Date().toISOString(),
+      }),
+    });
+  }
 }

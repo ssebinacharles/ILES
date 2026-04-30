@@ -6,6 +6,7 @@ import { asArray } from "../../utils/dashboardHelpers";
 
 function StudentPlacementRequestPage() {
   const [companies, setCompanies] = useState([]);
+
   const [form, setForm] = useState({
     company_name: "",
     location: "",
@@ -62,6 +63,7 @@ function StudentPlacementRequestPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     setLoading(true);
     setMessage("");
     setError("");

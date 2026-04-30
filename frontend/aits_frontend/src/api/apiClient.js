@@ -1,12 +1,13 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "http://localhost:8000/api";
 
 function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split(";") : [];
+  const cookieString = document.cookie || "";
+  const cookies = cookieString.split(";");
 
   for (let cookie of cookies) {
     cookie = cookie.trim();
 
-    if (cookie.startsWith(`${name}=`)) {
+    if (cookie.startsWith(name + "=")) {
       return decodeURIComponent(cookie.substring(name.length + 1));
     }
   }
@@ -14,11 +15,12 @@ function getCookie(name) {
   return null;
 }
 
-export async function apiRequest(endpoint, options = {}) {
+async function apiRequest(endpoint, options = {}) {
   const method = options.method || "GET";
 
   const headers = {
-    "Content-Type": "application/json",
+    Accept: "application/json",
+    ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...(options.headers || {}),
   };
 
@@ -31,21 +33,33 @@ export async function apiRequest(endpoint, options = {}) {
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    credentials: "include",
     ...options,
     method,
     headers,
+    credentials: "include",
   });
 
+  const contentType = response.headers.get("content-type");
+
+  let data = null;
+
+  if (contentType && contentType.includes("application/json")) {
+    data = await response.json();
+  } else {
+    data = await response.text();
+  }
+
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const message =
+      data?.detail ||
+      data?.error ||
+      data?.message ||
+      `API error: ${response.status}`;
+
+    throw new Error(message);
   }
 
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
+  return data;
 }
 
 export default apiRequest;

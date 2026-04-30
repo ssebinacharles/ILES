@@ -22,6 +22,13 @@ export function updateSupervisorAssignment(id, data) {
   });
 }
 
+export function patchSupervisorAssignment(id, data) {
+  return apiRequest(`/issues/supervisor-assignments/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export function deleteSupervisorAssignment(id) {
   return apiRequest(`/issues/supervisor-assignments/${id}/`, {
     method: "DELETE",

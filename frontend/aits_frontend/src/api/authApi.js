@@ -1,14 +1,9 @@
 import apiRequest from "./apiClient";
 
-export function loginUser({ username, password, requestedRole, supervisorType }) {
+export function loginUser(data) {
   return apiRequest("/users/auth/login/", {
     method: "POST",
-    body: JSON.stringify({
-      username,
-      password,
-      requested_role: requestedRole,
-      supervisor_type: supervisorType || "",
-    }),
+    body: JSON.stringify(data),
   });
 }
 
@@ -17,3 +12,11 @@ export function logoutUser() {
     method: "POST",
   });
 }
+
+export function getCurrentUser() {
+  return apiRequest("/users/auth/me/");
+}
+
+export const login = loginUser;
+export const logout = logoutUser;
+export const getCurrent = getCurrentUser;

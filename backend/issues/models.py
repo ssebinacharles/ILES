@@ -113,6 +113,12 @@ class InternshipPlacement(TimeStampedModel):
         related_name="approved_placements",
     )
     org_department = models.CharField(max_length=150, blank=True)
+    workplace_supervisor_name = models.CharField(max_length=150, blank=True)
+    workplace_supervisor_email = models.EmailField(blank=True, null=True)
+    workplace_supervisor_phone = models.CharField(max_length=30, blank=True)
+    workplace_supervisor_title = models.CharField(max_length=150, blank=True)
+    workplace_supervisor_department = models.CharField(max_length=150, blank=True)
+    student_notes = models.TextField(blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     status = models.CharField(
@@ -230,7 +236,12 @@ class WeeklyLog(TimeStampedModel):
         validators=[MinValueValidator(1), MaxValueValidator(52)]
     )
     title = models.CharField(max_length=200)
-    activities = models.TextField()
+    activities = models.TextField(blank=True)
+    monday_activities = models.TextField(blank=True)
+    tuesday_activities = models.TextField(blank=True)
+    wednesday_activities = models.TextField(blank=True)
+    thursday_activities = models.TextField(blank=True)
+    friday_activities = models.TextField(blank=True)
     challenges = models.TextField(blank=True)
     lessons_learned = models.TextField(blank=True)
     status = models.CharField(
@@ -287,6 +298,16 @@ class Feedback(TimeStampedModel):
         default=FeedbackDecision.COMMENT,
     )
     comment = models.TextField()
+    score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(Decimal("0.00")),
+            MaxValueValidator(Decimal("100.00")),
+        ],
+    )
     is_latest = models.BooleanField(default=True)
 
     class Meta:
@@ -297,6 +318,9 @@ class Feedback(TimeStampedModel):
         ]
 
     def clean(self):
+        if not self.weekly_log_id or not self.supervisor_id:
+            return
+
         assigned = SupervisorAssignment.objects.filter(
             placement=self.weekly_log.placement,
             supervisor=self.supervisor,
@@ -304,7 +328,9 @@ class Feedback(TimeStampedModel):
         ).exists()
 
         if not assigned:
-            raise ValidationError("Only an assigned supervisor can review this weekly log.")
+            raise ValidationError(
+                "Only an assigned supervisor can review this weekly log."
+            )
 
     def __str__(self):
         return f"{self.weekly_log} - {self.supervisor} - {self.decision}"

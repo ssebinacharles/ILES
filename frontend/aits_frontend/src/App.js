@@ -4,25 +4,28 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
-import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-
-import CompaniesPage from "./pages/CompaniesPage";
 import StudentPlacementPage from "./pages/student/StudentPlacementPage";
+import StudentPlacementRequestPage from "./pages/student/StudentPlacementRequestPage";
 import StudentsWeeklyLogsPage from "./pages/student/StudentsWeeklyLogsPage";
 import StudentsResultsPage from "./pages/student/StudentsResultsPage";
+import StudentsFeedbackPage from "./pages/student/StudentsFeedbackPage";
 
+import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
 import SupervisorAssignmentsPage from "./pages/supervisor/SupervisorAssignmentsPage";
 import SupervisorFeedbackPage from "./pages/supervisor/SupervisorFeedbackPage";
 import SupervisorEvaluationsPage from "./pages/supervisor/SupervisorEvaluationsPage";
+import SupervisorWeeklyLogsPage from "./pages/supervisor/SupervisorWeeklyLogsPage";
 
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminAssessmentsPage from "./pages/admin/AdminAssessmentsPage";
+
+import CompaniesPage from "./pages/CompaniesPage";
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
   const [loginRole, setLoginRole] = useState("");
   const [supervisorType, setSupervisorType] = useState("");
-
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
 
@@ -30,8 +33,7 @@ function App() {
     const savedUser = localStorage.getItem("iles_user");
 
     if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setLoggedInUser(user);
+      setLoggedInUser(JSON.parse(savedUser));
       setCurrentView("app");
     }
   }, []);
@@ -43,6 +45,7 @@ function App() {
   }
 
   function handleLoginSuccess(user) {
+    localStorage.setItem("iles_user", JSON.stringify(user));
     setLoggedInUser(user);
     setCurrentView("app");
     setActivePage("dashboard");
@@ -55,75 +58,171 @@ function App() {
     setActivePage("dashboard");
   }
 
-  function renderDashboard() {
-    if (!loggedInUser) return <HomePage onChooseLogin={handleChooseLogin} />;
-
-    if (loggedInUser.is_superuser || loggedInUser.is_staff) {
-      return <AdminDashboard />;
-    }
-
-    if (loggedInUser.role === "STUDENT") {
-      return <StudentDashboard />;
-    }
-
-    if (loggedInUser.role === "SUPERVISOR") {
-      return <SupervisorDashboard />;
-    }
-
-    if (loggedInUser.role === "ADMINISTRATOR") {
-      return <AdminDashboard />;
-    }
-
-    return <StudentDashboard />;
-  }
+  const isStudent = loggedInUser?.role === "STUDENT";
+  const isSupervisor = loggedInUser?.role === "SUPERVISOR";
+  const isAdmin =
+    loggedInUser?.role === "ADMINISTRATOR" ||
+    loggedInUser?.is_staff ||
+    loggedInUser?.is_superuser;
 
   function renderPage() {
-    switch (activePage) {
-      case "dashboard":
-        return renderDashboard();
-
-      case "companies":
-        return <CompaniesPage />;
-
-      case "placements":
-        return <StudentPlacementPage />;
-
-      case "weeklyLogs":
-        return <StudentsWeeklyLogsPage />;
-
-      case "results":
-        return <StudentsResultsPage />;
-
-      case "assignments":
-        return <SupervisorAssignmentsPage />;
-
-      case "feedback":
-        return <SupervisorFeedbackPage />;
-
-      case "evaluations":
-        return <SupervisorEvaluationsPage />;
-
-      case "users":
-        return <AdminUsersPage />;
-
-      default:
-        return renderDashboard();
+    if (activePage === "dashboard") {
+      if (isStudent) return <StudentDashboard />;
+      if (isSupervisor) return <SupervisorDashboard />;
+      if (isAdmin) return <AdminDashboard />;
     }
+
+    if (activePage === "companies") {
+      return <CompaniesPage />;
+    }
+
+    if (activePage === "placement") {
+      return <StudentPlacementPage />;
+    }
+
+    if (activePage === "placementRequest") {
+      return <StudentPlacementRequestPage />;
+    }
+
+    if (activePage === "weeklyLogs") {
+      if (isSupervisor) return <SupervisorWeeklyLogsPage />;
+      return <StudentsWeeklyLogsPage />;
+    }
+
+    if (activePage === "supervisors") {
+      return <SupervisorAssignmentsPage />;
+    }
+
+    if (activePage === "feedback") {
+      if (isStudent) return <StudentsFeedbackPage />;
+      return <SupervisorFeedbackPage />;
+    }
+
+    if (activePage === "evaluations") {
+      return <SupervisorEvaluationsPage />;
+    }
+
+    if (activePage === "results") {
+      return <StudentsResultsPage />;
+    }
+
+    if (activePage === "users") {
+      return <AdminUsersPage />;
+    }
+
+    if (activePage === "assessments") {
+      return <AdminAssessmentsPage />;
+    }
+
+    if (isStudent) return <StudentDashboard />;
+    if (isSupervisor) return <SupervisorDashboard />;
+    if (isAdmin) return <AdminDashboard />;
+
+    return <HomePage onChooseLogin={handleChooseLogin} />;
   }
 
-  function getUserLabel() {
-    if (!loggedInUser) return "";
+  function renderNavigation() {
+    return (
+      <nav style={navStyle}>
+        <button onClick={() => setActivePage("dashboard")}>Dashboard</button>
 
-    if (loggedInUser.is_superuser || loggedInUser.is_staff) {
-      return `${loggedInUser.username} - System Admin`;
-    }
+        {isStudent && (
+          <>
+            <button onClick={() => setActivePage("placement")}>
+              My Placement
+            </button>
 
-    if (loggedInUser.role === "SUPERVISOR") {
-      const type = loggedInUser.profile?.supervisor_type || "Supervisor";
-      return `${loggedInUser.username} - ${type}`;
-    }
+            <button onClick={() => setActivePage("placementRequest")}>
+              Submit Placement Details
+            </button>
 
-    return `${loggedInUser.username} - ${loggedInUser.role}`;
+            <button onClick={() => setActivePage("weeklyLogs")}>
+              My Weekly Logs
+            </button>
+
+            <button onClick={() => setActivePage("supervisors")}>
+              My Supervisors
+            </button>
+
+            <button onClick={() => setActivePage("feedback")}>
+              My Feedback
+            </button>
+
+            <button onClick={() => setActivePage("evaluations")}>
+              My Evaluations
+            </button>
+
+            <button onClick={() => setActivePage("results")}>
+              My Results
+            </button>
+          </>
+        )}
+
+        {isSupervisor && (
+          <>
+            <button onClick={() => setActivePage("companies")}>Companies</button>
+
+            <button onClick={() => setActivePage("placement")}>
+              Assigned Placements
+            </button>
+
+            <button onClick={() => setActivePage("weeklyLogs")}>
+              Student Weekly Logs
+            </button>
+
+            <button onClick={() => setActivePage("feedback")}>Feedback</button>
+
+            <button onClick={() => setActivePage("evaluations")}>
+              Evaluations
+            </button>
+
+            <button onClick={() => setActivePage("results")}>
+              Final Results
+            </button>
+          </>
+        )}
+
+        {isAdmin && (
+          <>
+            <button onClick={() => setActivePage("users")}>Users</button>
+
+            <button onClick={() => setActivePage("companies")}>Companies</button>
+
+            <button onClick={() => setActivePage("placement")}>
+              Placements
+            </button>
+
+            <button onClick={() => setActivePage("supervisors")}>
+              Supervisor Assignments
+            </button>
+
+            <button onClick={() => setActivePage("weeklyLogs")}>
+              Weekly Logs
+            </button>
+
+            <button onClick={() => setActivePage("feedback")}>Feedback</button>
+
+            <button onClick={() => setActivePage("evaluations")}>
+              Evaluations
+            </button>
+
+            <button onClick={() => setActivePage("assessments")}>
+              Assessments
+            </button>
+
+            <button onClick={() => setActivePage("results")}>
+              Final Results
+            </button>
+          </>
+        )}
+
+        <span style={{ marginLeft: "auto", fontWeight: "bold" }}>
+          {loggedInUser?.username} - {loggedInUser?.role}
+        </span>
+
+        <button onClick={handleLogout}>Logout</button>
+      </nav>
+    );
   }
 
   if (currentView === "home") {
@@ -143,63 +242,20 @@ function App() {
 
   return (
     <div>
-      <nav
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "10px",
-          padding: "15px",
-          borderBottom: "1px solid #ddd",
-          background: "#f7f7f7",
-          alignItems: "center",
-        }}
-      >
-        <button onClick={() => setActivePage("dashboard")}>
-          Dashboard
-        </button>
-
-        <button onClick={() => setActivePage("companies")}>
-          Companies
-        </button>
-
-        <button onClick={() => setActivePage("placements")}>
-          Placements
-        </button>
-
-        <button onClick={() => setActivePage("weeklyLogs")}>
-          Weekly Logs
-        </button>
-
-        <button onClick={() => setActivePage("results")}>
-          Results
-        </button>
-
-        <button onClick={() => setActivePage("assignments")}>
-          Supervisor Assignments
-        </button>
-
-        <button onClick={() => setActivePage("feedback")}>
-          Feedback
-        </button>
-
-        <button onClick={() => setActivePage("evaluations")}>
-          Evaluations
-        </button>
-
-        <button onClick={() => setActivePage("users")}>
-          Users
-        </button>
-
-        <span style={{ marginLeft: "auto", fontWeight: "bold" }}>
-          {getUserLabel()}
-        </span>
-
-        <button onClick={handleLogout}>Logout</button>
-      </nav>
-
+      {renderNavigation()}
       {renderPage()}
     </div>
   );
 }
+
+const navStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "10px",
+  padding: "15px",
+  borderBottom: "1px solid #ddd",
+  background: "#f7f7f7",
+  alignItems: "center",
+};
 
 export default App;

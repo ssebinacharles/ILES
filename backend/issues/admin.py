@@ -75,7 +75,11 @@ class InternshipPlacementAdmin(admin.ModelAdmin):
         "student__user__username",
         "student__registration_number",
         "company__company_name",
+        "workplace_supervisor_name",
+        "workplace_supervisor_email",
+        "workplace_supervisor_phone",
     )
+    autocomplete_fields = ("student", "company", "approved_by")
     readonly_fields = ("created_at", "updated_at", "requested_at", "approved_at")
     date_hierarchy = "start_date"
     inlines = [SupervisorAssignmentInline, WeeklyLogInline]

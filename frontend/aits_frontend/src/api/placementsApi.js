@@ -15,29 +15,22 @@ export function createPlacement(data) {
   });
 }
 
-export function approvePlacement(id) {
-  return apiRequest(`/issues/placements/${id}/approve/`, {
-    method: "POST",
+export function updatePlacement(id, data) {
+  return apiRequest(`/issues/placements/${id}/`, {
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 }
 
-export function rejectPlacement(id, rejectionReason) {
-  return apiRequest(`/issues/placements/${id}/reject/`, {
-    method: "POST",
-    body: JSON.stringify({
-      rejection_reason: rejectionReason,
-    }),
+export function patchPlacement(id, data) {
+  return apiRequest(`/issues/placements/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 
-export function markPlacementInProgress(id) {
-  return apiRequest(`/issues/placements/${id}/mark_in_progress/`, {
-    method: "POST",
-  });
-}
-
-export function completePlacement(id) {
-  return apiRequest(`/issues/placements/${id}/complete/`, {
-    method: "POST",
+export function deletePlacement(id) {
+  return apiRequest(`/issues/placements/${id}/`, {
+    method: "DELETE",
   });
 }

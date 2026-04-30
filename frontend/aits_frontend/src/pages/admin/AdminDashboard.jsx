@@ -1,168 +1,132 @@
 import { useEffect, useState } from "react";
 
-import { getUsers, getStudents, getSupervisors, getAdministrators } from "../../api/usersApi";
-import { getCompanies } from "../../api/companiesApi";
 import { getPlacements } from "../../api/placementsApi";
 import { getWeeklyLogs } from "../../api/weeklyLogsApi";
-import { getSupervisorAssignments } from "../../api/supervisorAssignmentsApi";
-import { getFeedback } from "../../api/feedbackApi";
-import { getEvaluations } from "../../api/evaluationsApi";
 import { getFinalResults } from "../../api/finalResultsApi";
 
-function getCount(data) {
-  if (Array.isArray(data)) return data.length;
-  if (data && Array.isArray(data.results)) return data.results.length;
-  return 0;
-}
+import { asArray, countByStatus } from "../../utils/dashboardHelpers";
 
 function AdminDashboard() {
-  const [stats, setStats] = useState({
-    users: 0,
-    students: 0,
-    supervisors: 0,
-    administrators: 0,
-    companies: 0,
-    placements: 0,
-    weeklyLogs: 0,
-    assignments: 0,
-    feedback: 0,
-    evaluations: 0,
-    finalResults: 0,
-  });
-
-  const [loading, setLoading] = useState(true);
+  const [placements, setPlacements] = useState([]);
+  const [weeklyLogs, setWeeklyLogs] = useState([]);
+  const [finalResults, setFinalResults] = useState([]);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    Promise.all([
-      getUsers(),
-      getStudents(),
-      getSupervisors(),
-      getAdministrators(),
-      getCompanies(),
-      getPlacements(),
-      getWeeklyLogs(),
-      getSupervisorAssignments(),
-      getFeedback(),
-      getEvaluations(),
-      getFinalResults(),
-    ])
-      .then(
-        ([
-          users,
-          students,
-          supervisors,
-          administrators,
-          companies,
-          placements,
-          weeklyLogs,
-          assignments,
-          feedback,
-          evaluations,
-          finalResults,
-        ]) => {
-          setStats({
-            users: getCount(users),
-            students: getCount(students),
-            supervisors: getCount(supervisors),
-            administrators: getCount(administrators),
-            companies: getCount(companies),
-            placements: getCount(placements),
-            weeklyLogs: getCount(weeklyLogs),
-            assignments: getCount(assignments),
-            feedback: getCount(feedback),
-            evaluations: getCount(evaluations),
-            finalResults: getCount(finalResults),
-          });
+  function loadDashboard() {
+    Promise.all([getPlacements(), getWeeklyLogs(), getFinalResults()])
+      .then(([placementData, logData, resultData]) => {
+        setPlacements(asArray(placementData));
+        setWeeklyLogs(asArray(logData));
+        setFinalResults(asArray(resultData));
+      })
+      .catch((err) => setError(err.message || "Failed to load admin dashboard."));
+  }
 
-          setLoading(false);
-        }
-      )
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+  useEffect(() => {
+    loadDashboard();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ padding: "30px" }}>
-        <h1>Admin Dashboard</h1>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
+  const pendingPlacements = placements.filter(
+    (placement) => placement.status === "PENDING"
+  );
 
-  if (error) {
-    return (
-      <div style={{ padding: "30px" }}>
-        <h1>Admin Dashboard</h1>
-        <p style={{ color: "red" }}>Error: {error}</p>
-      </div>
-    );
-  }
+  const approvedPlacements = placements.filter(
+    (placement) =>
+      placement.status === "APPROVED" || placement.status === "IN_PROGRESS"
+  );
+
+  const logStatusCounts = countByStatus(weeklyLogs);
 
   return (
     <div style={{ padding: "30px" }}>
-      <h1>Admin Dashboard</h1>
-      <p>Overview of the entire Internship Logging & Evaluation System.</p>
+      <h1>Internship Administrator Dashboard</h1>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div style={gridStyle}>
-        <div style={cardStyle}>
-          <h2>{stats.users}</h2>
-          <p>All Users</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.students}</h2>
-          <p>Student Profiles</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.supervisors}</h2>
-          <p>Supervisor Profiles</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.administrators}</h2>
-          <p>Administrator Profiles</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.companies}</h2>
-          <p>Companies</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.placements}</h2>
-          <p>Placements</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.weeklyLogs}</h2>
-          <p>Weekly Logs</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.assignments}</h2>
-          <p>Supervisor Assignments</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.feedback}</h2>
-          <p>Feedback Records</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.evaluations}</h2>
-          <p>Evaluations</p>
-        </div>
-
-        <div style={cardStyle}>
-          <h2>{stats.finalResults}</h2>
-          <p>Final Results</p>
-        </div>
+        <Card title="Total Placements" value={placements.length} />
+        <Card title="Pending Requests" value={pendingPlacements.length} />
+        <Card title="Active Placements" value={approvedPlacements.length} />
+        <Card title="Weekly Logs" value={weeklyLogs.length} />
+        <Card title="Submitted Logs" value={logStatusCounts.SUBMITTED || 0} />
+        <Card title="Final Results" value={finalResults.length} />
       </div>
+
+      <section style={sectionStyle}>
+        <h2>Placement Requests Submitted by Students</h2>
+        <p>
+          These are the company and workplace supervisor details submitted by students.
+          Use these details to create or assign the workplace supervisor and academic supervisor.
+        </p>
+
+        {pendingPlacements.length === 0 ? (
+          <p>No pending placement requests.</p>
+        ) : (
+          pendingPlacements.map((placement) => (
+            <div key={placement.id} style={boxStyle}>
+              <h3>
+                {placement.student?.registration_number} -{" "}
+                {placement.student?.user?.username}
+              </h3>
+
+              <h4>Company Details</h4>
+              <p><strong>Company:</strong> {placement.company?.company_name}</p>
+              <p><strong>Location:</strong> {placement.company?.location}</p>
+              <p><strong>Department:</strong> {placement.org_department || "-"}</p>
+              <p><strong>Start Date:</strong> {placement.start_date}</p>
+              <p><strong>End Date:</strong> {placement.end_date}</p>
+
+              <h4>Workplace Supervisor Details Submitted by Student</h4>
+              <p><strong>Name:</strong> {placement.workplace_supervisor_name || "-"}</p>
+              <p><strong>Email:</strong> {placement.workplace_supervisor_email || "-"}</p>
+              <p><strong>Phone:</strong> {placement.workplace_supervisor_phone || "-"}</p>
+              <p><strong>Title:</strong> {placement.workplace_supervisor_title || "-"}</p>
+              <p><strong>Department:</strong> {placement.workplace_supervisor_department || "-"}</p>
+
+              <h4>Internship Period</h4>
+              <p><strong>Start Date:</strong> {placement.start_date || "-"}</p>
+              <p><strong>End Date:</strong> {placement.end_date || "-"}</p>
+
+              <h4>Student Notes</h4>
+              <p>{placement.student_notes || "-"}</p>
+
+              <p style={{ color: "#666" }}>
+                Next: create the workplace supervisor under Users/Supervisor Profiles,
+                then assign both workplace and academic supervisors under Supervisor Assignments.
+              </p>
+            </div>
+          ))
+        )}
+      </section>
+
+      <section style={sectionStyle}>
+        <h2>All Placements</h2>
+
+        {placements.length === 0 ? (
+          <p>No placements found.</p>
+        ) : (
+          placements.map((placement) => (
+            <div key={placement.id} style={boxStyle}>
+              <h3>
+                {placement.student?.registration_number} @{" "}
+                {placement.company?.company_name}
+              </h3>
+              <p><strong>Status:</strong> {placement.status}</p>
+              <p><strong>Student:</strong> {placement.student?.user?.username}</p>
+              <p><strong>Period:</strong> {placement.start_date} to {placement.end_date}</p>
+            </div>
+          ))
+        )}
+      </section>
+    </div>
+  );
+}
+
+function Card({ title, value }) {
+  return (
+    <div style={cardStyle}>
+      <h2>{value}</h2>
+      <p>{title}</p>
     </div>
   );
 }
@@ -179,6 +143,18 @@ const cardStyle = {
   borderRadius: "8px",
   padding: "20px",
   background: "#f9f9f9",
+};
+
+const sectionStyle = {
+  marginTop: "30px",
+};
+
+const boxStyle = {
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  padding: "16px",
+  marginBottom: "14px",
+  background: "#fff",
 };
 
 export default AdminDashboard;

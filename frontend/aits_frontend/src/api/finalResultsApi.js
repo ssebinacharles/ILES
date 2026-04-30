@@ -22,9 +22,10 @@ export function updateFinalResult(id, data) {
   });
 }
 
-export function publishFinalResult(id) {
-  return apiRequest(`/issues/final-results/${id}/publish/`, {
-    method: "POST",
+export function patchFinalResult(id, data) {
+  return apiRequest(`/issues/final-results/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 
