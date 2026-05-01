@@ -5,9 +5,12 @@ import {
   getWeeklyLogs,
   createWeeklyLog,
   submitWeeklyLog,
+  getMyWeeklyLogEvaluations,
 } from "../../api/weeklyLogsApi";
 import { getEvaluations } from "../../api/evaluationsApi";
 import { getFinalResults } from "../../api/finalResultsApi";
+
+import PerformanceTrendChart from "../../components/common/PerformanceTrendChart";
 
 import {
   asArray,
@@ -18,6 +21,7 @@ import {
 function StudentDashboard() {
   const [placements, setPlacements] = useState([]);
   const [weeklyLogs, setWeeklyLogs] = useState([]);
+  const [performanceEvaluations, setPerformanceEvaluations] = useState([]);
   const [evaluations, setEvaluations] = useState([]);
   const [finalResults, setFinalResults] = useState([]);
 
@@ -42,14 +46,16 @@ function StudentDashboard() {
     Promise.all([
       getPlacements(),
       getWeeklyLogs(),
+      getMyWeeklyLogEvaluations(),
       getEvaluations(),
       getFinalResults(),
     ])
-      .then(([placementData, logData, evaluationData, resultData]) => {
+      .then(([placementData, logData, performanceData, evaluationData, resultData]) => {
         const placementsArray = asArray(placementData);
 
         setPlacements(placementsArray);
         setWeeklyLogs(asArray(logData));
+        setPerformanceEvaluations(asArray(performanceData));
         setEvaluations(asArray(evaluationData));
         setFinalResults(asArray(resultData));
 
@@ -155,7 +161,10 @@ function StudentDashboard() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div style={gridStyle}>
-        <Card title="Current Placement" value={currentPlacement ? currentPlacement.company?.company_name : "None"} />
+        <Card
+          title="Current Placement"
+          value={currentPlacement ? currentPlacement.company?.company_name : "None"}
+        />
         <Card title="Weekly Logs" value={weeklyLogs.length} />
         <Card title="Submitted Logs" value={statusCounts.SUBMITTED || 0} />
         <Card title="Approved Logs" value={statusCounts.APPROVED || 0} />
@@ -164,15 +173,36 @@ function StudentDashboard() {
       </div>
 
       <section style={sectionStyle}>
+        <PerformanceTrendChart
+          evaluations={performanceEvaluations}
+          title="My Weekly Performance Trend"
+        />
+      </section>
+
+      <section style={sectionStyle}>
         <h2>Current Placement</h2>
 
         {currentPlacement ? (
           <div style={boxStyle}>
-            <p><strong>Company:</strong> {currentPlacement.company?.company_name}</p>
-            <p><strong>Location:</strong> {currentPlacement.company?.location}</p>
-            <p><strong>Status:</strong> {currentPlacement.status}</p>
-            <p><strong>Period:</strong> {currentPlacement.start_date} to {currentPlacement.end_date}</p>
-            <p><strong>Workplace Supervisor:</strong> {currentPlacement.workplace_supervisor_name || "Not yet confirmed"}</p>
+            <p>
+              <strong>Company:</strong>{" "}
+              {currentPlacement.company?.company_name}
+            </p>
+            <p>
+              <strong>Location:</strong>{" "}
+              {currentPlacement.company?.location}
+            </p>
+            <p>
+              <strong>Status:</strong> {currentPlacement.status}
+            </p>
+            <p>
+              <strong>Period:</strong> {currentPlacement.start_date} to{" "}
+              {currentPlacement.end_date}
+            </p>
+            <p>
+              <strong>Workplace Supervisor:</strong>{" "}
+              {currentPlacement.workplace_supervisor_name || "Not yet confirmed"}
+            </p>
           </div>
         ) : (
           <p>No placement found.</p>
@@ -202,17 +232,69 @@ function StudentDashboard() {
               </select>
             </label>
 
-            <Input label="Week Number" name="week_number" type="number" value={logForm.week_number} onChange={handleLogChange} />
-            <Input label="Title" name="title" value={logForm.title} onChange={handleLogChange} />
+            <Input
+              label="Week Number"
+              name="week_number"
+              type="number"
+              value={logForm.week_number}
+              onChange={handleLogChange}
+            />
 
-            <TextArea label="Monday Activities" name="monday_activities" value={logForm.monday_activities} onChange={handleLogChange} />
-            <TextArea label="Tuesday Activities" name="tuesday_activities" value={logForm.tuesday_activities} onChange={handleLogChange} />
-            <TextArea label="Wednesday Activities" name="wednesday_activities" value={logForm.wednesday_activities} onChange={handleLogChange} />
-            <TextArea label="Thursday Activities" name="thursday_activities" value={logForm.thursday_activities} onChange={handleLogChange} />
-            <TextArea label="Friday Activities" name="friday_activities" value={logForm.friday_activities} onChange={handleLogChange} />
+            <Input
+              label="Title"
+              name="title"
+              value={logForm.title}
+              onChange={handleLogChange}
+            />
 
-            <TextArea label="Challenges" name="challenges" value={logForm.challenges} onChange={handleLogChange} />
-            <TextArea label="Lessons Learned" name="lessons_learned" value={logForm.lessons_learned} onChange={handleLogChange} />
+            <TextArea
+              label="Monday Activities"
+              name="monday_activities"
+              value={logForm.monday_activities}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Tuesday Activities"
+              name="tuesday_activities"
+              value={logForm.tuesday_activities}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Wednesday Activities"
+              name="wednesday_activities"
+              value={logForm.wednesday_activities}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Thursday Activities"
+              name="thursday_activities"
+              value={logForm.thursday_activities}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Friday Activities"
+              name="friday_activities"
+              value={logForm.friday_activities}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Challenges"
+              name="challenges"
+              value={logForm.challenges}
+              onChange={handleLogChange}
+            />
+
+            <TextArea
+              label="Lessons Learned"
+              name="lessons_learned"
+              value={logForm.lessons_learned}
+              onChange={handleLogChange}
+            />
 
             <div style={{ display: "flex", gap: "10px" }}>
               <button onClick={saveDraft}>Save Draft</button>
@@ -230,10 +312,19 @@ function StudentDashboard() {
         ) : (
           weeklyLogs.slice(0, 5).map((log) => (
             <div key={log.id} style={boxStyle}>
-              <h3>Week {log.week_number}: {log.title}</h3>
-              <p><strong>Status:</strong> {log.status}</p>
-              <p><strong>Submitted:</strong> {formatDateTime(log.submitted_at)}</p>
-              <p><strong>Feedback:</strong> {asArray(log.feedback_entries).length}</p>
+              <h3>
+                Week {log.week_number}: {log.title}
+              </h3>
+              <p>
+                <strong>Status:</strong> {log.status}
+              </p>
+              <p>
+                <strong>Submitted:</strong> {formatDateTime(log.submitted_at)}
+              </p>
+              <p>
+                <strong>Feedback:</strong>{" "}
+                {asArray(log.feedback_entries).length}
+              </p>
             </div>
           ))
         )}
@@ -248,10 +339,18 @@ function StudentDashboard() {
           evaluations.map((evaluation) => (
             <div key={evaluation.id} style={boxStyle}>
               <h3>{evaluation.evaluation_type}</h3>
-              <p><strong>Status:</strong> {evaluation.status}</p>
-              <p><strong>Total Score:</strong> {evaluation.total_score}</p>
-              <p><strong>Weighted Score:</strong> {evaluation.weighted_score}</p>
-              <p><strong>Remarks:</strong> {evaluation.remarks || "-"}</p>
+              <p>
+                <strong>Status:</strong> {evaluation.status}
+              </p>
+              <p>
+                <strong>Total Score:</strong> {evaluation.total_score}
+              </p>
+              <p>
+                <strong>Weighted Score:</strong> {evaluation.weighted_score}
+              </p>
+              <p>
+                <strong>Remarks:</strong> {evaluation.remarks || "-"}
+              </p>
             </div>
           ))
         )}

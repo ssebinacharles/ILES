@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import "./styles/ilesTheme.css";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentPlacementPage from "./pages/student/StudentPlacementPage";
@@ -9,6 +11,7 @@ import StudentPlacementRequestPage from "./pages/student/StudentPlacementRequest
 import StudentsWeeklyLogsPage from "./pages/student/StudentsWeeklyLogsPage";
 import StudentsResultsPage from "./pages/student/StudentsResultsPage";
 import StudentsFeedbackPage from "./pages/student/StudentsFeedbackPage";
+import StudentsEvaluationsPage from "./pages/student/StudentsEvaluationsPage";
 
 import SupervisorDashboard from "./pages/supervisor/SupervisorDashboard";
 import SupervisorAssignmentsPage from "./pages/supervisor/SupervisorAssignmentsPage";
@@ -19,13 +22,19 @@ import SupervisorWeeklyLogsPage from "./pages/supervisor/SupervisorWeeklyLogsPag
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminAssessmentsPage from "./pages/admin/AdminAssessmentsPage";
+import AdminResultsPage from "./pages/admin/AdminResultsPage";
 
 import CompaniesPage from "./pages/CompaniesPage";
 
 function App() {
   const [currentView, setCurrentView] = useState("home");
+
   const [loginRole, setLoginRole] = useState("");
   const [supervisorType, setSupervisorType] = useState("");
+
+  const [registerRole, setRegisterRole] = useState("");
+  const [registerSupervisorType, setRegisterSupervisorType] = useState("");
+
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
 
@@ -44,7 +53,20 @@ function App() {
     setCurrentView("login");
   }
 
+  function handleChooseRegister(role, type = "") {
+    setRegisterRole(role);
+    setRegisterSupervisorType(type);
+    setCurrentView("register");
+  }
+
   function handleLoginSuccess(user) {
+    localStorage.setItem("iles_user", JSON.stringify(user));
+    setLoggedInUser(user);
+    setCurrentView("app");
+    setActivePage("dashboard");
+  }
+
+  function handleRegisterSuccess(user) {
     localStorage.setItem("iles_user", JSON.stringify(user));
     setLoggedInUser(user);
     setCurrentView("app");
@@ -99,10 +121,15 @@ function App() {
     }
 
     if (activePage === "evaluations") {
-      return <SupervisorEvaluationsPage />;
+      if (isStudent) return <StudentsEvaluationsPage />;
+      if (isSupervisor) return <SupervisorEvaluationsPage />;
+      if (isAdmin) return <SupervisorEvaluationsPage />;
     }
 
     if (activePage === "results") {
+      if (isStudent) return <StudentsResultsPage />;
+      if (isAdmin) return <AdminResultsPage />;
+
       return <StudentsResultsPage />;
     }
 
@@ -118,12 +145,17 @@ function App() {
     if (isSupervisor) return <SupervisorDashboard />;
     if (isAdmin) return <AdminDashboard />;
 
-    return <HomePage onChooseLogin={handleChooseLogin} />;
+    return (
+      <HomePage
+        onChooseLogin={handleChooseLogin}
+        onChooseRegister={handleChooseRegister}
+      />
+    );
   }
 
   function renderNavigation() {
     return (
-      <nav style={navStyle}>
+      <nav className="app-nav">
         <button onClick={() => setActivePage("dashboard")}>Dashboard</button>
 
         {isStudent && (
@@ -160,25 +192,25 @@ function App() {
 
         {isSupervisor && (
           <>
-            <button onClick={() => setActivePage("companies")}>Companies</button>
-
-            <button onClick={() => setActivePage("placement")}>
-              Assigned Placements
+            <button onClick={() => setActivePage("companies")}>
+              Companies
             </button>
+
+            
 
             <button onClick={() => setActivePage("weeklyLogs")}>
               Student Weekly Logs
             </button>
 
-            <button onClick={() => setActivePage("feedback")}>Feedback</button>
+            <button onClick={() => setActivePage("feedback")}>
+              Feedback
+            </button>
 
             <button onClick={() => setActivePage("evaluations")}>
               Evaluations
             </button>
 
-            <button onClick={() => setActivePage("results")}>
-              Final Results
-            </button>
+            
           </>
         )}
 
@@ -186,11 +218,11 @@ function App() {
           <>
             <button onClick={() => setActivePage("users")}>Users</button>
 
-            <button onClick={() => setActivePage("companies")}>Companies</button>
-
-            <button onClick={() => setActivePage("placement")}>
-              Placements
+            <button onClick={() => setActivePage("companies")}>
+              Companies
             </button>
+
+            
 
             <button onClick={() => setActivePage("supervisors")}>
               Supervisor Assignments
@@ -200,7 +232,9 @@ function App() {
               Weekly Logs
             </button>
 
-            <button onClick={() => setActivePage("feedback")}>Feedback</button>
+            <button onClick={() => setActivePage("feedback")}>
+              Feedback
+            </button>
 
             <button onClick={() => setActivePage("evaluations")}>
               Evaluations
@@ -226,7 +260,12 @@ function App() {
   }
 
   if (currentView === "home") {
-    return <HomePage onChooseLogin={handleChooseLogin} />;
+    return (
+      <HomePage
+        onChooseLogin={handleChooseLogin}
+        onChooseRegister={handleChooseRegister}
+      />
+    );
   }
 
   if (currentView === "login") {
@@ -240,22 +279,23 @@ function App() {
     );
   }
 
+  if (currentView === "register") {
+    return (
+      <RegisterPage
+        registerRole={registerRole}
+        registerSupervisorType={registerSupervisorType}
+        onRegisterSuccess={handleRegisterSuccess}
+        onBack={() => setCurrentView("home")}
+      />
+    );
+  }
+
   return (
-    <div>
+    <div className="app-shell">
       {renderNavigation()}
       {renderPage()}
     </div>
   );
 }
-
-const navStyle = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "10px",
-  padding: "15px",
-  borderBottom: "1px solid #ddd",
-  background: "#f7f7f7",
-  alignItems: "center",
-};
 
 export default App;

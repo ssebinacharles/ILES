@@ -34,3 +34,11 @@ export function deleteFinalResult(id) {
     method: "DELETE",
   });
 }
+
+export function getMyFinalResult() {
+  return apiRequest("/issues/final-results/my-results/");
+}
+
+export function getStudentFinalResult(studentId) {
+  return apiRequest(`/issues/final-results/student/${studentId}/result/`);
+}

@@ -21,6 +21,7 @@ function ApiListPage({
   description,
   fetchData,
   renderItem,
+  renderTop,
   emptyMessage = "No records found yet.",
 }) {
   const [items, setItems] = useState([]);
@@ -64,6 +65,8 @@ function ApiListPage({
       <h1>{title}</h1>
 
       {description && <p>{description}</p>}
+
+      {renderTop && renderTop(items, rawData)}
 
       {items.length === 0 ? (
         <p>{emptyMessage}</p>

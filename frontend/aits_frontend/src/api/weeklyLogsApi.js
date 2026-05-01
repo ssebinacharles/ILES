@@ -38,18 +38,25 @@ export function deleteWeeklyLog(id) {
 // Used by StudentDashboard.jsx and StudentsWeeklyLogsPage.jsx
 export async function submitWeeklyLog(id) {
   try {
-    // If your backend has a custom submit endpoint, this will work.
+    // Preferred: backend submit endpoint sets submitted_at using Django timezone.now()
     return await apiRequest(`/issues/weekly-logs/${id}/submit/`, {
       method: "POST",
     });
   } catch (error) {
-    // Fallback: directly update the weekly log status.
+    // Fallback: backend model save() should still set submitted_at when status becomes SUBMITTED
     return apiRequest(`/issues/weekly-logs/${id}/`, {
       method: "PATCH",
       body: JSON.stringify({
         status: "SUBMITTED",
-        submitted_at: new Date().toISOString(),
       }),
     });
   }
+}
+
+export function getMyWeeklyLogEvaluations() {
+  return apiRequest("/issues/weekly-logs/my-evaluations/");
+}
+
+export function getStudentWeeklyLogEvaluations(studentId) {
+  return apiRequest(`/issues/weekly-logs/student/${studentId}/evaluations/`);
 }

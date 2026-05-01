@@ -22,6 +22,13 @@ function SupervisorFeedbackPage() {
           </p>
 
           <p>
+            <strong>Score:</strong>{" "}
+            {feedback.score !== null && feedback.score !== undefined
+              ? `${feedback.score}%`
+              : "No score provided"}
+          </p>
+
+          <p>
             <strong>Latest:</strong>{" "}
             {feedback.is_latest ? "Yes" : "No"}
           </p>

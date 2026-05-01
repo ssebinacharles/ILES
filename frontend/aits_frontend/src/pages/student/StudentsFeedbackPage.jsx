@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getFeedback } from "../../api/feedbackApi";
+import { formatDateTime } from "../../utils/dashboardHelpers";
 
 function StudentsFeedbackPage() {
   const [feedbackList, setFeedbackList] = useState([]);
@@ -50,7 +51,13 @@ function StudentsFeedbackPage() {
                 ? `Week ${feedback.weekly_log.week_number} - ${feedback.weekly_log.title}`
                 : "Not shown"}
             </p>
-
+            
+            <p>
+              <strong>Weekly Log Submitted At:</strong>{" "}
+              {feedback.weekly_log?.submitted_at
+                ? formatDateTime(feedback.weekly_log.submitted_at)
+                : "Not submitted yet"}
+            </p>
             <p>
               <strong>Student:</strong>{" "}
               {feedback.weekly_log?.student_name || "-"}{" "}
@@ -76,7 +83,10 @@ function StudentsFeedbackPage() {
               <strong>Supervisor:</strong>{" "}
               {feedback.supervisor?.user?.username || "-"}
             </p>
-
+            <p>
+              <strong>Feedback Sent At:</strong>{" "}
+              {formatDateTime(feedback.created_at)}
+            </p>
             <p>
               <strong>Latest:</strong> {feedback.is_latest ? "Yes" : "No"}
             </p>

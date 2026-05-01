@@ -66,6 +66,18 @@ function StudentsWeeklyLogsPage() {
     }
   }
 
+function getSubmissionTime(log) {
+  if (log.submitted_at) {
+    return formatDateTime(log.submitted_at);
+  }
+
+  if (log.status !== "DRAFT" && log.updated_at) {
+    return formatDateTime(log.updated_at);
+  }
+
+  return "Not submitted yet";
+}
+
   return (
     <div style={{ padding: "30px" }}>
       <h1>My Weekly Logs</h1>
@@ -83,7 +95,7 @@ function StudentsWeeklyLogsPage() {
             <p><strong>Student:</strong> {log.placement?.student?.user?.username || "Student"}</p>
             <p><strong>Registration Number:</strong> {log.placement?.student?.registration_number || "-"}</p>
             <p><strong>Status:</strong> {log.status}</p>
-            <p><strong>Time of Submission:</strong> {formatDateTime(log.submitted_at)}</p>
+            <p><strong>Time of Submission:</strong> {getSubmissionTime(log)}</p>
 
             {editingId === log.id ? (
               <div style={formStyle}>
@@ -116,6 +128,7 @@ function StudentsWeeklyLogsPage() {
                   asArray(log.feedback_entries).map((feedback) => (
                     <div key={feedback.id} style={innerBoxStyle}>
                       <p><strong>Supervisor:</strong> {feedback.supervisor?.user?.username || "-"}</p>
+                      <p><strong>Feedback Sent At:</strong> {formatDateTime(feedback.created_at)}</p>
                       <p><strong>Decision:</strong> {feedback.decision}</p>
                       <p><strong>Score:</strong> {feedback.score || "-"}</p>
                       <p><strong>Comment:</strong> {feedback.comment}</p>

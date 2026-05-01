@@ -94,19 +94,40 @@ function AcademicSupervisorDashboard() {
   }, [user]);
 
   if (loading) {
-    return <Page><h1>Academic Supervisor Dashboard</h1><p>Loading dashboard...</p></Page>;
+    return (
+      <Page>
+        <h1>Academic Supervisor Dashboard</h1>
+
+        <div className="card">
+          <p>Loading dashboard...</p>
+        </div>
+      </Page>
+    );
   }
 
   if (error) {
-    return <Page><h1>Academic Supervisor Dashboard</h1><p style={{ color: "red" }}>Error: {error}</p></Page>;
+    return (
+      <Page>
+        <h1>Academic Supervisor Dashboard</h1>
+
+        <p className="error">Error: {error}</p>
+      </Page>
+    );
   }
 
   const logStatusCounts = countByStatus(dashboard.weeklyLogs);
 
   return (
     <Page>
-      <h1>Academic Supervisor Dashboard</h1>
-      <p>Monitor assigned students, review weekly logs, give feedback and submit academic evaluations.</p>
+      <div className="dashboard-header">
+        <div>
+          <h1>Academic Supervisor Dashboard</h1>
+          <p className="muted">
+            Monitor assigned students, review weekly logs, give feedback and
+            submit academic evaluations.
+          </p>
+        </div>
+      </div>
 
       <Grid>
         <Card title="Assigned Students" value={dashboard.students.length} />
@@ -115,7 +136,10 @@ function AcademicSupervisorDashboard() {
         <Card title="Approved Logs" value={logStatusCounts.APPROVED || 0} />
         <Card title="Rejected Logs" value={logStatusCounts.REJECTED || 0} />
         <Card title="Feedback Given" value={dashboard.feedback.length} />
-        <Card title="Academic Evaluations" value={dashboard.evaluations.length} />
+        <Card
+          title="Academic Evaluations"
+          value={dashboard.evaluations.length}
+        />
       </Grid>
 
       <Section title="Assigned Students">
@@ -124,10 +148,30 @@ function AcademicSupervisorDashboard() {
         ) : (
           dashboard.assignments.map((assignment) => (
             <ListItem key={assignment.id}>
-              <strong>{assignment.placement?.student?.registration_number}</strong>
-              <p>Student: {assignment.placement?.student?.user?.username}</p>
-              <p>Company: {assignment.placement?.company?.company_name}</p>
-              <p>Placement Status: {assignment.placement?.status}</p>
+              <h3>
+                {assignment.placement?.student?.registration_number || "Student"}
+              </h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {assignment.placement?.student?.user?.username || "-"}
+              </p>
+
+              <p>
+                <strong>Company:</strong>{" "}
+                {assignment.placement?.company?.company_name || "-"}
+              </p>
+
+              <p>
+                <strong>Placement Status:</strong>{" "}
+                <span
+                  className={`badge badge-${String(
+                    assignment.placement?.status || ""
+                  ).toLowerCase()}`}
+                >
+                  {assignment.placement?.status || "-"}
+                </span>
+              </p>
             </ListItem>
           ))
         )}
@@ -139,10 +183,25 @@ function AcademicSupervisorDashboard() {
         ) : (
           dashboard.submittedLogs.map((log) => (
             <ListItem key={log.id}>
-              <strong>Week {log.week_number}: {log.title}</strong>
-              <p>Student: {log.placement?.student?.registration_number}</p>
-              <p>Status: {log.status}</p>
-              <p>Activities: {log.activities}</p>
+              <h3>
+                Week {log.week_number}: {log.title}
+              </h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {log.placement?.student?.registration_number || "-"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className={`badge badge-${String(log.status).toLowerCase()}`}>
+                  {log.status}
+                </span>
+              </p>
+
+              <p>
+                <strong>Activities:</strong> {log.activities || "-"}
+              </p>
             </ListItem>
           ))
         )}
@@ -154,12 +213,35 @@ function AcademicSupervisorDashboard() {
         ) : (
           dashboard.evaluations.map((evaluation) => (
             <ListItem key={evaluation.id}>
-              <strong>{evaluation.evaluation_type}</strong>
-              <p>Student: {evaluation.placement?.student?.registration_number}</p>
-              <p>Status: {evaluation.status}</p>
-              <p>Total Score: {evaluation.total_score}</p>
-              <p>Weighted Score: {evaluation.weighted_score}</p>
-              <p>Remarks: {evaluation.remarks || "-"}</p>
+              <h3>{evaluation.evaluation_type}</h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {evaluation.placement?.student?.registration_number || "-"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`badge badge-${String(
+                    evaluation.status
+                  ).toLowerCase()}`}
+                >
+                  {evaluation.status}
+                </span>
+              </p>
+
+              <p>
+                <strong>Total Score:</strong> {evaluation.total_score}
+              </p>
+
+              <p>
+                <strong>Weighted Score:</strong> {evaluation.weighted_score}
+              </p>
+
+              <p>
+                <strong>Remarks:</strong> {evaluation.remarks || "-"}
+              </p>
             </ListItem>
           ))
         )}
@@ -169,16 +251,16 @@ function AcademicSupervisorDashboard() {
 }
 
 function Page({ children }) {
-  return <div style={{ padding: "30px" }}>{children}</div>;
+  return <div className="page">{children}</div>;
 }
 
 function Grid({ children }) {
-  return <div style={gridStyle}>{children}</div>;
+  return <div className="dashboard-grid">{children}</div>;
 }
 
 function Card({ title, value }) {
   return (
-    <div style={cardStyle}>
+    <div className="stat-card">
       <h2>{value}</h2>
       <p>{title}</p>
     </div>
@@ -187,7 +269,7 @@ function Card({ title, value }) {
 
 function Section({ title, children }) {
   return (
-    <section style={{ marginTop: "30px" }}>
+    <section className="card">
       <h2>{title}</h2>
       {children}
     </section>
@@ -195,29 +277,7 @@ function Section({ title, children }) {
 }
 
 function ListItem({ children }) {
-  return <div style={listItemStyle}>{children}</div>;
+  return <div className="info-card">{children}</div>;
 }
-
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: "16px",
-  marginTop: "20px",
-};
-
-const cardStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "20px",
-  background: "#f9f9f9",
-};
-
-const listItemStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "15px",
-  marginBottom: "12px",
-  background: "#fff",
-};
 
 export default AcademicSupervisorDashboard;

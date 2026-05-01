@@ -1,99 +1,113 @@
-function HomePage({ onChooseLogin }) {
+import "../styles/homePage.css";
+
+function HomePage({ onChooseLogin, onChooseRegister }) {
+  function openDjangoAdmin() {
+    window.open("http://127.0.0.1:8000/admin/", "_blank");
+  }
+
   return (
-    <div style={pageStyle}>
-      <h1>Internship Logging & Evaluation System</h1>
-      <p>Select your user type to login.</p>
+    <div className="home-page">
+      <div className="home-overlay">
+        <header className="home-header">
+          <h1>Internship Logging & Evaluation System</h1>
+          <p>
+            A role-based platform for managing internship placements, weekly
+            logs, supervisor feedback, evaluations, and final results.
+          </p>
+        </header>
 
-      <div style={gridStyle}>
-        <div style={cardStyle}>
-          <h2>Student</h2>
-          <p>Login to view placements, weekly logs, and final results.</p>
-          <button onClick={() => onChooseLogin("STUDENT")}>
-            Student Login
-          </button>
-        </div>
+        <div className="home-cards">
+          <div className="home-card">
+            <div className="home-icon">🎓</div>
+            <h2>Student</h2>
+            <p>
+              Login to view your internship placement, submit weekly logs,
+              receive supervisor feedback, and view final results.
+            </p>
 
-        <div style={cardStyle}>
-          <h2>Supervisor</h2>
-          <p>Login as an academic or workplace supervisor.</p>
+            <button onClick={() => onChooseLogin("STUDENT")}>
+              Student Login
+            </button>
 
-          <div style={buttonGroupStyle}>
+            <button
+              className="outline-button"
+              onClick={() => onChooseRegister("STUDENT")}
+            >
+              Create Student Account
+            </button>
+          </div>
+
+          <div className="home-card">
+            <div className="home-icon">👨‍🏫</div>
+            <h2>Supervisor</h2>
+            <p>
+              Login as an academic or workplace supervisor to review assigned
+              students, weekly logs, feedback, and evaluations.
+            </p>
+
             <button onClick={() => onChooseLogin("SUPERVISOR", "ACADEMIC")}>
-              Academic Supervisor
+              Academic Supervisor Login
             </button>
 
             <button onClick={() => onChooseLogin("SUPERVISOR", "WORKPLACE")}>
-              Workplace Supervisor
+              Workplace Supervisor Login
+            </button>
+
+            <button
+              className="outline-button"
+              onClick={() => onChooseRegister("SUPERVISOR", "ACADEMIC")}
+            >
+              Create Academic Supervisor Account
+            </button>
+
+            <button
+              className="outline-button"
+              onClick={() => onChooseRegister("SUPERVISOR", "WORKPLACE")}
+            >
+              Create Workplace Supervisor Account
             </button>
           </div>
-        </div>
 
-        <div style={cardStyle}>
-          <h2>Internship Administrator</h2>
-          <p>Login to manage users, placements, assignments, and results.</p>
-          <button onClick={() => onChooseLogin("ADMINISTRATOR")}>
-            Internship Admin Login
-          </button>
-        </div>
+          <div className="home-card">
+            <div className="home-icon">📋</div>
+            <h2>Internship Administrator</h2>
+            <p>
+              Manage internship placement requests, supervisors, student
+              assignments, evaluations, and final results.
+            </p>
 
-        <div style={cardStyle}>
-          <h2>System Admin</h2>
-          <p>For superuser/staff access to system-level management.</p>
+            <button onClick={() => onChooseLogin("ADMINISTRATOR")}>
+              Internship Admin Login
+            </button>
 
-          <div style={buttonGroupStyle}>
-            <button onClick={() => onChooseLogin("SYSTEM_ADMIN")}>
+            <button
+              className="outline-button"
+              onClick={() => onChooseRegister("ADMINISTRATOR")}
+            >
+              Create Internship Admin Account
+            </button>
+          </div>
+
+          <div className="home-card">
+            <div className="home-icon">⚙️</div>
+            <h2>System Admin</h2>
+            <p>
+              Access the Django admin panel for system-level management,
+              database records, users, and configurations.
+            </p>
+
+            <button onClick={() => onChooseLogin("ADMINISTRATOR")}>
               System Admin Login
             </button>
 
-            <a
-              href="http://127.0.0.1:8000/admin/"
-              target="_blank"
-              rel="noreferrer"
-              style={linkButtonStyle}
-            >
+            <button className="outline-button" onClick={openDjangoAdmin}>
               Open Django Admin
-            </a>
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-const pageStyle = {
-  padding: "40px",
-  fontFamily: "Arial, sans-serif",
-};
-
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-  gap: "20px",
-  marginTop: "25px",
-};
-
-const cardStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "10px",
-  padding: "22px",
-  background: "#f9f9f9",
-};
-
-const buttonGroupStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "10px",
-};
-
-const linkButtonStyle = {
-  display: "inline-block",
-  textAlign: "center",
-  textDecoration: "none",
-  color: "black",
-  border: "1px solid #999",
-  borderRadius: "4px",
-  padding: "8px 12px",
-  background: "#eee",
-};
 
 export default HomePage;

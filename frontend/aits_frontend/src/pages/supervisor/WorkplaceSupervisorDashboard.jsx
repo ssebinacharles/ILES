@@ -94,19 +94,40 @@ function WorkplaceSupervisorDashboard() {
   }, [user]);
 
   if (loading) {
-    return <Page><h1>Workplace Supervisor Dashboard</h1><p>Loading dashboard...</p></Page>;
+    return (
+      <Page>
+        <h1>Workplace Supervisor Dashboard</h1>
+
+        <div className="card">
+          <p>Loading dashboard...</p>
+        </div>
+      </Page>
+    );
   }
 
   if (error) {
-    return <Page><h1>Workplace Supervisor Dashboard</h1><p style={{ color: "red" }}>Error: {error}</p></Page>;
+    return (
+      <Page>
+        <h1>Workplace Supervisor Dashboard</h1>
+
+        <p className="error">Error: {error}</p>
+      </Page>
+    );
   }
 
   const logStatusCounts = countByStatus(dashboard.weeklyLogs);
 
   return (
     <Page>
-      <h1>Workplace Supervisor Dashboard</h1>
-      <p>Review assigned interns, weekly logs, feedback and workplace assessments.</p>
+      <div className="dashboard-header">
+        <div>
+          <h1>Workplace Supervisor Dashboard</h1>
+          <p className="muted">
+            Review assigned interns, weekly logs, feedback and workplace
+            assessments.
+          </p>
+        </div>
+      </div>
 
       <Grid>
         <Card title="Assigned Interns" value={dashboard.students.length} />
@@ -125,11 +146,39 @@ function WorkplaceSupervisorDashboard() {
         ) : (
           dashboard.assignments.map((assignment) => (
             <ListItem key={assignment.id}>
-              <strong>{assignment.placement?.student?.registration_number}</strong>
-              <p>Student: {assignment.placement?.student?.user?.username}</p>
-              <p>Company: {assignment.placement?.company?.company_name}</p>
-              <p>Assignment Role: {assignment.assignment_role}</p>
-              <p>Active: {assignment.is_active ? "Yes" : "No"}</p>
+              <h3>
+                {assignment.placement?.student?.registration_number || "Intern"}
+              </h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {assignment.placement?.student?.user?.username || "-"}
+              </p>
+
+              <p>
+                <strong>Company:</strong>{" "}
+                {assignment.placement?.company?.company_name || "-"}
+              </p>
+
+              <p>
+                <strong>Assignment Role:</strong>{" "}
+                <span className="badge badge-submitted">
+                  {assignment.assignment_role || "-"}
+                </span>
+              </p>
+
+              <p>
+                <strong>Active:</strong>{" "}
+                <span
+                  className={
+                    assignment.is_active
+                      ? "badge badge-approved"
+                      : "badge badge-rejected"
+                  }
+                >
+                  {assignment.is_active ? "Yes" : "No"}
+                </span>
+              </p>
             </ListItem>
           ))
         )}
@@ -141,10 +190,26 @@ function WorkplaceSupervisorDashboard() {
         ) : (
           dashboard.pendingLogs.map((log) => (
             <ListItem key={log.id}>
-              <strong>Week {log.week_number}: {log.title}</strong>
-              <p>Student: {log.placement?.student?.registration_number}</p>
-              <p>Company: {log.placement?.company?.company_name}</p>
-              <p>Status: {log.status}</p>
+              <h3>
+                Week {log.week_number}: {log.title}
+              </h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {log.placement?.student?.registration_number || "-"}
+              </p>
+
+              <p>
+                <strong>Company:</strong>{" "}
+                {log.placement?.company?.company_name || "-"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className={`badge badge-${String(log.status).toLowerCase()}`}>
+                  {log.status}
+                </span>
+              </p>
             </ListItem>
           ))
         )}
@@ -156,11 +221,31 @@ function WorkplaceSupervisorDashboard() {
         ) : (
           dashboard.evaluations.map((evaluation) => (
             <ListItem key={evaluation.id}>
-              <strong>{evaluation.evaluation_type}</strong>
-              <p>Student: {evaluation.placement?.student?.registration_number}</p>
-              <p>Status: {evaluation.status}</p>
-              <p>Weighted Score: {evaluation.weighted_score}</p>
-              <p>Remarks: {evaluation.remarks || "-"}</p>
+              <h3>{evaluation.evaluation_type}</h3>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {evaluation.placement?.student?.registration_number || "-"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`badge badge-${String(
+                    evaluation.status
+                  ).toLowerCase()}`}
+                >
+                  {evaluation.status}
+                </span>
+              </p>
+
+              <p>
+                <strong>Weighted Score:</strong> {evaluation.weighted_score}
+              </p>
+
+              <p>
+                <strong>Remarks:</strong> {evaluation.remarks || "-"}
+              </p>
             </ListItem>
           ))
         )}
@@ -170,16 +255,16 @@ function WorkplaceSupervisorDashboard() {
 }
 
 function Page({ children }) {
-  return <div style={{ padding: "30px" }}>{children}</div>;
+  return <div className="page">{children}</div>;
 }
 
 function Grid({ children }) {
-  return <div style={gridStyle}>{children}</div>;
+  return <div className="dashboard-grid">{children}</div>;
 }
 
 function Card({ title, value }) {
   return (
-    <div style={cardStyle}>
+    <div className="stat-card">
       <h2>{value}</h2>
       <p>{title}</p>
     </div>
@@ -188,7 +273,7 @@ function Card({ title, value }) {
 
 function Section({ title, children }) {
   return (
-    <section style={{ marginTop: "30px" }}>
+    <section className="card">
       <h2>{title}</h2>
       {children}
     </section>
@@ -196,29 +281,7 @@ function Section({ title, children }) {
 }
 
 function ListItem({ children }) {
-  return <div style={listItemStyle}>{children}</div>;
+  return <div className="info-card">{children}</div>;
 }
-
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-  gap: "16px",
-  marginTop: "20px",
-};
-
-const cardStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "20px",
-  background: "#f9f9f9",
-};
-
-const listItemStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "15px",
-  marginBottom: "12px",
-  background: "#fff",
-};
 
 export default WorkplaceSupervisorDashboard;

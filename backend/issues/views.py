@@ -2,15 +2,15 @@
 from __future__ import annotations
 from rest_framework.permissions import IsAuthenticated,AllowAny
 
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from users.models import UserRole, StudentProfile
+from users.models import User, UserRole, StudentProfile
 
 from django.utils import timezone
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 
-#from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from .utils import send_iles_email
 
 from rest_framework.response import Response
@@ -23,6 +23,7 @@ from .models import (
     EvaluationScore,
     EvaluationStatus,
     Feedback,
+    FeedbackDecision,
     FinalResult,
     GeneratedReport,
     InternshipPlacement,
@@ -67,6 +68,7 @@ from .serializers import (
     InternshipPlacementSerializer,
     ReportDefinitionSerializer,
     SupervisorAssignmentSerializer,
+    WeeklyLogEvaluationSerializer,
     WeeklyLogSerializer,
 )
 
@@ -246,10 +248,183 @@ class WeeklyLogViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
             ).distinct()
 
         return WeeklyLog.objects.none()
+    
+    def notify_assigned_supervisors(self, weekly_log):
+        """
+        Notify both assigned supervisors when a student submits a weekly log.
+        """
+        supervisor_emails = (
+            SupervisorAssignment.objects
+            .filter(
+                placement=weekly_log.placement,
+                is_active=True,
+            )
+            .select_related("supervisor__user")
+            .exclude(supervisor__user__email="")
+            .values_list("supervisor__user__email", flat=True)
+        )
+
+        supervisor_emails = list(supervisor_emails)
+
+        if not supervisor_emails:
+            return
+
+        student_user = weekly_log.placement.student.user
+        student_name = student_user.get_full_name() or student_user.username
+        registration_number = weekly_log.placement.student.registration_number
+        company_name = weekly_log.placement.company.company_name
+
+        send_iles_email(
+            "Weekly log submitted for review",
+            (
+                f"A weekly log has been submitted for your review.\n\n"
+                f"Student: {student_name}\n"
+                f"Registration Number: {registration_number}\n"
+                f"Company: {company_name}\n"
+                f"Week: {weekly_log.week_number}\n"
+                f"Title: {weekly_log.title}\n"
+                f"Submitted At: {weekly_log.submitted_at}\n\n"
+                f"Please log in to ILES to review and provide feedback."
+            ),
+            supervisor_emails,
+        )
+
 
     def perform_create(self, serializer):
         serializer.save()
 
+    @action(detail=True, methods=["post"])
+    def submit(self, request, pk=None):
+        weekly_log = self.get_object()
+
+        was_already_submitted = weekly_log.status == WeeklyLogStatus.SUBMITTED
+
+        if weekly_log.status != WeeklyLogStatus.SUBMITTED:
+            weekly_log.status = WeeklyLogStatus.SUBMITTED
+
+        if not weekly_log.submitted_at:
+            weekly_log.submitted_at = timezone.now()
+
+        weekly_log.save(update_fields=["status", "submitted_at", "updated_at"])
+
+        if not was_already_submitted:
+            self.notify_assigned_supervisors(weekly_log)
+
+        return Response(self.get_serializer(weekly_log).data)
+    
+    @action(detail=False, methods=["get"], url_path="my-evaluations")
+    def my_evaluations(self, request):
+       
+        if not is_student(request.user):
+            return Response(
+                {"detail": "Only students can access their own evaluations."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        student_profile = get_student_profile(request.user)
+
+        if not student_profile:
+            return Response(
+                {"detail": "Student profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        weekly_logs = (
+            WeeklyLog.objects.select_related(
+                "placement",
+                "placement__student",
+                "placement__student__user",
+                "placement__company",
+            )
+            .prefetch_related(
+                "feedback_entries",
+                "feedback_entries__supervisor",
+                "feedback_entries__supervisor__user",
+            )
+            .filter(
+                placement__student=student_profile,
+                status__in=[
+                    WeeklyLogStatus.SUBMITTED,
+                    WeeklyLogStatus.UNDER_REVIEW,
+                    WeeklyLogStatus.APPROVED,
+                ],
+            )
+            .order_by("placement", "week_number")
+        )
+
+        assessed_weekly_logs = [
+            weekly_log for weekly_log in weekly_logs
+            if weekly_log.is_fully_assessed()
+        ]
+
+        serializer = WeeklyLogEvaluationSerializer(
+            assessed_weekly_logs,
+            many=True,
+            context=self.get_serializer_context(),
+        )
+
+        return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="student/(?P<student_id>[^/.]+)/evaluations",
+    )
+    def student_evaluations(self, request, student_id=None):
+        
+        if not (
+            request.user.is_staff
+            or request.user.is_superuser
+            or is_administrator(request.user)
+        ):
+            return Response(
+                {"detail": "Administrator access is required."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        student_profile = StudentProfile.objects.filter(id=student_id).first()
+
+        if not student_profile:
+            return Response(
+                {"detail": "Student profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        weekly_logs = (
+            WeeklyLog.objects.select_related(
+                "placement",
+                "placement__student",
+                "placement__student__user",
+                "placement__company",
+            )
+            .prefetch_related(
+                "feedback_entries",
+                "feedback_entries__supervisor",
+                "feedback_entries__supervisor__user",
+            )
+            .filter(
+                placement__student=student_profile,
+                status__in=[
+                    WeeklyLogStatus.SUBMITTED,
+                    WeeklyLogStatus.UNDER_REVIEW,
+                    WeeklyLogStatus.APPROVED,
+                ],
+            )
+            .order_by("placement", "week_number")
+        )
+
+        assessed_weekly_logs = [
+            weekly_log for weekly_log in weekly_logs
+            if weekly_log.is_fully_assessed()
+        ]
+
+        serializer = WeeklyLogEvaluationSerializer(
+            assessed_weekly_logs,
+            many=True,
+            context=self.get_serializer_context(),
+        )
+
+        return Response(serializer.data)
 
 class FeedbackViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
     queryset = Feedback.objects.select_related(
@@ -309,11 +484,31 @@ class FeedbackViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
             feedback.weekly_log.status = WeeklyLogStatus.REJECTED
             feedback.weekly_log.save()
 
-        send_iles_email(
-            "New supervisor feedback received",
-            f"Feedback has been added to Week {feedback.weekly_log.week_number}: {feedback.weekly_log.title}.",
-            [feedback.weekly_log.placement.student.user.email],
+        final_result, created = FinalResult.objects.get_or_create(
+            placement=feedback.weekly_log.placement
         )
+        final_result.save()
+
+        student_email = feedback.weekly_log.placement.student.user.email
+
+        if student_email:
+            supervisor_user = feedback.supervisor.user
+            supervisor_name = supervisor_user.get_full_name() or supervisor_user.username
+
+            send_iles_email(
+                "New supervisor feedback received",
+                (
+                    f"New feedback has been added to your weekly log.\n\n"
+                    f"Week: {feedback.weekly_log.week_number}\n"
+                    f"Title: {feedback.weekly_log.title}\n"
+                    f"Supervisor: {supervisor_name}\n"
+                    f"Decision: {feedback.decision}\n"
+                    f"Score: {feedback.score if feedback.score is not None else 'No score'}\n"
+                    f"Comment: {feedback.comment}\n\n"
+                    f"Please log in to ILES to view the feedback."
+                ),
+                [student_email],
+            )
 
 
 class EvaluationCriterionViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
@@ -462,6 +657,93 @@ class FinalResultViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
             return self.queryset.none()
 
         return self.queryset.none()
+
+    @action(detail=False, methods=["get"], url_path="my-results")
+    def my_results(self, request):
+        if not is_student(request.user):
+            return Response(
+                {"detail": "Only students can access their own results."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        student_profile = get_student_profile(request.user)
+
+        if not student_profile:
+            return Response(
+                {"detail": "Student profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        placement = (
+            InternshipPlacement.objects
+            .filter(student=student_profile)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not placement:
+            return Response(
+                {"detail": "No internship placement found for this student."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        final_result, created = FinalResult.objects.get_or_create(
+            placement=placement
+        )
+
+        final_result.weekly_logs_score = final_result.calculate_weekly_logs_average()
+        final_result.recalculate_final_mark()
+        final_result.save()
+
+        serializer = self.get_serializer(final_result)
+        return Response(serializer.data)
+    
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="student/(?P<student_id>[^/.]+)/result",
+    )
+    def student_result(self, request, student_id=None):
+        
+        if not (
+            request.user.is_staff
+            or request.user.is_superuser
+            or is_administrator(request.user)
+        ):
+            return Response(
+                {"detail": "Administrator access is required."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        student_profile = StudentProfile.objects.filter(id=student_id).first()
+
+        if not student_profile:
+            return Response(
+                {"detail": "Student profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        placement = (
+            InternshipPlacement.objects
+            .filter(student=student_profile)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not placement:
+            return Response(
+                {"detail": "No internship placement found for this student."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        final_result, created = FinalResult.objects.get_or_create(
+            placement=placement
+        )
+
+        final_result.save()
+
+        serializer = self.get_serializer(final_result)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def publish(self, request, pk=None):

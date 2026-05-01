@@ -1,0 +1,480 @@
+:root {
+  --primary: #0f766e;
+  --primary-dark: #115e59;
+  --primary-light: #ccfbf1;
+
+  --secondary: #1e3a8a;
+  --accent: #f59e0b;
+
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #f97316;
+
+  --bg: #f3f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --radius: 16px;
+}
+
+/* Whole app */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 30%),
+    radial-gradient(circle at top right, rgba(30, 58, 138, 0.10), transparent 28%),
+    var(--bg);
+}
+
+/* Top navigation */
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, var(--primary-dark), var(--secondary));
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-nav button {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 15px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.app-nav button:hover {
+  background: #ffffff;
+  color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.app-nav span {
+  color: #ffffff;
+}
+
+.app-nav button:last-child {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.app-nav button:last-child:hover {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+/* General page layout */
+.page,
+main,
+section {
+  box-sizing: border-box;
+}
+
+h1 {
+  color: var(--secondary);
+  font-size: 36px;
+  margin: 28px 0 10px;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  color: var(--text);
+  font-size: 24px;
+  margin-top: 28px;
+}
+
+h3 {
+  color: var(--primary-dark);
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Apply modern spacing to page content */
+.app-shell > div:not(.app-nav),
+.app-shell > div > div {
+  box-sizing: border-box;
+}
+
+/* Most pages currently use plain divs. This gives them spacing. */
+.app-shell > div > h1,
+.app-shell > div > h2,
+.app-shell > div > p,
+.app-shell > div > form,
+.app-shell > div > table,
+.app-shell > div > ul,
+.app-shell > div > section,
+.app-shell > div > div {
+  margin-left: 28px;
+  margin-right: 28px;
+}
+
+/* Cards */
+.card,
+.dashboard-card,
+.stat-card,
+.info-card,
+.feedback-card,
+.placement-card,
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+/* Any plain direct card-like divs inside pages */
+div[style*="border"] {
+  border-color: var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+
+/* Dashboard statistic cards */
+.dashboard-grid,
+.stats-grid,
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+  margin-bottom: 28px;
+}
+
+.dashboard-grid > div,
+.stats-grid > div,
+.summary-grid > div {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.dashboard-grid h2,
+.stats-grid h2,
+.summary-grid h2 {
+  margin: 0;
+  color: var(--primary-dark);
+  font-size: 30px;
+}
+
+.dashboard-grid p,
+.stats-grid p,
+.summary-grid p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Buttons */
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Forms */
+form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  max-width: 900px;
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 7px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-size: 15px;
+  background: #ffffff;
+  color: var(--text);
+  margin-bottom: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+/* Tables */
+table {
+  width: calc(100% - 56px);
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-top: 18px;
+}
+
+th {
+  background: var(--primary-dark);
+  color: #ffffff;
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+}
+
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 13px 14px;
+}
+
+tr:hover td {
+  background: #f8fafc;
+}
+
+/* Status labels */
+.status,
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.status-draft,
+.badge-draft {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.status-submitted,
+.badge-submitted {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-approved,
+.badge-approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-rejected,
+.badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-pending,
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Alerts and error messages */
+p[style*="red"],
+.error,
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b !important;
+  border: 1px solid #fecaca;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.success,
+.alert-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Home and login pages */
+.login-card,
+.home-card {
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+
+/* Page section headers */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26px;
+  margin-bottom: 14px;
+}
+
+.section-title h2 {
+  margin: 0;
+}
+
+/* Small muted text */
+.muted {
+  color: var(--muted);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  .app-nav {
+    padding: 12px;
+  }
+
+  .app-nav button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .app-shell > div > h1,
+  .app-shell > div > h2,
+  .app-shell > div > p,
+  .app-shell > div > form,
+  .app-shell > div > table,
+  .app-shell > div > ul,
+  .app-shell > div > section,
+  .app-shell > div > div {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  table {
+    width: calc(100% - 28px);
+    font-size: 13px;
+  }
+}
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.form-card {
+  display: grid;
+  gap: 12px;
+  max-width: 850px;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 28px;
+  margin-bottom: 10px;
+}
+
+.dashboard-header h1 {
+  margin-bottom: 6px;
+}
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 28px;
+  margin-bottom: 10px;
+}
+
+.dashboard-header h1 {
+  margin-bottom: 6px;
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.form-card {
+  display: grid;
+  gap: 12px;
+  max-width: 850px;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.details-grid > div {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}

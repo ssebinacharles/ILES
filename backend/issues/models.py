@@ -270,6 +270,117 @@ class WeeklyLog(TimeStampedModel):
 
         if self.week_number > max_expected_weeks + 2:
             raise ValidationError("Week number exceeds the likely internship duration.")
+        
+    def save(self, *args, **kwargs):
+        if self.status == WeeklyLogStatus.SUBMITTED and not self.submitted_at:
+            self.submitted_at = timezone.now()
+
+        super().save(*args, **kwargs)
+
+    def get_latest_academic_feedback(self):
+        """
+        Returns the latest feedback for this weekly log
+        from the academic supervisor.
+        """
+        return (
+            self.feedback_entries
+            .filter(
+                is_latest=True,
+                score__isnull=False,
+                supervisor__supervisor_type=SupervisorType.ACADEMIC,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
+    def get_latest_workplace_feedback(self):
+        """
+        Returns the latest feedback for this weekly log
+        from the workplace supervisor.
+        """
+        return (
+            self.feedback_entries
+            .filter(
+                is_latest=True,
+                score__isnull=False,
+                supervisor__supervisor_type=SupervisorType.WORKPLACE,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
+    def get_academic_score(self):
+        feedback = self.get_latest_academic_feedback()
+        return feedback.score if feedback else None
+
+    def get_workplace_score(self):
+        feedback = self.get_latest_workplace_feedback()
+        return feedback.score if feedback else None
+
+    def get_average_supervisor_score(self):
+        """
+        Calculates the weekly log final mark using:
+
+        academic supervisor score + workplace supervisor score
+        ----------------------------------------------------
+                              2
+
+        Returns None if one of the two scores is missing.
+        """
+        academic_score = self.get_academic_score()
+        workplace_score = self.get_workplace_score()
+
+        if academic_score is None or workplace_score is None:
+            return None
+
+        return (academic_score + workplace_score) / Decimal("2.00")
+
+    def is_fully_assessed(self):
+       
+        return self.get_average_supervisor_score() is not None
+    
+
+    def get_latest_academic_feedback(self):
+        return (
+            self.feedback_entries
+            .filter(
+                score__isnull=False,
+                supervisor__supervisor_type=SupervisorType.ACADEMIC,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
+    def get_latest_workplace_feedback(self):
+        return (
+            self.feedback_entries
+            .filter(
+                score__isnull=False,
+                supervisor__supervisor_type=SupervisorType.WORKPLACE,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+
+    def get_academic_score(self):
+        feedback = self.get_latest_academic_feedback()
+        return feedback.score if feedback else None
+
+    def get_workplace_score(self):
+        feedback = self.get_latest_workplace_feedback()
+        return feedback.score if feedback else None
+
+    def get_average_supervisor_score(self):
+        academic_score = self.get_academic_score()
+        workplace_score = self.get_workplace_score()
+
+        if academic_score is None or workplace_score is None:
+            return None
+
+        return (academic_score + workplace_score) / Decimal("2.00")
+
+    def is_fully_assessed(self):
+        return self.get_average_supervisor_score() is not None
 
     def __str__(self):
         return f"{self.placement} - Week {self.week_number}"
@@ -331,6 +442,20 @@ class Feedback(TimeStampedModel):
             raise ValidationError(
                 "Only an assigned supervisor can review this weekly log."
             )
+
+    def save(self, *args, **kwargs):
+        """
+        When a supervisor gives new feedback for a weekly log,
+        mark their older feedback for the same weekly log as not latest.
+        """
+        super().save(*args, **kwargs)
+
+        if self.is_latest:
+            Feedback.objects.filter(
+                weekly_log=self.weekly_log,
+                supervisor=self.supervisor,
+                is_latest=True,
+            ).exclude(pk=self.pk).update(is_latest=False)
 
     def __str__(self):
         return f"{self.weekly_log} - {self.supervisor} - {self.decision}"
@@ -600,6 +725,31 @@ class FinalResult(TimeStampedModel):
 
     class Meta:
         ordering = ["-published_at"]
+        
+    def calculate_weekly_logs_average(self):
+        weekly_logs = self.placement.weekly_logs.filter(
+            status__in=[
+                WeeklyLogStatus.SUBMITTED,
+                WeeklyLogStatus.UNDER_REVIEW,
+                WeeklyLogStatus.APPROVED,
+                WeeklyLogStatus.REJECTED,
+            ]
+        )
+
+        assessed_scores = []
+
+        for log in weekly_logs:
+            average_score = log.get_average_supervisor_score()
+
+            if average_score is not None:
+                assessed_scores.append(average_score)
+
+        if not assessed_scores:
+            return Decimal("0.00")
+
+        total = sum(assessed_scores, Decimal("0.00"))
+
+        return total / Decimal(len(assessed_scores))
 
     def recalculate_final_mark(self):
         total = (
@@ -612,6 +762,7 @@ class FinalResult(TimeStampedModel):
         self.final_mark = min(total, Decimal("100.00"))
 
     def save(self, *args, **kwargs):
+        self.weekly_logs_score = self.calculate_weekly_logs_average()
         self.recalculate_final_mark()
         super().save(*args, **kwargs)
 

@@ -322,6 +322,10 @@ class FeedbackSerializer(FullCleanModelSerializer):
 
 class WeeklyLogSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
+    academic_score = serializers.SerializerMethodField()
+    workplace_score = serializers.SerializerMethodField()
+    average_score = serializers.SerializerMethodField()
+    is_fully_assessed = serializers.SerializerMethodField()
 
     placement_id = serializers.PrimaryKeyRelatedField(
         source="placement",
@@ -353,6 +357,10 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
             "status",
             "submitted_at",
             "feedback_entries",
+            "academic_score",
+            "workplace_score",
+            "average_score",
+            "is_fully_assessed",
             "created_at",
             "updated_at",
         )
@@ -363,6 +371,63 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
             "updated_at",
         )
 
+    def get_academic_score(self, obj):
+        score = obj.get_academic_score()
+        return float(score) if score is not None else None
+
+    def get_workplace_score(self, obj):
+        score = obj.get_workplace_score()
+        return float(score) if score is not None else None
+
+    def get_average_score(self, obj):
+        score = obj.get_average_supervisor_score()
+        return float(score) if score is not None else None
+
+    def get_is_fully_assessed(self, obj):
+        return obj.is_fully_assessed()
+
+class WeeklyLogEvaluationSerializer(serializers.ModelSerializer):
+    student = StudentProfileSummarySerializer(source="placement.student", read_only=True)
+    company = CompanySummarySerializer(source="placement.company", read_only=True)
+
+    academic_score = serializers.SerializerMethodField()
+    workplace_score = serializers.SerializerMethodField()
+    average_score = serializers.SerializerMethodField()
+    is_fully_assessed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WeeklyLog
+        fields = (
+            "id",
+            "placement_id",
+            "student",
+            "company",
+            "week_number",
+            "title",
+            "status",
+            "submitted_at",
+            "academic_score",
+            "workplace_score",
+            "average_score",
+            "is_fully_assessed",
+            "created_at",
+            "updated_at",
+        )
+
+    def get_academic_score(self, obj):
+        score = obj.get_academic_score()
+        return float(score) if score is not None else None
+
+    def get_workplace_score(self, obj):
+        score = obj.get_workplace_score()
+        return float(score) if score is not None else None
+
+    def get_average_score(self, obj):
+        score = obj.get_average_supervisor_score()
+        return float(score) if score is not None else None
+
+    def get_is_fully_assessed(self, obj):
+        return obj.is_fully_assessed()
 
 class WeeklyLogFeedbackSummarySerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
@@ -376,6 +441,7 @@ class WeeklyLogFeedbackSummarySerializer(serializers.ModelSerializer):
             "week_number",
             "title",
             "status",
+            "submitted_at",
             "student_name",
             "registration_number",
             "company_name",
@@ -551,6 +617,7 @@ class EvaluationSerializer(FullCleanModelSerializer):
 class FinalResultSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
     published_by = AdministratorProfileSummarySerializer(read_only=True)
+    assessed_weekly_logs_count = serializers.SerializerMethodField()
 
     placement_id = serializers.PrimaryKeyRelatedField(
         source="placement",
@@ -574,6 +641,7 @@ class FinalResultSerializer(FullCleanModelSerializer):
             "published_by",
             "published_by_id",
             "weekly_logs_score",
+            "assessed_weekly_logs_count",
             "supervisor_evaluation_score",
             "final_report_score",
             "workplace_assessment_score",
@@ -589,6 +657,24 @@ class FinalResultSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def get_assessed_weekly_logs_count(self, obj):
+        count = 0
+
+        weekly_logs = obj.placement.weekly_logs.filter(
+            status__in=[
+                "SUBMITTED",
+                "UNDER_REVIEW",
+                "APPROVED",
+                "REJECTED",
+            ]
+        )
+
+        for log in weekly_logs:
+            if log.is_fully_assessed():
+                count += 1
+
+        return count
 
 
 # ============================================================
