@@ -1,10 +1,17 @@
-function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }) {
+function PerformanceTrendChart({
+  evaluations = [],
+  title = "Performance Trend",
+}) {
   function toNumber(value) {
-    if (value === null || value === undefined || value === "") return null;
+    if (value === null || value === undefined || value === "") {
+      return null;
+    }
 
     const numberValue = Number(value);
 
-    if (Number.isNaN(numberValue)) return null;
+    if (Number.isNaN(numberValue)) {
+      return null;
+    }
 
     return numberValue;
   }
@@ -12,16 +19,17 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
   const chartData = evaluations
     .map((item) => ({
       ...item,
-      week: Number(item.week_number),
-      score: toNumber(item.average_score),
+      week: Number(item.week_number || item.week || 0),
+      score: toNumber(item.average_score ?? item.score),
     }))
-    .filter((item) => item.score !== null)
+    .filter((item) => item.score !== null && item.week > 0)
     .sort((a, b) => a.week - b.week);
 
   if (chartData.length === 0) {
     return (
       <div style={chartBoxStyle}>
         <h2>{title}</h2>
+
         <p>
           The performance trend graph will appear after weekly logs are fully
           assessed by both supervisors.
@@ -46,7 +54,8 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
   }
 
   function getY(score) {
-    return padding + ((100 - score) / 100) * chartHeight;
+    const safeScore = Math.max(0, Math.min(100, score));
+    return padding + ((100 - safeScore) / 100) * chartHeight;
   }
 
   const points = chartData
@@ -61,13 +70,7 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        style={{
-          width: "100%",
-          maxWidth: "850px",
-          border: "1px solid #ddd",
-          borderRadius: "8px",
-          background: "white",
-        }}
+        style={svgStyle}
       >
         {yLabels.map((label) => {
           const y = getY(label);
@@ -81,6 +84,7 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
                 y2={y}
                 stroke="#e5e7eb"
               />
+
               <text x={10} y={y + 5} fontSize="12" fill="#555">
                 {label}%
               </text>
@@ -116,7 +120,7 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
           const y = getY(item.score);
 
           return (
-            <g key={item.id || index}>
+            <g key={item.id || `${item.week}-${index}`}>
               <circle cx={x} cy={y} r="6" fill="#1d4ed8" />
 
               <text
@@ -126,7 +130,7 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
                 fontSize="12"
                 fill="#111"
               >
-                {item.score}%
+                {Number(item.score).toFixed(2)}%
               </text>
 
               <text
@@ -143,7 +147,7 @@ function PerformanceTrendChart({ evaluations = [], title = "Performance Trend" }
         })}
       </svg>
 
-      <p style={{ marginTop: "10px" }}>
+      <p style={descriptionStyle}>
         This graph shows weekly performance using the average of the academic
         supervisor score and workplace supervisor score.
       </p>
@@ -157,6 +161,18 @@ const chartBoxStyle = {
   padding: "16px",
   marginBottom: "18px",
   backgroundColor: "#fff",
+};
+
+const svgStyle = {
+  width: "100%",
+  maxWidth: "850px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  background: "white",
+};
+
+const descriptionStyle = {
+  marginTop: "10px",
 };
 
 export default PerformanceTrendChart;

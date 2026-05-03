@@ -1,62 +1,82 @@
 import apiRequest from "./apiClient";
 
+const WEEKLY_LOGS_ENDPOINT = "/issues/weekly-logs/";
+
 export function getWeeklyLogs() {
-  return apiRequest("/issues/weekly-logs/");
+  return apiRequest(WEEKLY_LOGS_ENDPOINT);
 }
 
 export function getWeeklyLog(id) {
-  return apiRequest(`/issues/weekly-logs/${id}/`);
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}${id}/`);
 }
 
 export function createWeeklyLog(data) {
-  return apiRequest("/issues/weekly-logs/", {
+  const payload = {
+    placement_id: Number(data.placement_id),
+    week_number: Number(data.week_number),
+    title: data.title || "",
+    activities: data.activities || "",
+    monday_activities: data.monday_activities || "",
+    tuesday_activities: data.tuesday_activities || "",
+    wednesday_activities: data.wednesday_activities || "",
+    thursday_activities: data.thursday_activities || "",
+    friday_activities: data.friday_activities || "",
+    challenges: data.challenges || "",
+    lessons_learned: data.lessons_learned || "",
+    status: data.status || "DRAFT",
+  };
+
+  return apiRequest(WEEKLY_LOGS_ENDPOINT, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
 export function updateWeeklyLog(id, data) {
-  return apiRequest(`/issues/weekly-logs/${id}/`, {
+  const payload = {
+    placement_id: Number(data.placement_id || data.placement?.id),
+    week_number: Number(data.week_number),
+    title: data.title || "",
+    activities: data.activities || "",
+    monday_activities: data.monday_activities || "",
+    tuesday_activities: data.tuesday_activities || "",
+    wednesday_activities: data.wednesday_activities || "",
+    thursday_activities: data.thursday_activities || "",
+    friday_activities: data.friday_activities || "",
+    challenges: data.challenges || "",
+    lessons_learned: data.lessons_learned || "",
+    status: data.status || "DRAFT",
+  };
+
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}${id}/`, {
     method: "PUT",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
 export function patchWeeklyLog(id, data) {
-  return apiRequest(`/issues/weekly-logs/${id}/`, {
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}${id}/`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
 export function deleteWeeklyLog(id) {
-  return apiRequest(`/issues/weekly-logs/${id}/`, {
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}${id}/`, {
     method: "DELETE",
   });
 }
 
-// Used by StudentDashboard.jsx and StudentsWeeklyLogsPage.jsx
 export async function submitWeeklyLog(id) {
-  try {
-    // Preferred: backend submit endpoint sets submitted_at using Django timezone.now()
-    return await apiRequest(`/issues/weekly-logs/${id}/submit/`, {
-      method: "POST",
-    });
-  } catch (error) {
-    // Fallback: backend model save() should still set submitted_at when status becomes SUBMITTED
-    return apiRequest(`/issues/weekly-logs/${id}/`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        status: "SUBMITTED",
-      }),
-    });
-  }
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}${id}/submit/`, {
+    method: "POST",
+  });
 }
 
 export function getMyWeeklyLogEvaluations() {
-  return apiRequest("/issues/weekly-logs/my-evaluations/");
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}my-evaluations/`);
 }
 
 export function getStudentWeeklyLogEvaluations(studentId) {
-  return apiRequest(`/issues/weekly-logs/student/${studentId}/evaluations/`);
+  return apiRequest(`${WEEKLY_LOGS_ENDPOINT}student/${studentId}/evaluations/`);
 }

@@ -3,54 +3,68 @@ import { useEffect, useState } from "react";
 import { getStudents } from "../../api/usersApi";
 import { getStudentFinalResult } from "../../api/finalResultsApi";
 
+import {
+  asArray,
+  displayScore,
+  formatDateTime,
+} from "../../utils/dashboardHelpers";
+
 function AdminResultsPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  function normalize(response) {
-    if (Array.isArray(response)) return response;
-    if (response && Array.isArray(response.results)) return response.results;
-    return [];
+  function getStudentName(student) {
+    if (!student) return "Student";
+
+    const fullName =
+      student.full_name ||
+      `${student.user?.first_name || ""} ${student.user?.last_name || ""}`.trim();
+
+    return fullName || student.username || student.user?.username || "Student";
   }
 
-  useEffect(() => {
-    async function loadResults() {
-      try {
-        setLoading(true);
-        setError("");
+  async function loadResults() {
+    try {
+      setLoading(true);
+      setError("");
 
-        const studentsResponse = await getStudents();
-        const students = normalize(studentsResponse);
+      const studentsResponse = await getStudents();
+      const students = asArray(studentsResponse);
 
-        const resultResponses = await Promise.allSettled(
-          students.map((student) => getStudentFinalResult(student.id))
-        );
+      const resultResponses = await Promise.allSettled(
+        students.map((student) => getStudentFinalResult(student.id))
+      );
 
-        const combinedRows = students.map((student, index) => {
-          const outcome = resultResponses[index];
+      const combinedRows = students.map((student, index) => {
+        const outcome = resultResponses[index];
+
+        if (outcome.status === "fulfilled") {
+          const normalizedResult = asArray(outcome.value);
 
           return {
             student,
-            result:
-              outcome.status === "fulfilled"
-                ? outcome.value
-                : null,
-            error:
-              outcome.status === "rejected"
-                ? outcome.reason?.message || "No result found"
-                : "",
+            result: normalizedResult[0] || null,
+            error: "",
           };
-        });
+        }
 
-        setRows(combinedRows);
-      } catch (err) {
-        setError(err.message || "Failed to load final results.");
-      } finally {
-        setLoading(false);
-      }
+        return {
+          student,
+          result: null,
+          error: outcome.reason?.message || "No result found",
+        };
+      });
+
+      setRows(combinedRows);
+    } catch (err) {
+      setError(err.message || "Failed to load final results.");
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     loadResults();
   }, []);
 
@@ -69,7 +83,8 @@ function AdminResultsPage() {
 
       <p>
         This page shows each student’s internship result based on assessed
-        weekly logs.
+        weekly logs, supervisor evaluation, workplace assessment, final report,
+        and final mark.
       </p>
 
       {error && <p style={{ color: "red" }}>Error: {error}</p>}
@@ -80,8 +95,7 @@ function AdminResultsPage() {
         rows.map(({ student, result, error }) => (
           <div key={student.id} style={cardStyle}>
             <h2>
-              {student.registration_number} -{" "}
-              {student.full_name || student.username || "Student"}
+              {student.registration_number || "-"} - {getStudentName(student)}
             </h2>
 
             <p>
@@ -92,14 +106,21 @@ function AdminResultsPage() {
               <strong>Department:</strong> {student.department || "-"}
             </p>
 
+            <p>
+              <strong>Year of Study:</strong> {student.year_of_study || "-"}
+            </p>
+
             {!result ? (
               <p style={{ color: "#b45309" }}>
                 {error || "No result found for this student yet."}
               </p>
             ) : (
               <>
+                <h3>Result Summary</h3>
+
                 <p>
-                  <strong>Final Mark:</strong> {result.final_mark}%
+                  <strong>Final Mark:</strong>{" "}
+                  {displayScore(result.final_mark)}
                 </p>
 
                 <p>
@@ -109,22 +130,53 @@ function AdminResultsPage() {
 
                 <p>
                   <strong>Average Weekly Logs Score:</strong>{" "}
-                  {result.weekly_logs_score}%
+                  {displayScore(result.weekly_logs_score)}
+                </p>
+
+                <p>
+                  <strong>Supervisor Evaluation Score:</strong>{" "}
+                  {displayScore(result.supervisor_evaluation_score)}
+                </p>
+
+                <p>
+                  <strong>Workplace Assessment Score:</strong>{" "}
+                  {displayScore(result.workplace_assessment_score)}
+                </p>
+
+                <p>
+                  <strong>Final Report Score:</strong>{" "}
+                  {displayScore(result.final_report_score)}
                 </p>
 
                 <p>
                   <strong>Published At:</strong>{" "}
                   {result.published_at
-                    ? new Date(result.published_at).toLocaleString()
+                    ? formatDateTime(result.published_at)
                     : "Not published yet"}
                 </p>
 
-                {result.placement?.company && (
-                  <p>
-                    <strong>Company:</strong>{" "}
-                    {result.placement.company.company_name}
-                  </p>
-                )}
+                <h3>Placement Details</h3>
+
+                <p>
+                  <strong>Company:</strong>{" "}
+                  {result.placement?.company?.company_name || "-"}
+                </p>
+
+                <p>
+                  <strong>Location:</strong>{" "}
+                  {result.placement?.company?.location || "-"}
+                </p>
+
+                <p>
+                  <strong>Placement Status:</strong>{" "}
+                  {result.placement?.status || "-"}
+                </p>
+
+                <p>
+                  <strong>Internship Period:</strong>{" "}
+                  {result.placement?.start_date || "-"} to{" "}
+                  {result.placement?.end_date || "-"}
+                </p>
               </>
             )}
           </div>

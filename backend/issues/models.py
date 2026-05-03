@@ -24,12 +24,6 @@ from users.models import (
 # ============================================================
 
 def make_json_safe(value):
-    """
-    Convert Python values into JSON-safe values before saving into JSONField.
-    This prevents errors like:
-    Object of type datetime is not JSON serializable
-    """
-
     if isinstance(value, (datetime, date)):
         return value.isoformat()
 
@@ -142,22 +136,39 @@ class InternshipPlacement(TimeStampedModel):
         ]
 
     def clean(self):
-        if self.start_date >= self.end_date:
+        if self.start_date and self.end_date and self.start_date >= self.end_date:
             raise ValidationError("Internship start date must be earlier than end date.")
 
-        overlapping = InternshipPlacement.objects.filter(
-            student=self.student,
-            status__in=[
-                PlacementStatus.APPROVED,
-                PlacementStatus.IN_PROGRESS,
-            ],
-        ).exclude(pk=self.pk)
+        if self.student_id:
+            existing_placement = (
+                InternshipPlacement.objects.filter(student=self.student)
+                .exclude(pk=self.pk)
+                .exclude(status=PlacementStatus.REJECTED)
+            )
 
-        for placement in overlapping:
-            if self.start_date <= placement.end_date and self.end_date >= placement.start_date:
+            if existing_placement.exists():
                 raise ValidationError(
-                    "This student already has an overlapping active internship placement."
+                    "You already have a placement request/placement in the system. "
+                    "You can only submit another placement if the previous one was rejected."
                 )
+
+        if self.student_id and self.start_date and self.end_date:
+            overlapping = (
+                InternshipPlacement.objects.filter(
+                    student=self.student,
+                    status__in=[
+                        PlacementStatus.APPROVED,
+                        PlacementStatus.IN_PROGRESS,
+                    ],
+                )
+                .exclude(pk=self.pk)
+            )
+
+            for placement in overlapping:
+                if self.start_date <= placement.end_date and self.end_date >= placement.start_date:
+                    raise ValidationError(
+                        "This student already has an overlapping active internship placement."
+                    )
 
     def __str__(self):
         return f"{self.student.registration_number} @ {self.company.company_name}"
@@ -207,7 +218,7 @@ class SupervisorAssignment(TimeStampedModel):
         ]
 
     def clean(self):
-        if self.supervisor.supervisor_type != self.assignment_role:
+        if self.supervisor_id and self.supervisor.supervisor_type != self.assignment_role:
             raise ValidationError("Supervisor type must match assignment role.")
 
     def __str__(self):
@@ -265,80 +276,31 @@ class WeeklyLog(TimeStampedModel):
         ]
 
     def clean(self):
-        duration_days = (self.placement.end_date - self.placement.start_date).days
-        max_expected_weeks = max(1, (duration_days // 7) + 1)
+        if self.placement_id and self.week_number:
+            duration_days = (self.placement.end_date - self.placement.start_date).days
+            max_expected_weeks = max(1, (duration_days // 7) + 1)
 
-        if self.week_number > max_expected_weeks + 2:
-            raise ValidationError("Week number exceeds the likely internship duration.")
-        
+            if self.week_number > max_expected_weeks + 2:
+                raise ValidationError("Week number exceeds the likely internship duration.")
+
+            existing_week = (
+                WeeklyLog.objects.filter(
+                    placement=self.placement,
+                    week_number=self.week_number,
+                )
+                .exclude(pk=self.pk)
+            )
+
+            if existing_week.exists():
+                raise ValidationError(
+                    f"Week {self.week_number} has already been created/submitted for this placement."
+                )
+
     def save(self, *args, **kwargs):
         if self.status == WeeklyLogStatus.SUBMITTED and not self.submitted_at:
             self.submitted_at = timezone.now()
 
         super().save(*args, **kwargs)
-
-    def get_latest_academic_feedback(self):
-        """
-        Returns the latest feedback for this weekly log
-        from the academic supervisor.
-        """
-        return (
-            self.feedback_entries
-            .filter(
-                is_latest=True,
-                score__isnull=False,
-                supervisor__supervisor_type=SupervisorType.ACADEMIC,
-            )
-            .order_by("-created_at")
-            .first()
-        )
-
-    def get_latest_workplace_feedback(self):
-        """
-        Returns the latest feedback for this weekly log
-        from the workplace supervisor.
-        """
-        return (
-            self.feedback_entries
-            .filter(
-                is_latest=True,
-                score__isnull=False,
-                supervisor__supervisor_type=SupervisorType.WORKPLACE,
-            )
-            .order_by("-created_at")
-            .first()
-        )
-
-    def get_academic_score(self):
-        feedback = self.get_latest_academic_feedback()
-        return feedback.score if feedback else None
-
-    def get_workplace_score(self):
-        feedback = self.get_latest_workplace_feedback()
-        return feedback.score if feedback else None
-
-    def get_average_supervisor_score(self):
-        """
-        Calculates the weekly log final mark using:
-
-        academic supervisor score + workplace supervisor score
-        ----------------------------------------------------
-                              2
-
-        Returns None if one of the two scores is missing.
-        """
-        academic_score = self.get_academic_score()
-        workplace_score = self.get_workplace_score()
-
-        if academic_score is None or workplace_score is None:
-            return None
-
-        return (academic_score + workplace_score) / Decimal("2.00")
-
-    def is_fully_assessed(self):
-       
-        return self.get_average_supervisor_score() is not None
-    
 
     def get_latest_academic_feedback(self):
         return (
@@ -427,6 +389,12 @@ class Feedback(TimeStampedModel):
             models.Index(fields=["decision"]),
             models.Index(fields=["is_latest"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["weekly_log", "supervisor"],
+                name="unique_feedback_per_supervisor_per_weekly_log",
+            ),
+        ]
 
     def clean(self):
         if not self.weekly_log_id or not self.supervisor_id:
@@ -443,19 +411,18 @@ class Feedback(TimeStampedModel):
                 "Only an assigned supervisor can review this weekly log."
             )
 
-    def save(self, *args, **kwargs):
-        """
-        When a supervisor gives new feedback for a weekly log,
-        mark their older feedback for the same weekly log as not latest.
-        """
-        super().save(*args, **kwargs)
-
-        if self.is_latest:
+        duplicate_feedback = (
             Feedback.objects.filter(
                 weekly_log=self.weekly_log,
                 supervisor=self.supervisor,
-                is_latest=True,
-            ).exclude(pk=self.pk).update(is_latest=False)
+            )
+            .exclude(pk=self.pk)
+        )
+
+        if duplicate_feedback.exists():
+            raise ValidationError(
+                "You have already submitted feedback for this weekly log."
+            )
 
     def __str__(self):
         return f"{self.weekly_log} - {self.supervisor} - {self.decision}"
@@ -563,6 +530,9 @@ class Evaluation(TimeStampedModel):
         ]
 
     def clean(self):
+        if not self.placement_id or not self.evaluator_id:
+            return
+
         assigned = SupervisorAssignment.objects.filter(
             placement=self.placement,
             supervisor=self.evaluator,
@@ -589,6 +559,12 @@ class Evaluation(TimeStampedModel):
             raise ValidationError(
                 "Workplace assessment must be submitted by a workplace supervisor."
             )
+
+    def save(self, *args, **kwargs):
+        if self.status == EvaluationStatus.SUBMITTED and not self.submitted_at:
+            self.submitted_at = timezone.now()
+
+        super().save(*args, **kwargs)
 
     def recalculate_scores(self):
         scores = self.scores.select_related("criterion").all()
@@ -725,7 +701,7 @@ class FinalResult(TimeStampedModel):
 
     class Meta:
         ordering = ["-published_at"]
-        
+
     def calculate_weekly_logs_average(self):
         weekly_logs = self.placement.weekly_logs.filter(
             status__in=[
@@ -748,7 +724,6 @@ class FinalResult(TimeStampedModel):
             return Decimal("0.00")
 
         total = sum(assessed_scores, Decimal("0.00"))
-
         return total / Decimal(len(assessed_scores))
 
     def recalculate_final_mark(self):

@@ -6,24 +6,35 @@ import { getFinalResults } from "../../api/finalResultsApi";
 
 import PerformanceTrendChart from "../../components/common/PerformanceTrendChart";
 
-import { asArray, countByStatus } from "../../utils/dashboardHelpers";
+import {
+  asArray,
+  countByStatus,
+  formatDateTime,
+} from "../../utils/dashboardHelpers";
 
 function AdminDashboard() {
   const [placements, setPlacements] = useState([]);
   const [weeklyLogs, setWeeklyLogs] = useState([]);
   const [finalResults, setFinalResults] = useState([]);
+
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   function loadDashboard() {
+    setLoading(true);
+    setError("");
+
     Promise.all([getPlacements(), getWeeklyLogs(), getFinalResults()])
       .then(([placementData, logData, resultData]) => {
         setPlacements(asArray(placementData));
         setWeeklyLogs(asArray(logData));
         setFinalResults(asArray(resultData));
+        setLoading(false);
       })
-      .catch((err) =>
-        setError(err.message || "Failed to load admin dashboard.")
-      );
+      .catch((err) => {
+        setError(err.message || "Failed to load admin dashboard.");
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -39,7 +50,43 @@ function AdminDashboard() {
       placement.status === "APPROVED" || placement.status === "IN_PROGRESS"
   );
 
+  const completedPlacements = placements.filter(
+    (placement) => placement.status === "COMPLETED"
+  );
+
+  const rejectedPlacements = placements.filter(
+    (placement) => placement.status === "REJECTED"
+  );
+
   const logStatusCounts = countByStatus(weeklyLogs);
+
+  function displayScore(value) {
+    if (value === null || value === undefined || value === "") {
+      return "Not available";
+    }
+
+    return `${value}%`;
+  }
+
+  function getPlacementLogs(placementId) {
+    return weeklyLogs.filter((log) => log.placement?.id === placementId);
+  }
+
+  function getPlacementFinalResult(placementId) {
+    return finalResults.find((result) => result.placement?.id === placementId);
+  }
+
+  function getSubmittedLogsCount(placementId) {
+    return getPlacementLogs(placementId).filter(
+      (log) => log.status !== "DRAFT"
+    ).length;
+  }
+
+  function getFeedbackCount(placementId) {
+    return getPlacementLogs(placementId).reduce((total, log) => {
+      return total + asArray(log.feedback_entries).length;
+    }, 0);
+  }
 
   function getStudentPerformanceGroups() {
     const groups = {};
@@ -77,14 +124,24 @@ function AdminDashboard() {
 
   const studentPerformanceGroups = getStudentPerformanceGroups();
 
+  if (loading) {
+    return (
+      <div className="page">
+        <h1>Internship Administrator Dashboard</h1>
+        <p className="muted">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <div className="dashboard-header">
         <div>
           <h1>Internship Administrator Dashboard</h1>
+
           <p className="muted">
-            Review student placement requests, monitor weekly logs, and track
-            final internship results.
+            Review student placement requests, monitor weekly logs, track
+            supervisor feedback, and view final internship results.
           </p>
         </div>
       </div>
@@ -95,13 +152,136 @@ function AdminDashboard() {
         <Card title="Total Placements" value={placements.length} />
         <Card title="Pending Requests" value={pendingPlacements.length} />
         <Card title="Active Placements" value={approvedPlacements.length} />
+        <Card title="Completed Placements" value={completedPlacements.length} />
+        <Card title="Rejected Placements" value={rejectedPlacements.length} />
         <Card title="Weekly Logs" value={weeklyLogs.length} />
         <Card title="Submitted Logs" value={logStatusCounts.SUBMITTED || 0} />
+        <Card title="Approved Logs" value={logStatusCounts.APPROVED || 0} />
         <Card title="Final Results" value={finalResults.length} />
       </div>
 
       <section className="card">
+        <h2>Placement Requests Submitted by Students</h2>
+
+        <p className="muted">
+          These are company details, internship period details, and workplace
+          supervisor details submitted by students. Use these details to create
+          or assign the workplace supervisor and academic supervisor.
+        </p>
+
+        {pendingPlacements.length === 0 ? (
+          <p>No pending placement requests.</p>
+        ) : (
+          pendingPlacements.map((placement) => (
+            <div key={placement.id} className="info-card">
+              <h3>
+                {placement.student?.registration_number || "-"} -{" "}
+                {placement.student?.user?.username || "Student"}
+              </h3>
+
+              <p>
+                <strong>Request Submitted At:</strong>{" "}
+                {placement.requested_at
+                  ? formatDateTime(placement.requested_at)
+                  : "-"}
+              </p>
+
+              <div className="details-grid">
+                <div>
+                  <h4>Student Details</h4>
+
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {placement.student?.user?.username || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Registration Number:</strong>{" "}
+                    {placement.student?.registration_number || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Course:</strong>{" "}
+                    {placement.student?.course || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Department:</strong>{" "}
+                    {placement.student?.department || "-"}
+                  </p>
+                </div>
+
+                <div>
+                  <h4>Company Details</h4>
+
+                  <p>
+                    <strong>Company:</strong>{" "}
+                    {placement.company?.company_name || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {placement.company?.location || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Organization Department:</strong>{" "}
+                    {placement.org_department || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Internship Period:</strong>{" "}
+                    {placement.start_date || "-"} to{" "}
+                    {placement.end_date || "-"}
+                  </p>
+                </div>
+
+                <div>
+                  <h4>Workplace Supervisor Details</h4>
+
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {placement.workplace_supervisor_name || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {placement.workplace_supervisor_email || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Phone:</strong>{" "}
+                    {placement.workplace_supervisor_phone || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Title:</strong>{" "}
+                    {placement.workplace_supervisor_title || "-"}
+                  </p>
+
+                  <p>
+                    <strong>Department:</strong>{" "}
+                    {placement.workplace_supervisor_department || "-"}
+                  </p>
+                </div>
+              </div>
+
+              <h4>Student Notes</h4>
+              <p>{placement.student_notes || "-"}</p>
+
+              <p className="muted">
+                Next step: create or confirm the workplace supervisor account,
+                then assign both the workplace supervisor and academic
+                supervisor under Supervisor Assignments.
+              </p>
+            </div>
+          ))
+        )}
+      </section>
+
+      <section className="card">
         <h2>Student Performance Trends</h2>
+
         <p className="muted">
           These graphs show weekly performance for students whose weekly logs
           have been assessed by both the academic supervisor and workplace
@@ -138,137 +318,76 @@ function AdminDashboard() {
       </section>
 
       <section className="card">
-        <h2>Placement Requests Submitted by Students</h2>
-        <p className="muted">
-          These are the company and workplace supervisor details submitted by
-          students. Use these details to create or assign the workplace
-          supervisor and academic supervisor.
-        </p>
-
-        {pendingPlacements.length === 0 ? (
-          <p>No pending placement requests.</p>
-        ) : (
-          pendingPlacements.map((placement) => (
-            <div key={placement.id} className="info-card">
-              <h3>
-                {placement.student?.registration_number} -{" "}
-                {placement.student?.user?.username}
-              </h3>
-
-              <div className="details-grid">
-                <div>
-                  <h4>Company Details</h4>
-
-                  <p>
-                    <strong>Company:</strong>{" "}
-                    {placement.company?.company_name || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Location:</strong>{" "}
-                    {placement.company?.location || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Department:</strong>{" "}
-                    {placement.org_department || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Start Date:</strong> {placement.start_date || "-"}
-                  </p>
-
-                  <p>
-                    <strong>End Date:</strong> {placement.end_date || "-"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4>Workplace Supervisor Details Submitted by Student</h4>
-
-                  <p>
-                    <strong>Name:</strong>{" "}
-                    {placement.workplace_supervisor_name || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Email:</strong>{" "}
-                    {placement.workplace_supervisor_email || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Phone:</strong>{" "}
-                    {placement.workplace_supervisor_phone || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Title:</strong>{" "}
-                    {placement.workplace_supervisor_title || "-"}
-                  </p>
-
-                  <p>
-                    <strong>Department:</strong>{" "}
-                    {placement.workplace_supervisor_department || "-"}
-                  </p>
-                </div>
-              </div>
-
-              <h4>Internship Period</h4>
-              <p>
-                <strong>Start Date:</strong> {placement.start_date || "-"}
-              </p>
-              <p>
-                <strong>End Date:</strong> {placement.end_date || "-"}
-              </p>
-
-              <h4>Student Notes</h4>
-              <p>{placement.student_notes || "-"}</p>
-
-              <p className="muted">
-                Next: create the workplace supervisor under Users/Supervisor
-                Profiles, then assign both workplace and academic supervisors
-                under Supervisor Assignments.
-              </p>
-            </div>
-          ))
-        )}
-      </section>
-
-      <section className="card">
         <h2>All Placements</h2>
 
         {placements.length === 0 ? (
           <p>No placements found.</p>
         ) : (
-          placements.map((placement) => (
-            <div key={placement.id} className="info-card">
-              <h3>
-                {placement.student?.registration_number} @{" "}
-                {placement.company?.company_name}
-              </h3>
+          placements.map((placement) => {
+            const placementLogs = getPlacementLogs(placement.id);
+            const finalResult = getPlacementFinalResult(placement.id);
+            const submittedLogsCount = getSubmittedLogsCount(placement.id);
+            const feedbackCount = getFeedbackCount(placement.id);
 
-              <p>
-                <strong>Status:</strong>{" "}
-                <span
-                  className={`badge badge-${String(
-                    placement.status || ""
-                  ).toLowerCase()}`}
-                >
-                  {placement.status || "-"}
-                </span>
-              </p>
+            return (
+              <div key={placement.id} className="info-card">
+                <h3>
+                  {placement.student?.registration_number || "-"} @{" "}
+                  {placement.company?.company_name || "-"}
+                </h3>
 
-              <p>
-                <strong>Student:</strong>{" "}
-                {placement.student?.user?.username || "-"}
-              </p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    className={`badge badge-${String(
+                      placement.status || ""
+                    ).toLowerCase()}`}
+                  >
+                    {placement.status || "-"}
+                  </span>
+                </p>
 
-              <p>
-                <strong>Period:</strong> {placement.start_date || "-"} to{" "}
-                {placement.end_date || "-"}
-              </p>
-            </div>
-          ))
+                <p>
+                  <strong>Student:</strong>{" "}
+                  {placement.student?.user?.username || "-"}
+                </p>
+
+                <p>
+                  <strong>Company:</strong>{" "}
+                  {placement.company?.company_name || "-"}
+                </p>
+
+                <p>
+                  <strong>Period:</strong> {placement.start_date || "-"} to{" "}
+                  {placement.end_date || "-"}
+                </p>
+
+                <p>
+                  <strong>Workplace Supervisor Submitted:</strong>{" "}
+                  {placement.workplace_supervisor_name || "Not provided"}
+                </p>
+
+                <p>
+                  <strong>Total Weekly Logs:</strong> {placementLogs.length}
+                </p>
+
+                <p>
+                  <strong>Submitted Logs:</strong> {submittedLogsCount}
+                </p>
+
+                <p>
+                  <strong>Feedback Received:</strong> {feedbackCount}
+                </p>
+
+                <p>
+                  <strong>Final Mark:</strong>{" "}
+                  {finalResult
+                    ? displayScore(finalResult.final_mark)
+                    : "Not published"}
+                </p>
+              </div>
+            );
+          })
         )}
       </section>
     </div>

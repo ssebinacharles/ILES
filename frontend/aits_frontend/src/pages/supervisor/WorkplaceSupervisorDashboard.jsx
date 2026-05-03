@@ -8,13 +8,17 @@ import { getEvaluations } from "../../api/evaluationsApi";
 import {
   asArray,
   countByStatus,
+  formatDateTime,
   getPlacementIdFromItem,
   getStoredUser,
+  getUserProfileId,
   isMySupervisorAssignment,
   uniqueById,
 } from "../../utils/dashboardHelpers";
 
 function WorkplaceSupervisorDashboard() {
+  const [user] = useState(() => getStoredUser());
+
   const [dashboard, setDashboard] = useState({
     assignments: [],
     students: [],
@@ -27,9 +31,10 @@ function WorkplaceSupervisorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const user = getStoredUser();
+  function loadDashboard() {
+    setLoading(true);
+    setError("");
 
-  useEffect(() => {
     Promise.all([
       getSupervisorAssignments(),
       getWeeklyLogs(),
@@ -41,9 +46,9 @@ function WorkplaceSupervisorDashboard() {
           isMySupervisorAssignment(assignment, user, "WORKPLACE")
         );
 
-        const placementIds = assignments.map((assignment) =>
-          getPlacementIdFromItem(assignment)
-        );
+        const placementIds = assignments
+          .map((assignment) => getPlacementIdFromItem(assignment))
+          .filter(Boolean);
 
         const students = uniqueById(
           assignments
@@ -59,20 +64,29 @@ function WorkplaceSupervisorDashboard() {
           ["SUBMITTED", "UNDER_REVIEW"].includes(log.status)
         );
 
+        const profileId = getUserProfileId(user);
+
         const feedback = asArray(feedbackData).filter((entry) => {
           const supervisor = entry.supervisor;
+
           return (
-            supervisor?.id === user?.profile?.profile_id ||
-            supervisor?.user?.id === user?.id
+            supervisor?.id === profileId ||
+            supervisor?.user?.id === user?.id ||
+            supervisor?.user?.username === user?.username ||
+            supervisor?.user?.email === user?.email
           );
         });
 
         const evaluations = asArray(evaluationsData).filter((evaluation) => {
           const evaluator = evaluation.evaluator;
+          const placementId = getPlacementIdFromItem(evaluation);
+
           return (
-            evaluator?.id === user?.profile?.profile_id ||
+            evaluator?.id === profileId ||
             evaluator?.user?.id === user?.id ||
-            placementIds.includes(getPlacementIdFromItem(evaluation))
+            evaluator?.user?.username === user?.username ||
+            evaluator?.user?.email === user?.email ||
+            placementIds.includes(placementId)
           );
         });
 
@@ -88,10 +102,26 @@ function WorkplaceSupervisorDashboard() {
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message || "Failed to load dashboard.");
+        setError(err.message || "Failed to load workplace supervisor dashboard.");
         setLoading(false);
       });
-  }, [user]);
+  }
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  function displayScore(value) {
+    if (value === null || value === undefined || value === "") {
+      return "Not available";
+    }
+
+    return `${value}%`;
+  }
+
+  function getFeedbackCount(log) {
+    return asArray(log.feedback_entries).length;
+  }
 
   if (loading) {
     return (
@@ -111,6 +141,8 @@ function WorkplaceSupervisorDashboard() {
         <h1>Workplace Supervisor Dashboard</h1>
 
         <p className="error">Error: {error}</p>
+
+        <button onClick={loadDashboard}>Try Again</button>
       </Page>
     );
   }
@@ -122,9 +154,10 @@ function WorkplaceSupervisorDashboard() {
       <div className="dashboard-header">
         <div>
           <h1>Workplace Supervisor Dashboard</h1>
+
           <p className="muted">
-            Review assigned interns, weekly logs, feedback and workplace
-            assessments.
+            Review assigned interns, weekly logs, workplace feedback, and
+            workplace assessment records.
           </p>
         </div>
       </div>
@@ -141,7 +174,7 @@ function WorkplaceSupervisorDashboard() {
       </Grid>
 
       <Section title="Assigned Interns">
-        {dashboard.students.length === 0 ? (
+        {dashboard.assignments.length === 0 ? (
           <p>No assigned interns found.</p>
         ) : (
           dashboard.assignments.map((assignment) => (
@@ -161,6 +194,12 @@ function WorkplaceSupervisorDashboard() {
               </p>
 
               <p>
+                <strong>Internship Period:</strong>{" "}
+                {assignment.placement?.start_date || "-"} to{" "}
+                {assignment.placement?.end_date || "-"}
+              </p>
+
+              <p>
                 <strong>Assignment Role:</strong>{" "}
                 <span className="badge badge-submitted">
                   {assignment.assignment_role || "-"}
@@ -168,7 +207,25 @@ function WorkplaceSupervisorDashboard() {
               </p>
 
               <p>
-                <strong>Active:</strong>{" "}
+                <strong>Assigned At:</strong>{" "}
+                {assignment.assigned_at
+                  ? formatDateTime(assignment.assigned_at)
+                  : "-"}
+              </p>
+
+              <p>
+                <strong>Placement Status:</strong>{" "}
+                <span
+                  className={`badge badge-${String(
+                    assignment.placement?.status || ""
+                  ).toLowerCase()}`}
+                >
+                  {assignment.placement?.status || "-"}
+                </span>
+              </p>
+
+              <p>
+                <strong>Active Assignment:</strong>{" "}
                 <span
                   className={
                     assignment.is_active
@@ -206,16 +263,122 @@ function WorkplaceSupervisorDashboard() {
 
               <p>
                 <strong>Status:</strong>{" "}
-                <span className={`badge badge-${String(log.status).toLowerCase()}`}>
-                  {log.status}
+                <span
+                  className={`badge badge-${String(
+                    log.status || ""
+                  ).toLowerCase()}`}
+                >
+                  {log.status || "-"}
                 </span>
+              </p>
+
+              <p>
+                <strong>Submitted At:</strong>{" "}
+                {log.submitted_at
+                  ? formatDateTime(log.submitted_at)
+                  : "Not submitted yet"}
+              </p>
+
+              <p>
+                <strong>Academic Supervisor Score:</strong>{" "}
+                {displayScore(log.academic_score)}
+              </p>
+
+              <p>
+                <strong>Workplace Supervisor Score:</strong>{" "}
+                {displayScore(log.workplace_score)}
+              </p>
+
+              <p>
+                <strong>Final Weekly Log Mark:</strong>{" "}
+                {displayScore(log.average_score)}
+              </p>
+
+              <p>
+                <strong>Feedback Entries:</strong> {getFeedbackCount(log)}
+              </p>
+
+              <h4>Student Activities</h4>
+
+              <p>
+                <strong>Monday:</strong> {log.monday_activities || "-"}
+              </p>
+
+              <p>
+                <strong>Tuesday:</strong> {log.tuesday_activities || "-"}
+              </p>
+
+              <p>
+                <strong>Wednesday:</strong>{" "}
+                {log.wednesday_activities || "-"}
+              </p>
+
+              <p>
+                <strong>Thursday:</strong> {log.thursday_activities || "-"}
+              </p>
+
+              <p>
+                <strong>Friday:</strong> {log.friday_activities || "-"}
+              </p>
+
+              <p>
+                <strong>Challenges:</strong> {log.challenges || "-"}
+              </p>
+
+              <p>
+                <strong>Lessons Learned:</strong>{" "}
+                {log.lessons_learned || "-"}
               </p>
             </ListItem>
           ))
         )}
       </Section>
 
-      <Section title="Workplace Evaluations">
+      <Section title="Feedback Given by You">
+        {dashboard.feedback.length === 0 ? (
+          <p>No feedback submitted yet.</p>
+        ) : (
+          dashboard.feedback.map((feedback) => (
+            <ListItem key={feedback.id}>
+              <h3>{feedback.decision}</h3>
+
+              <p>
+                <strong>Weekly Log:</strong>{" "}
+                {feedback.weekly_log
+                  ? `Week ${feedback.weekly_log.week_number} - ${feedback.weekly_log.title}`
+                  : "-"}
+              </p>
+
+              <p>
+                <strong>Student:</strong>{" "}
+                {feedback.weekly_log?.registration_number || "-"}
+              </p>
+
+              <p>
+                <strong>Company:</strong>{" "}
+                {feedback.weekly_log?.company_name || "-"}
+              </p>
+
+              <p>
+                <strong>Feedback Sent At:</strong>{" "}
+                {feedback.created_at
+                  ? formatDateTime(feedback.created_at)
+                  : "-"}
+              </p>
+
+              <p>
+                <strong>Score:</strong> {displayScore(feedback.score)}
+              </p>
+
+              <p>
+                <strong>Comment:</strong> {feedback.comment || "-"}
+              </p>
+            </ListItem>
+          ))
+        )}
+      </Section>
+
+      <Section title="Workplace Evaluation Records">
         {dashboard.evaluations.length === 0 ? (
           <p>No workplace evaluations found.</p>
         ) : (
@@ -229,18 +392,36 @@ function WorkplaceSupervisorDashboard() {
               </p>
 
               <p>
+                <strong>Company:</strong>{" "}
+                {evaluation.placement?.company?.company_name || "-"}
+              </p>
+
+              <p>
                 <strong>Status:</strong>{" "}
                 <span
                   className={`badge badge-${String(
-                    evaluation.status
+                    evaluation.status || ""
                   ).toLowerCase()}`}
                 >
-                  {evaluation.status}
+                  {evaluation.status || "-"}
                 </span>
               </p>
 
               <p>
-                <strong>Weighted Score:</strong> {evaluation.weighted_score}
+                <strong>Submitted At:</strong>{" "}
+                {evaluation.submitted_at
+                  ? formatDateTime(evaluation.submitted_at)
+                  : "Not submitted yet"}
+              </p>
+
+              <p>
+                <strong>Total Score:</strong>{" "}
+                {displayScore(evaluation.total_score)}
+              </p>
+
+              <p>
+                <strong>Weighted Score:</strong>{" "}
+                {displayScore(evaluation.weighted_score)}
               </p>
 
               <p>

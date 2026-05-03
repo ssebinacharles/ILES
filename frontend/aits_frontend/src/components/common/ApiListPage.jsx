@@ -23,13 +23,17 @@ function ApiListPage({
   renderItem,
   renderTop,
   emptyMessage = "No records found yet.",
+  showRawResponse = false,
 }) {
   const [items, setItems] = useState([]);
   const [rawData, setRawData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  function loadData() {
+    setLoading(true);
+    setError("");
+
     fetchData()
       .then((data) => {
         setRawData(data);
@@ -37,14 +41,18 @@ function ApiListPage({
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        setError(err.message || "Failed to load records.");
         setLoading(false);
       });
+  }
+
+  useEffect(() => {
+    loadData();
   }, [fetchData]);
 
   if (loading) {
     return (
-      <div style={{ padding: "30px" }}>
+      <div style={pageStyle}>
         <h1>{title}</h1>
         <p>Loading...</p>
       </div>
@@ -53,15 +61,20 @@ function ApiListPage({
 
   if (error) {
     return (
-      <div style={{ padding: "30px" }}>
+      <div style={pageStyle}>
         <h1>{title}</h1>
-        <p style={{ color: "red" }}>Error: {error}</p>
+
+        {description && <p>{description}</p>}
+
+        <p style={errorStyle}>Error: {error}</p>
+
+        <button onClick={loadData}>Try Again</button>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "30px" }}>
+    <div style={pageStyle}>
       <h1>{title}</h1>
 
       {description && <p>{description}</p>}
@@ -73,39 +86,49 @@ function ApiListPage({
       ) : (
         <div>
           {items.map((item, index) => (
-            <div
-              key={item.id || index}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "16px",
-                marginBottom: "12px",
-              }}
-            >
+            <div key={item.id || index} style={itemBoxStyle}>
               {renderItem ? (
-                renderItem(item)
+                renderItem(item, index)
               ) : (
-                <pre>{JSON.stringify(item, null, 2)}</pre>
+                <pre style={preStyle}>{JSON.stringify(item, null, 2)}</pre>
               )}
             </div>
           ))}
         </div>
       )}
 
-      <details style={{ marginTop: "25px" }}>
-        <summary>View raw API response</summary>
-        <pre
-          style={{
-            background: "#f5f5f5",
-            padding: "12px",
-            overflowX: "auto",
-          }}
-        >
-          {JSON.stringify(rawData, null, 2)}
-        </pre>
-      </details>
+      {showRawResponse && (
+        <details style={{ marginTop: "25px" }}>
+          <summary>View raw API response</summary>
+
+          <pre style={preStyle}>{JSON.stringify(rawData, null, 2)}</pre>
+        </details>
+      )}
     </div>
   );
 }
+
+const pageStyle = {
+  padding: "30px",
+};
+
+const itemBoxStyle = {
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  padding: "16px",
+  marginBottom: "12px",
+  background: "#fff",
+};
+
+const errorStyle = {
+  color: "red",
+};
+
+const preStyle = {
+  background: "#f5f5f5",
+  padding: "12px",
+  overflowX: "auto",
+  borderRadius: "6px",
+};
 
 export default ApiListPage;

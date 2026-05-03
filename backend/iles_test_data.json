@@ -1,0 +1,1171 @@
+[
+{
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$RENnOhdtmqXeSc0a02ZR9J$E1rFXuC23HdjoRhQ7+2YaVOPk/e+RJ3rvCSBLS3ACcw=",
+    "last_login": "2026-04-30T14:16:51.951Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-04-26T21:17:40.333Z",
+    "email": "kjohnbosco62@gmail.com",
+    "role": "",
+    "phone_number": "",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 15,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6VjSbnZxLAptGcsSletDw2$SpwYskz7XAkTh1AyyzpIps3EE/unrNfMZAv8/HXrae4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "JaneAtim2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:14:03.921Z",
+    "email": "JaneAtim2000@proton.me",
+    "role": "STUDENT",
+    "phone_number": "0786573452",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 16,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$B4rvpHn9Nn93cPLNUhlG1E$xB2nM3ocoFPobUS8ox3uPp2wMoI8xzRDVJ5lICHJdYQ=",
+    "last_login": "2026-05-03T17:41:40.321Z",
+    "is_superuser": false,
+    "username": "NatashaAine2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:16:18.459Z",
+    "email": "NatashaAine2000@proton.me",
+    "role": "STUDENT",
+    "phone_number": "0789342675",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 17,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$7YR47HLpAM01ioCUI2uwSb$5XGRLlOU2t3o9qezfiXu6oURuVv6TIYCisMqb2NrwTg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "OkelloPatrick2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:18:31.099Z",
+    "email": "OkelloPatrick2000@proton.me",
+    "role": "STUDENT",
+    "phone_number": "0786542345",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 18,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$sdw5QygMAseMxhcWlX5kJL$k6tkF6/mfrRzBtndcokTpr/3cilhOsdq7dcyadth3Y4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "EricMarvin2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:19:37.607Z",
+    "email": "EricMarvin2000@proton.me",
+    "role": "STUDENT",
+    "phone_number": "0786564738",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 19,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$dXDkbhh821iTeIIXi8BnU3$GkXyXPuSv4qdSKbPBUB+iGQaQSAEggcA+H+v0BGieYc=",
+    "last_login": "2026-05-03T17:56:21.887Z",
+    "is_superuser": false,
+    "username": "PeterKyajja2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:21:13.344Z",
+    "email": "PeterKyajja2000@proton.me",
+    "role": "SUPERVISOR",
+    "phone_number": "0789563412",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 20,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$mT5s09PmTSpyY7bxM9oThU$5cfUq6YVsg1N4LEaFVKbc3etn8+pfWacsEaRZTJnDz4=",
+    "last_login": "2026-05-03T17:46:28.950Z",
+    "is_superuser": false,
+    "username": "JoelKato2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:22:49.315Z",
+    "email": "JoelKato2000@proton.me",
+    "role": "SUPERVISOR",
+    "phone_number": "0786543756",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 21,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$CIjgA8cMGq2dYfpbMVwVlf$MznPoRXbRSGJV5l2JnSB3BShNaPxcuOF2kZ5SGPZgOQ=",
+    "last_login": "2026-05-01T17:20:58.217Z",
+    "is_superuser": false,
+    "username": "NgubiruJoseph2000",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-04-28T13:24:22.100Z",
+    "email": "NgubiruJoseph2000@proton.me",
+    "role": "ADMINISTRATOR",
+    "phone_number": "0786542345",
+    "is_verified": false,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 22,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$GWPD2QFJYczpeMB4XShACa$D5p6YVcROTNaS0/+b7qy0VkOh1KgslP2P1UFkNNFatI=",
+    "last_login": "2026-05-03T17:45:56.972Z",
+    "is_superuser": false,
+    "username": "Josiah_401",
+    "first_name": "josiah",
+    "last_name": "O",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-05-01T16:32:45.637Z",
+    "email": "jj.o.godfery@gmail.com",
+    "role": "STUDENT",
+    "phone_number": "0787564356",
+    "is_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 23,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$7BZ8ygGbXlgZQCW7k0Lsvy$+EcyVQTn/45Wut68lYw0UleDpiw3SSl80yy7Yb7pLi0=",
+    "last_login": "2026-05-03T17:58:37.814Z",
+    "is_superuser": false,
+    "username": "kenny",
+    "first_name": "kenny",
+    "last_name": "A",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-05-01T16:57:46.326Z",
+    "email": "aac@gmail.com",
+    "role": "SUPERVISOR",
+    "phone_number": "0785674534",
+    "is_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.studentprofile",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:26:02.344Z",
+    "updated_at": "2026-04-28T13:26:02.344Z",
+    "user": 15,
+    "registration_number": "26/U/1",
+    "course": "Bsc Computer science",
+    "year_of_study": 1,
+    "department": "computer science"
+  }
+},
+{
+  "model": "users.studentprofile",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-04-28T13:26:50.920Z",
+    "updated_at": "2026-04-28T13:26:50.920Z",
+    "user": 16,
+    "registration_number": "26/U/2",
+    "course": "Bsc Computer science",
+    "year_of_study": 2,
+    "department": "computer science"
+  }
+},
+{
+  "model": "users.studentprofile",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-04-28T13:27:34.536Z",
+    "updated_at": "2026-04-28T13:27:34.536Z",
+    "user": 17,
+    "registration_number": "26/U/3",
+    "course": "Bsc Computer science",
+    "year_of_study": 3,
+    "department": "computer science"
+  }
+},
+{
+  "model": "users.studentprofile",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-04-28T13:28:29.205Z",
+    "updated_at": "2026-04-28T13:28:29.205Z",
+    "user": 18,
+    "registration_number": "26/U/4",
+    "course": "Bsc Computer science",
+    "year_of_study": 2,
+    "department": "computer science"
+  }
+},
+{
+  "model": "users.studentprofile",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-05-01T16:32:46.513Z",
+    "updated_at": "2026-05-01T16:32:46.513Z",
+    "user": 22,
+    "registration_number": "26/U/1000",
+    "course": "BSC COMPUTER SCIENCE",
+    "year_of_study": 1,
+    "department": "computer science"
+  }
+},
+{
+  "model": "users.supervisorprofile",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:29:35.130Z",
+    "updated_at": "2026-04-28T13:29:35.130Z",
+    "user": 19,
+    "supervisor_type": "WORKPLACE",
+    "organization_name": "NSSF Uganda",
+    "title": "IT expert"
+  }
+},
+{
+  "model": "users.supervisorprofile",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-04-28T13:31:11.962Z",
+    "updated_at": "2026-04-28T13:31:11.962Z",
+    "user": 20,
+    "supervisor_type": "ACADEMIC",
+    "organization_name": "MAKERERE UNVERSITY - COCIS",
+    "title": "Dr/Prof."
+  }
+},
+{
+  "model": "users.supervisorprofile",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-05-01T16:57:46.902Z",
+    "updated_at": "2026-05-01T16:57:46.902Z",
+    "user": 23,
+    "supervisor_type": "WORKPLACE",
+    "organization_name": "UN",
+    "title": "Mr"
+  }
+},
+{
+  "model": "users.administratorprofile",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-04-28T13:31:37.146Z",
+    "updated_at": "2026-04-28T13:31:37.146Z",
+    "user": 21,
+    "office_name": "Internship Office"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:37:49.163Z",
+    "updated_at": "2026-04-28T13:37:49.163Z",
+    "company_name": "NSSF Uganda",
+    "location": "Kampala",
+    "contact_email": "nssfuganda@gmail.com",
+    "contact_phone": "0789657890",
+    "website": "https://www.nssfuganda.com",
+    "contact_person_name": "Peter Kyajja"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-04-28T13:40:02.930Z",
+    "updated_at": "2026-04-28T13:40:02.930Z",
+    "company_name": "MAKERERE UNVERSITY - COCIS",
+    "location": "Kampala",
+    "contact_email": "cocis@makerere.ac.ug",
+    "contact_phone": "0786453467",
+    "website": "https://www.cocis.com",
+    "contact_person_name": "Joel Kato"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-04-30T11:46:30.512Z",
+    "updated_at": "2026-04-30T11:46:30.512Z",
+    "company_name": "GOOGLE.IN",
+    "location": "California",
+    "contact_email": "googlein@gmail.com",
+    "contact_phone": "0200346718",
+    "website": "",
+    "contact_person_name": "PETER"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-04-30T12:54:56.339Z",
+    "updated_at": "2026-04-30T12:54:56.339Z",
+    "company_name": "APPLE",
+    "location": "Kampala",
+    "contact_email": "apple@gmail.com",
+    "contact_phone": "0765564329",
+    "website": "",
+    "contact_person_name": "Tim cook"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-04-30T13:55:10.158Z",
+    "updated_at": "2026-04-30T13:55:10.158Z",
+    "company_name": "SAMSUNG",
+    "location": "Nairobi",
+    "contact_email": "samsung@gmail.com",
+    "contact_phone": "0875456784",
+    "website": "",
+    "contact_person_name": "mr sam"
+  }
+},
+{
+  "model": "issues.company",
+  "pk": 8,
+  "fields": {
+    "created_at": "2026-05-01T16:36:28.755Z",
+    "updated_at": "2026-05-01T16:36:28.755Z",
+    "company_name": "UN",
+    "location": "UK",
+    "contact_email": "un@gmail.com",
+    "contact_phone": "0787456324",
+    "website": "",
+    "contact_person_name": "joel"
+  }
+},
+{
+  "model": "issues.internshipplacement",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-04-28T13:45:38.043Z",
+    "updated_at": "2026-04-28T13:45:38.043Z",
+    "student": 3,
+    "company": 3,
+    "approved_by": 2,
+    "org_department": "NSSF IT DEPARTMENT",
+    "workplace_supervisor_name": "",
+    "workplace_supervisor_email": null,
+    "workplace_supervisor_phone": "",
+    "workplace_supervisor_title": "",
+    "workplace_supervisor_department": "",
+    "student_notes": "",
+    "start_date": "2026-04-28",
+    "end_date": "2026-06-28",
+    "status": "APPROVED",
+    "requested_at": "2026-04-28T13:45:38.016Z",
+    "approved_at": null,
+    "rejection_reason": ""
+  }
+},
+{
+  "model": "issues.internshipplacement",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:47:07.703Z",
+    "updated_at": "2026-04-28T13:47:07.703Z",
+    "student": 4,
+    "company": 3,
+    "approved_by": 2,
+    "org_department": "NSSF IT DEPARTMENT",
+    "workplace_supervisor_name": "",
+    "workplace_supervisor_email": null,
+    "workplace_supervisor_phone": "",
+    "workplace_supervisor_title": "",
+    "workplace_supervisor_department": "",
+    "student_notes": "",
+    "start_date": "2026-04-28",
+    "end_date": "2026-06-28",
+    "status": "APPROVED",
+    "requested_at": "2026-04-28T13:47:07.682Z",
+    "approved_at": null,
+    "rejection_reason": ""
+  }
+},
+{
+  "model": "issues.internshipplacement",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-05-01T16:36:28.799Z",
+    "updated_at": "2026-05-01T16:59:18.358Z",
+    "student": 7,
+    "company": 8,
+    "approved_by": null,
+    "org_department": "NETWORKING",
+    "workplace_supervisor_name": "kenny",
+    "workplace_supervisor_email": "jj.o.godfery@gmail.com",
+    "workplace_supervisor_phone": "0756789012",
+    "workplace_supervisor_title": "Mr",
+    "workplace_supervisor_department": "NETWORKING",
+    "student_notes": "ABC",
+    "start_date": "2026-05-01",
+    "end_date": "2026-07-01",
+    "status": "APPROVED",
+    "requested_at": "2026-05-01T16:36:28.799Z",
+    "approved_at": null,
+    "rejection_reason": ""
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 1,
+  "fields": {
+    "created_at": "2026-04-28T13:45:38.047Z",
+    "updated_at": "2026-04-28T13:45:38.047Z",
+    "placement": 2,
+    "supervisor": 4,
+    "assigned_by": 2,
+    "assignment_role": "ACADEMIC",
+    "assigned_at": "2026-04-28T13:45:38.033Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-04-28T13:45:38.052Z",
+    "updated_at": "2026-04-28T13:45:38.052Z",
+    "placement": 2,
+    "supervisor": 3,
+    "assigned_by": 2,
+    "assignment_role": "WORKPLACE",
+    "assigned_at": "2026-04-28T13:45:38.034Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:47:07.707Z",
+    "updated_at": "2026-04-28T13:47:07.707Z",
+    "placement": 3,
+    "supervisor": 4,
+    "assigned_by": 2,
+    "assignment_role": "ACADEMIC",
+    "assigned_at": "2026-04-28T13:47:07.695Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-04-28T13:47:07.710Z",
+    "updated_at": "2026-04-28T13:47:07.710Z",
+    "placement": 3,
+    "supervisor": 3,
+    "assigned_by": 2,
+    "assignment_role": "WORKPLACE",
+    "assigned_at": "2026-04-28T13:47:07.695Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-05-01T16:59:18.409Z",
+    "updated_at": "2026-05-01T16:59:18.409Z",
+    "placement": 4,
+    "supervisor": 4,
+    "assigned_by": 2,
+    "assignment_role": "ACADEMIC",
+    "assigned_at": "2026-05-01T16:59:18.409Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.supervisorassignment",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-05-01T16:59:18.917Z",
+    "updated_at": "2026-05-01T16:59:18.917Z",
+    "placement": 4,
+    "supervisor": 5,
+    "assigned_by": 2,
+    "assignment_role": "WORKPLACE",
+    "assigned_at": "2026-05-01T16:59:18.917Z",
+    "is_active": true
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-04-28T13:45:38.053Z",
+    "updated_at": "2026-04-28T13:45:38.053Z",
+    "placement": 2,
+    "week_number": 1,
+    "title": "START",
+    "activities": "",
+    "monday_activities": "",
+    "tuesday_activities": "",
+    "wednesday_activities": "",
+    "thursday_activities": "",
+    "friday_activities": "",
+    "challenges": "",
+    "lessons_learned": "",
+    "status": "DRAFT",
+    "submitted_at": null
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-28T13:47:07.711Z",
+    "updated_at": "2026-04-28T13:47:07.711Z",
+    "placement": 3,
+    "week_number": 1,
+    "title": "START",
+    "activities": "",
+    "monday_activities": "",
+    "tuesday_activities": "",
+    "wednesday_activities": "",
+    "thursday_activities": "",
+    "friday_activities": "",
+    "challenges": "",
+    "lessons_learned": "",
+    "status": "DRAFT",
+    "submitted_at": null
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-04-28T16:20:35.359Z",
+    "updated_at": "2026-04-28T16:23:46.215Z",
+    "placement": 2,
+    "week_number": 2,
+    "title": "START",
+    "activities": "programming",
+    "monday_activities": "",
+    "tuesday_activities": "",
+    "wednesday_activities": "",
+    "thursday_activities": "",
+    "friday_activities": "",
+    "challenges": "slow internet",
+    "lessons_learned": "how to code basics in python",
+    "status": "SUBMITTED",
+    "submitted_at": null
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-04-30T15:42:00.763Z",
+    "updated_at": "2026-04-30T15:42:00.847Z",
+    "placement": 3,
+    "week_number": 2,
+    "title": "PROGRAMING",
+    "activities": "Monday: Introduction to programming\nTuesday: \nWednesday: \nThursday: \nFriday:",
+    "monday_activities": "Introduction to programming",
+    "tuesday_activities": "",
+    "wednesday_activities": "",
+    "thursday_activities": "",
+    "friday_activities": "",
+    "challenges": "",
+    "lessons_learned": "",
+    "status": "SUBMITTED",
+    "submitted_at": null
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-05-01T09:27:20.554Z",
+    "updated_at": "2026-05-01T10:45:28.456Z",
+    "placement": 3,
+    "week_number": 3,
+    "title": "DEBUGING",
+    "activities": "Monday: introduction to debuting\nTuesday: basics of debuging\nWednesday: debuging tutorials\nThursday: debuging project\nFriday: troubleshooting",
+    "monday_activities": "introduction to debuting",
+    "tuesday_activities": "basics of debuging",
+    "wednesday_activities": "debuging tutorials",
+    "thursday_activities": "debuging project",
+    "friday_activities": "troubleshooting",
+    "challenges": "slow internet, no lunch given",
+    "lessons_learned": "inter-person skills and some debugging",
+    "status": "APPROVED",
+    "submitted_at": null
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-05-01T13:31:01.524Z",
+    "updated_at": "2026-05-01T13:33:26.203Z",
+    "placement": 3,
+    "week_number": 4,
+    "title": "DEBUGING PART 2",
+    "activities": "Monday: looping \nTuesday: implementation \nWednesday: debugging 1\nThursday: debugging 2\nFriday: debugging 3",
+    "monday_activities": "looping",
+    "tuesday_activities": "implementation",
+    "wednesday_activities": "debugging 1",
+    "thursday_activities": "debugging 2",
+    "friday_activities": "debugging 3",
+    "challenges": "slow internet",
+    "lessons_learned": "how to debug",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-01T13:31:01.592Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 8,
+  "fields": {
+    "created_at": "2026-05-01T15:16:15.049Z",
+    "updated_at": "2026-05-01T15:20:45.067Z",
+    "placement": 3,
+    "week_number": 5,
+    "title": "FRONT END UI DEVELOPMENT",
+    "activities": "Monday: introduction to CSS\nTuesday: introduction to Javascript\nWednesday: fundamentals of HTML\nThursday: Fundamentals of CSS\nFriday: Fundamentals of Javascript",
+    "monday_activities": "introduction to CSS",
+    "tuesday_activities": "introduction to Javascript",
+    "wednesday_activities": "fundamentals of HTML",
+    "thursday_activities": "Fundamentals of CSS",
+    "friday_activities": "Fundamentals of Javascript",
+    "challenges": "slow internet",
+    "lessons_learned": "basics of front end development for user interface.",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-01T15:16:15.118Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 9,
+  "fields": {
+    "created_at": "2026-05-01T15:33:19.991Z",
+    "updated_at": "2026-05-01T15:37:52.586Z",
+    "placement": 3,
+    "week_number": 6,
+    "title": "BACKEND DEVELOPMENT",
+    "activities": "Monday: creating models \nTuesday: creating views\nWednesday: creating permissions \nThursday: entering and creating admin\nFriday: creating urls",
+    "monday_activities": "creating models",
+    "tuesday_activities": "creating views",
+    "wednesday_activities": "creating permissions",
+    "thursday_activities": "entering and creating admin",
+    "friday_activities": "creating urls",
+    "challenges": "no lunch , slow internet",
+    "lessons_learned": "basics of backend development.",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-01T15:33:20.066Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 10,
+  "fields": {
+    "created_at": "2026-05-01T15:45:10.223Z",
+    "updated_at": "2026-05-01T15:46:44.004Z",
+    "placement": 3,
+    "week_number": 7,
+    "title": "DISCUSSION",
+    "activities": "Monday: team building\nTuesday: connecting with team\nWednesday: team assignments\nThursday: team task working \nFriday: team oppions",
+    "monday_activities": "team building",
+    "tuesday_activities": "connecting with team",
+    "wednesday_activities": "team assignments",
+    "thursday_activities": "team task working",
+    "friday_activities": "team oppions",
+    "challenges": "some team members aren't cooperative",
+    "lessons_learned": "team work is key",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-01T15:45:10.289Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 11,
+  "fields": {
+    "created_at": "2026-05-01T15:52:51.111Z",
+    "updated_at": "2026-05-01T15:54:34.394Z",
+    "placement": 3,
+    "week_number": 8,
+    "title": "PROGRESS REVIEW",
+    "activities": "Monday: reviewing backend development\nTuesday: reviewing frontend development\nWednesday: apis development\nThursday: endpoints\nFriday: connecting apis with endpoints",
+    "monday_activities": "reviewing backend development",
+    "tuesday_activities": "reviewing frontend development",
+    "wednesday_activities": "apis development",
+    "thursday_activities": "endpoints",
+    "friday_activities": "connecting apis with endpoints",
+    "challenges": "slow internet",
+    "lessons_learned": "full stack development",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-01T15:52:51.257Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 12,
+  "fields": {
+    "created_at": "2026-05-03T13:22:53.281Z",
+    "updated_at": "2026-05-03T13:26:06.200Z",
+    "placement": 3,
+    "week_number": 9,
+    "title": "absc",
+    "activities": "Monday: done\nTuesday: doing\nWednesday: best\nThursday: work\nFriday: good",
+    "monday_activities": "done",
+    "tuesday_activities": "doing",
+    "wednesday_activities": "best",
+    "thursday_activities": "work",
+    "friday_activities": "good",
+    "challenges": "aaaaaaaaaassdfgghhhhhhhhhggfvfccxxxxxxxxxxxxxxxccdddeerrtthhbhbvvccxxasawsdefrghjkiioioojhggvzsxsddfgfggggggghhhhhhhhhghgfdfrrttyttrreddssssddcdffggghhjikookkjjjhgfgdfdsswqwqqaaaa",
+    "lessons_learned": "ghrgdmnmv",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-03T13:22:53.364Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 13,
+  "fields": {
+    "created_at": "2026-05-03T13:23:29.799Z",
+    "updated_at": "2026-05-03T13:23:29.866Z",
+    "placement": 3,
+    "week_number": 10,
+    "title": "absc",
+    "activities": "Monday: done\nTuesday: doing\nWednesday: best\nThursday: work\nFriday: good",
+    "monday_activities": "done",
+    "tuesday_activities": "doing",
+    "wednesday_activities": "best",
+    "thursday_activities": "work",
+    "friday_activities": "good",
+    "challenges": "aaaaaaaaaassdfgghhhhhhhhhggfvfccxxxxxxxxxxxxxxxccdddeerrtthhbhbvvccxxasawsdefrghjkiioioojhggvzsxsddfgfggggggghhhhhhhhhghgfdfrrttyttrreddssssddcdffggghhjikookkjjjhgfgdfdsswqwqqaaaa",
+    "lessons_learned": "ghrgdmnmv",
+    "status": "SUBMITTED",
+    "submitted_at": "2026-05-03T13:23:29.866Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 14,
+  "fields": {
+    "created_at": "2026-05-03T15:30:53.379Z",
+    "updated_at": "2026-05-03T15:30:53.462Z",
+    "placement": 3,
+    "week_number": 11,
+    "title": "fr",
+    "activities": "Monday: d\nTuesday: dd\nWednesday: d\nThursday: d\nFriday: d",
+    "monday_activities": "d",
+    "tuesday_activities": "dd",
+    "wednesday_activities": "d",
+    "thursday_activities": "d",
+    "friday_activities": "d",
+    "challenges": "d",
+    "lessons_learned": "ds",
+    "status": "SUBMITTED",
+    "submitted_at": "2026-05-03T15:30:53.462Z"
+  }
+},
+{
+  "model": "issues.weeklylog",
+  "pk": 15,
+  "fields": {
+    "created_at": "2026-05-03T17:44:36.917Z",
+    "updated_at": "2026-05-03T17:59:00.405Z",
+    "placement": 4,
+    "week_number": 2,
+    "title": "W",
+    "activities": "Monday: TG\nTuesday: D\nWednesday: I\nThursday: S\nFriday: S",
+    "monday_activities": "TG",
+    "tuesday_activities": "D",
+    "wednesday_activities": "I",
+    "thursday_activities": "S",
+    "friday_activities": "S",
+    "challenges": "L",
+    "lessons_learned": "RT",
+    "status": "APPROVED",
+    "submitted_at": "2026-05-03T17:44:36.975Z"
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 1,
+  "fields": {
+    "created_at": "2026-04-28T16:23:46.217Z",
+    "updated_at": "2026-04-28T16:23:46.218Z",
+    "weekly_log": 4,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "good",
+    "score": null,
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-04-30T15:48:28.719Z",
+    "updated_at": "2026-04-30T15:48:28.719Z",
+    "weekly_log": 5,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "fair",
+    "score": "10.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-04-30T15:49:03.916Z",
+    "updated_at": "2026-04-30T15:49:03.916Z",
+    "weekly_log": 4,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "fair",
+    "score": "53.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-04-30T15:52:32.958Z",
+    "updated_at": "2026-04-30T15:52:32.958Z",
+    "weekly_log": 5,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "improve",
+    "score": "25.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-05-01T10:42:20.002Z",
+    "updated_at": "2026-05-01T10:42:20.002Z",
+    "weekly_log": 6,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "good",
+    "score": "75.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-05-01T10:45:28.448Z",
+    "updated_at": "2026-05-01T10:45:28.448Z",
+    "weekly_log": 6,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "good attempt",
+    "score": "70.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 8,
+  "fields": {
+    "created_at": "2026-05-01T13:32:16.379Z",
+    "updated_at": "2026-05-01T13:32:16.379Z",
+    "weekly_log": 7,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "fair attempt",
+    "score": "55.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 9,
+  "fields": {
+    "created_at": "2026-05-01T13:33:26.195Z",
+    "updated_at": "2026-05-01T13:33:26.195Z",
+    "weekly_log": 7,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "do better",
+    "score": "41.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 10,
+  "fields": {
+    "created_at": "2026-05-01T15:19:58.291Z",
+    "updated_at": "2026-05-01T15:19:58.291Z",
+    "weekly_log": 8,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "do better",
+    "score": "69.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 11,
+  "fields": {
+    "created_at": "2026-05-01T15:20:45.059Z",
+    "updated_at": "2026-05-01T15:20:45.059Z",
+    "weekly_log": 8,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "quite good",
+    "score": "75.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 14,
+  "fields": {
+    "created_at": "2026-05-01T15:36:23.519Z",
+    "updated_at": "2026-05-01T15:36:23.519Z",
+    "weekly_log": 9,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "improve",
+    "score": "32.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 16,
+  "fields": {
+    "created_at": "2026-05-01T15:37:52.576Z",
+    "updated_at": "2026-05-01T15:37:52.576Z",
+    "weekly_log": 9,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "do better",
+    "score": "40.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 17,
+  "fields": {
+    "created_at": "2026-05-01T15:45:57.936Z",
+    "updated_at": "2026-05-01T15:45:57.936Z",
+    "weekly_log": 10,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "good",
+    "score": "85.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 18,
+  "fields": {
+    "created_at": "2026-05-01T15:46:43.996Z",
+    "updated_at": "2026-05-01T15:46:43.996Z",
+    "weekly_log": 10,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "excellent",
+    "score": "90.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 19,
+  "fields": {
+    "created_at": "2026-05-01T15:53:49.314Z",
+    "updated_at": "2026-05-01T15:53:49.314Z",
+    "weekly_log": 11,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "GOOD",
+    "score": "100.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 21,
+  "fields": {
+    "created_at": "2026-05-01T15:54:34.385Z",
+    "updated_at": "2026-05-01T15:54:34.385Z",
+    "weekly_log": 11,
+    "supervisor": 3,
+    "decision": "APPROVED",
+    "comment": "GOOD",
+    "score": "95.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 23,
+  "fields": {
+    "created_at": "2026-05-03T13:26:06.191Z",
+    "updated_at": "2026-05-03T13:26:06.191Z",
+    "weekly_log": 12,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "fair",
+    "score": "40.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 24,
+  "fields": {
+    "created_at": "2026-05-03T17:55:33.249Z",
+    "updated_at": "2026-05-03T17:55:33.249Z",
+    "weekly_log": 15,
+    "supervisor": 4,
+    "decision": "APPROVED",
+    "comment": "GOOD",
+    "score": "100.00",
+    "is_latest": false
+  }
+},
+{
+  "model": "issues.feedback",
+  "pk": 25,
+  "fields": {
+    "created_at": "2026-05-03T17:59:00.398Z",
+    "updated_at": "2026-05-03T17:59:00.398Z",
+    "weekly_log": 15,
+    "supervisor": 5,
+    "decision": "APPROVED",
+    "comment": "GOOD",
+    "score": "98.00",
+    "is_latest": true
+  }
+},
+{
+  "model": "issues.finalresult",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-04-29T09:47:16.760Z",
+    "updated_at": "2026-05-01T17:21:27.616Z",
+    "placement": 2,
+    "published_by": 2,
+    "weekly_logs_score": "0.00",
+    "supervisor_evaluation_score": "20.00",
+    "final_report_score": "30.00",
+    "workplace_assessment_score": "35.00",
+    "final_mark": "85.00",
+    "published_at": null
+  }
+},
+{
+  "model": "issues.finalresult",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-05-01T13:28:00.964Z",
+    "updated_at": "2026-05-03T13:26:06.239Z",
+    "placement": 3,
+    "published_by": null,
+    "weekly_logs_score": "61.57",
+    "supervisor_evaluation_score": "0.00",
+    "final_report_score": "0.00",
+    "workplace_assessment_score": "0.00",
+    "final_mark": "61.57",
+    "published_at": null
+  }
+},
+{
+  "model": "issues.finalresult",
+  "pk": 9,
+  "fields": {
+    "created_at": "2026-05-01T16:48:31.408Z",
+    "updated_at": "2026-05-01T17:21:27.681Z",
+    "placement": 4,
+    "published_by": null,
+    "weekly_logs_score": "0.00",
+    "supervisor_evaluation_score": "0.00",
+    "final_report_score": "0.00",
+    "workplace_assessment_score": "0.00",
+    "final_mark": "0.00",
+    "published_at": null
+  }
+}
+]

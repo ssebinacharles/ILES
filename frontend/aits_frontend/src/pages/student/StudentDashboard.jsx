@@ -15,6 +15,8 @@ import PerformanceTrendChart from "../../components/common/PerformanceTrendChart
 import {
   asArray,
   countByStatus,
+  displayScore,
+  getSubmissionTime,
   formatDateTime,
 } from "../../utils/dashboardHelpers";
 
@@ -42,7 +44,16 @@ function StudentDashboard() {
     lessons_learned: "",
   });
 
-  function loadDashboard() {
+  function loadDashboard({ showLoading = true, clearMessages = false } = {}) {
+    if (showLoading) {
+      setLoading(true);
+    }
+
+    if (clearMessages) {
+      setMessage("");
+      setError("");
+    }
+
     Promise.all([
       getPlacements(),
       getWeeklyLogs(),
@@ -50,22 +61,30 @@ function StudentDashboard() {
       getEvaluations(),
       getFinalResults(),
     ])
-      .then(([placementData, logData, performanceData, evaluationData, resultData]) => {
-        const placementsArray = asArray(placementData);
+      .then(
+        ([
+          placementData,
+          logData,
+          performanceData,
+          evaluationData,
+          resultData,
+        ]) => {
+          const placementsArray = asArray(placementData);
 
-        setPlacements(placementsArray);
-        setWeeklyLogs(asArray(logData));
-        setPerformanceEvaluations(asArray(performanceData));
-        setEvaluations(asArray(evaluationData));
-        setFinalResults(asArray(resultData));
+          setPlacements(placementsArray);
+          setWeeklyLogs(asArray(logData));
+          setPerformanceEvaluations(asArray(performanceData));
+          setEvaluations(asArray(evaluationData));
+          setFinalResults(asArray(resultData));
 
-        setLogForm((previous) => ({
-          ...previous,
-          placement_id: placementsArray[0]?.id || "",
-        }));
+          setLogForm((previous) => ({
+            ...previous,
+            placement_id: previous.placement_id || placementsArray[0]?.id || "",
+          }));
 
-        setLoading(false);
-      })
+          setLoading(false);
+        }
+      )
       .catch((err) => {
         setError(err.message || "Failed to load dashboard.");
         setLoading(false);
@@ -73,7 +92,7 @@ function StudentDashboard() {
   }
 
   useEffect(() => {
-    loadDashboard();
+    loadDashboard({ clearMessages: true });
   }, []);
 
   function handleLogChange(event) {
@@ -95,9 +114,69 @@ function StudentDashboard() {
     ].join("\n");
   }
 
+  function findExistingWeeklyLog() {
+    return weeklyLogs.find((log) => {
+      const samePlacement =
+        Number(log.placement?.id) === Number(logForm.placement_id);
+
+      const sameWeek =
+        Number(log.week_number) === Number(logForm.week_number);
+
+      return samePlacement && sameWeek;
+    });
+  }
+
+  function validateWeeklyLogForm() {
+    if (!logForm.placement_id) {
+      return "Please select an internship placement before creating a weekly log.";
+    }
+
+    if (!logForm.week_number) {
+      return "Please enter the week number.";
+    }
+
+    if (Number(logForm.week_number) < 1) {
+      return "Week number must be 1 or above.";
+    }
+
+    if (!logForm.title.trim()) {
+      return "Please enter a title for the weekly log.";
+    }
+
+    const existingLog = findExistingWeeklyLog();
+
+    if (existingLog) {
+      return `Week ${logForm.week_number} already exists for this placement. You cannot create or submit the same weekly log twice.`;
+    }
+
+    return "";
+  }
+
+  function resetLogForm() {
+    setLogForm((previous) => ({
+      ...previous,
+      week_number: "",
+      title: "",
+      monday_activities: "",
+      tuesday_activities: "",
+      wednesday_activities: "",
+      thursday_activities: "",
+      friday_activities: "",
+      challenges: "",
+      lessons_learned: "",
+    }));
+  }
+
   async function saveDraft() {
     setMessage("");
     setError("");
+
+    const validationError = validateWeeklyLogForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     try {
       await createWeeklyLog({
@@ -107,8 +186,9 @@ function StudentDashboard() {
         activities: buildActivitySummary(),
       });
 
+      resetLogForm();
       setMessage("Weekly log draft saved.");
-      loadDashboard();
+      loadDashboard({ showLoading: false });
     } catch (err) {
       setError(err.message || "Failed to save draft.");
     }
@@ -117,6 +197,13 @@ function StudentDashboard() {
   async function saveAndSubmit() {
     setMessage("");
     setError("");
+
+    const validationError = validateWeeklyLogForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     try {
       const createdLog = await createWeeklyLog({
@@ -128,8 +215,9 @@ function StudentDashboard() {
 
       await submitWeeklyLog(createdLog.id);
 
+      resetLogForm();
       setMessage("Weekly log submitted successfully.");
-      loadDashboard();
+      loadDashboard({ showLoading: false });
     } catch (err) {
       setError(err.message || "Failed to submit weekly log.");
     }
@@ -150,7 +238,10 @@ function StudentDashboard() {
     return total + asArray(log.feedback_entries).length;
   }, 0);
 
-  const currentPlacement = placements[0];
+  const currentPlacement =
+    placements.find((placement) => placement.status !== "REJECTED") ||
+    placements[0];
+
   const latestResult = finalResults[0];
 
   return (
@@ -163,13 +254,26 @@ function StudentDashboard() {
       <div style={gridStyle}>
         <Card
           title="Current Placement"
-          value={currentPlacement ? currentPlacement.company?.company_name : "None"}
+          value={
+            currentPlacement
+              ? currentPlacement.company?.company_name || "Placement Found"
+              : "None"
+          }
         />
+
         <Card title="Weekly Logs" value={weeklyLogs.length} />
         <Card title="Submitted Logs" value={statusCounts.SUBMITTED || 0} />
         <Card title="Approved Logs" value={statusCounts.APPROVED || 0} />
         <Card title="Feedback Received" value={feedbackCount} />
-        <Card title="Final Mark" value={latestResult?.final_mark || "N/A"} />
+        <Card
+          title="Final Mark"
+          value={
+            latestResult?.final_mark !== null &&
+            latestResult?.final_mark !== undefined
+              ? `${latestResult.final_mark}%`
+              : "N/A"
+          }
+        />
       </div>
 
       <section style={sectionStyle}>
@@ -186,22 +290,28 @@ function StudentDashboard() {
           <div style={boxStyle}>
             <p>
               <strong>Company:</strong>{" "}
-              {currentPlacement.company?.company_name}
+              {currentPlacement.company?.company_name || "-"}
             </p>
+
             <p>
               <strong>Location:</strong>{" "}
-              {currentPlacement.company?.location}
+              {currentPlacement.company?.location || "-"}
             </p>
+
             <p>
-              <strong>Status:</strong> {currentPlacement.status}
+              <strong>Status:</strong> {currentPlacement.status || "-"}
             </p>
+
             <p>
-              <strong>Period:</strong> {currentPlacement.start_date} to{" "}
-              {currentPlacement.end_date}
+              <strong>Period:</strong>{" "}
+              {currentPlacement.start_date || "-"} to{" "}
+              {currentPlacement.end_date || "-"}
             </p>
+
             <p>
               <strong>Workplace Supervisor:</strong>{" "}
-              {currentPlacement.workplace_supervisor_name || "Not yet confirmed"}
+              {currentPlacement.workplace_supervisor_name ||
+                "Not yet confirmed"}
             </p>
           </div>
         ) : (
@@ -226,7 +336,8 @@ function StudentDashboard() {
               >
                 {placements.map((placement) => (
                   <option key={placement.id} value={placement.id}>
-                    {placement.company?.company_name} - {placement.status}
+                    {placement.company?.company_name || "Company"} -{" "}
+                    {placement.status}
                   </option>
                 ))}
               </select>
@@ -236,6 +347,7 @@ function StudentDashboard() {
               label="Week Number"
               name="week_number"
               type="number"
+              min="1"
               value={logForm.week_number}
               onChange={handleLogChange}
             />
@@ -296,7 +408,7 @@ function StudentDashboard() {
               onChange={handleLogChange}
             />
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button onClick={saveDraft}>Save Draft</button>
               <button onClick={saveAndSubmit}>Save & Submit</button>
             </div>
@@ -315,15 +427,23 @@ function StudentDashboard() {
               <h3>
                 Week {log.week_number}: {log.title}
               </h3>
+
               <p>
                 <strong>Status:</strong> {log.status}
               </p>
+
               <p>
-                <strong>Submitted:</strong> {formatDateTime(log.submitted_at)}
+                <strong>Submitted:</strong> {getSubmissionTime(log)}
               </p>
+
               <p>
                 <strong>Feedback:</strong>{" "}
                 {asArray(log.feedback_entries).length}
+              </p>
+
+              <p>
+                <strong>Final Weekly Log Mark:</strong>{" "}
+                {displayScore(log.average_score, "Pending")}
               </p>
             </div>
           ))
@@ -339,15 +459,28 @@ function StudentDashboard() {
           evaluations.map((evaluation) => (
             <div key={evaluation.id} style={boxStyle}>
               <h3>{evaluation.evaluation_type}</h3>
+
               <p>
                 <strong>Status:</strong> {evaluation.status}
               </p>
+
               <p>
-                <strong>Total Score:</strong> {evaluation.total_score}
+                <strong>Total Score:</strong>{" "}
+                {displayScore(evaluation.total_score)}
               </p>
+
               <p>
-                <strong>Weighted Score:</strong> {evaluation.weighted_score}
+                <strong>Weighted Score:</strong>{" "}
+                {displayScore(evaluation.weighted_score)}
               </p>
+
+              <p>
+                <strong>Submitted At:</strong>{" "}
+                {evaluation.submitted_at
+                  ? formatDateTime(evaluation.submitted_at)
+                  : "Not submitted yet"}
+              </p>
+
               <p>
                 <strong>Remarks:</strong> {evaluation.remarks || "-"}
               </p>
@@ -409,6 +542,7 @@ const boxStyle = {
   borderRadius: "8px",
   padding: "15px",
   marginBottom: "12px",
+  background: "#fff",
 };
 
 const formStyle = {

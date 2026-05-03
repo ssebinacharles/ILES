@@ -24,11 +24,12 @@ from .models import (
     ReportDefinition,
     SupervisorAssignment,
     WeeklyLog,
+    WeeklyLogStatus,
 )
 
 
 class FullCleanModelSerializer(serializers.ModelSerializer):
-    """Run model full_clean() during create/update."""
+    """Run Django model full_clean() during create/update."""
 
     def _run_model_validation(self, instance):
         try:
@@ -36,6 +37,7 @@ class FullCleanModelSerializer(serializers.ModelSerializer):
         except DjangoValidationError as exc:
             if hasattr(exc, "message_dict"):
                 raise serializers.ValidationError(exc.message_dict)
+
             raise serializers.ValidationError(exc.messages)
 
     def create(self, validated_data):
@@ -54,7 +56,6 @@ class FullCleanModelSerializer(serializers.ModelSerializer):
 
 # ============================================================
 # USER / PROFILE SUMMARY SERIALIZERS
-# These models are from the users app, not issues app.
 # ============================================================
 
 class UserSummarySerializer(serializers.ModelSerializer):
@@ -175,11 +176,13 @@ class InternshipPlacementSerializer(FullCleanModelSerializer):
         write_only=True,
         required=False,
     )
+
     company_id = serializers.PrimaryKeyRelatedField(
         source="company",
         queryset=Company.objects.all(),
         write_only=True,
     )
+
     approved_by_id = serializers.PrimaryKeyRelatedField(
         source="approved_by",
         queryset=AdministratorProfile.objects.all(),
@@ -222,6 +225,7 @@ class InternshipPlacementSerializer(FullCleanModelSerializer):
         )
         read_only_fields = (
             "id",
+            "student",
             "requested_at",
             "approved_at",
             "created_at",
@@ -243,11 +247,13 @@ class SupervisorAssignmentSerializer(FullCleanModelSerializer):
         queryset=InternshipPlacement.objects.all(),
         write_only=True,
     )
+
     supervisor_id = serializers.PrimaryKeyRelatedField(
         source="supervisor",
         queryset=SupervisorProfile.objects.all(),
         write_only=True,
     )
+
     assigned_by_id = serializers.PrimaryKeyRelatedField(
         source="assigned_by",
         queryset=AdministratorProfile.objects.all(),
@@ -274,6 +280,9 @@ class SupervisorAssignmentSerializer(FullCleanModelSerializer):
         )
         read_only_fields = (
             "id",
+            "placement",
+            "supervisor",
+            "assigned_by",
             "assigned_at",
             "created_at",
             "updated_at",
@@ -284,37 +293,24 @@ class SupervisorAssignmentSerializer(FullCleanModelSerializer):
 # WEEKLY LOG + FEEDBACK
 # ============================================================
 
-class FeedbackSerializer(FullCleanModelSerializer):
+class FeedbackInWeeklyLogSerializer(serializers.ModelSerializer):
     supervisor = SupervisorProfileSummarySerializer(read_only=True)
-
-    weekly_log_id = serializers.PrimaryKeyRelatedField(
-        source="weekly_log",
-        queryset=WeeklyLog.objects.all(),
-        write_only=True,
-    )
-    supervisor_id = serializers.PrimaryKeyRelatedField(
-        source="supervisor",
-        queryset=SupervisorProfile.objects.all(),
-        write_only=True,
-        required=False,
-    )
 
     class Meta:
         model = Feedback
         fields = (
             "id",
-            "weekly_log_id",
             "supervisor",
-            "supervisor_id",
-            "score",
             "decision",
             "comment",
+            "score",
             "is_latest",
             "created_at",
             "updated_at",
         )
         read_only_fields = (
             "id",
+            "supervisor",
             "created_at",
             "updated_at",
         )
@@ -322,10 +318,6 @@ class FeedbackSerializer(FullCleanModelSerializer):
 
 class WeeklyLogSerializer(FullCleanModelSerializer):
     placement = InternshipPlacementSerializer(read_only=True)
-    academic_score = serializers.SerializerMethodField()
-    workplace_score = serializers.SerializerMethodField()
-    average_score = serializers.SerializerMethodField()
-    is_fully_assessed = serializers.SerializerMethodField()
 
     placement_id = serializers.PrimaryKeyRelatedField(
         source="placement",
@@ -333,10 +325,15 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
         write_only=True,
     )
 
-    feedback_entries = FeedbackSerializer(
+    feedback_entries = FeedbackInWeeklyLogSerializer(
         many=True,
         read_only=True,
     )
+
+    academic_score = serializers.SerializerMethodField()
+    workplace_score = serializers.SerializerMethodField()
+    average_score = serializers.SerializerMethodField()
+    is_fully_assessed = serializers.SerializerMethodField()
 
     class Meta:
         model = WeeklyLog
@@ -366,10 +363,47 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
         )
         read_only_fields = (
             "id",
+            "placement",
             "submitted_at",
+            "feedback_entries",
+            "academic_score",
+            "workplace_score",
+            "average_score",
+            "is_fully_assessed",
             "created_at",
             "updated_at",
         )
+
+    def validate(self, attrs):
+        placement = attrs.get("placement") or getattr(
+            self.instance,
+            "placement",
+            None,
+        )
+
+        week_number = attrs.get("week_number") or getattr(
+            self.instance,
+            "week_number",
+            None,
+        )
+
+        if placement and week_number:
+            existing_log = (
+                WeeklyLog.objects.filter(
+                    placement=placement,
+                    week_number=week_number,
+                )
+                .exclude(pk=getattr(self.instance, "pk", None))
+                .exists()
+            )
+
+            if existing_log:
+                raise serializers.ValidationError(
+                    f"Week {week_number} already exists for this placement. "
+                    "You cannot create or submit the same weekly log twice."
+                )
+
+        return attrs
 
     def get_academic_score(self, obj):
         score = obj.get_academic_score()
@@ -386,9 +420,19 @@ class WeeklyLogSerializer(FullCleanModelSerializer):
     def get_is_fully_assessed(self, obj):
         return obj.is_fully_assessed()
 
+
 class WeeklyLogEvaluationSerializer(serializers.ModelSerializer):
-    student = StudentProfileSummarySerializer(source="placement.student", read_only=True)
-    company = CompanySummarySerializer(source="placement.company", read_only=True)
+    placement_id = serializers.IntegerField(source="placement.id", read_only=True)
+
+    student = StudentProfileSummarySerializer(
+        source="placement.student",
+        read_only=True,
+    )
+
+    company = CompanySummarySerializer(
+        source="placement.company",
+        read_only=True,
+    )
 
     academic_score = serializers.SerializerMethodField()
     workplace_score = serializers.SerializerMethodField()
@@ -428,6 +472,7 @@ class WeeklyLogEvaluationSerializer(serializers.ModelSerializer):
 
     def get_is_fully_assessed(self, obj):
         return obj.is_fully_assessed()
+
 
 class WeeklyLogFeedbackSummarySerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
@@ -471,14 +516,6 @@ class FeedbackSerializer(FullCleanModelSerializer):
         write_only=True,
     )
 
-    supervisor_id = serializers.PrimaryKeyRelatedField(
-        source="supervisor",
-        queryset=SupervisorProfile.objects.all(),
-        write_only=True,
-        required=False,
-        allow_null=True,
-    )
-
     class Meta:
         model = Feedback
         fields = (
@@ -486,7 +523,6 @@ class FeedbackSerializer(FullCleanModelSerializer):
             "weekly_log",
             "weekly_log_id",
             "supervisor",
-            "supervisor_id",
             "decision",
             "comment",
             "score",
@@ -494,7 +530,6 @@ class FeedbackSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
-
         read_only_fields = (
             "id",
             "weekly_log",
@@ -503,6 +538,31 @@ class FeedbackSerializer(FullCleanModelSerializer):
             "created_at",
             "updated_at",
         )
+
+    def validate(self, attrs):
+        comment = attrs.get("comment", "")
+
+        if not comment or not str(comment).strip():
+            raise serializers.ValidationError(
+                "Please enter a comment before submitting feedback."
+            )
+
+        attrs["comment"] = str(comment).strip()
+
+        score = attrs.get("score", None)
+
+        if score is None:
+            raise serializers.ValidationError(
+                "Please enter a score before submitting feedback."
+            )
+
+        weekly_log = attrs.get("weekly_log")
+
+        if not weekly_log:
+            raise serializers.ValidationError("Weekly log is required.")
+
+        return attrs
+
 
 # ============================================================
 # EVALUATION CRITERIA + SCORES
@@ -535,6 +595,7 @@ class EvaluationScoreSerializer(FullCleanModelSerializer):
         queryset=EvaluationCriterion.objects.all(),
         write_only=True,
     )
+
     evaluation_id = serializers.PrimaryKeyRelatedField(
         source="evaluation",
         queryset=Evaluation.objects.all(),
@@ -570,6 +631,7 @@ class EvaluationSerializer(FullCleanModelSerializer):
         queryset=InternshipPlacement.objects.all(),
         write_only=True,
     )
+
     evaluator_id = serializers.PrimaryKeyRelatedField(
         source="evaluator",
         queryset=SupervisorProfile.objects.all(),
@@ -602,9 +664,12 @@ class EvaluationSerializer(FullCleanModelSerializer):
         )
         read_only_fields = (
             "id",
+            "placement",
+            "evaluator",
             "total_score",
             "weighted_score",
             "submitted_at",
+            "scores",
             "created_at",
             "updated_at",
         )
@@ -624,6 +689,7 @@ class FinalResultSerializer(FullCleanModelSerializer):
         queryset=InternshipPlacement.objects.all(),
         write_only=True,
     )
+
     published_by_id = serializers.PrimaryKeyRelatedField(
         source="published_by",
         queryset=AdministratorProfile.objects.all(),
@@ -652,6 +718,10 @@ class FinalResultSerializer(FullCleanModelSerializer):
         )
         read_only_fields = (
             "id",
+            "placement",
+            "published_by",
+            "weekly_logs_score",
+            "assessed_weekly_logs_count",
             "final_mark",
             "published_at",
             "created_at",
@@ -663,10 +733,10 @@ class FinalResultSerializer(FullCleanModelSerializer):
 
         weekly_logs = obj.placement.weekly_logs.filter(
             status__in=[
-                "SUBMITTED",
-                "UNDER_REVIEW",
-                "APPROVED",
-                "REJECTED",
+                WeeklyLogStatus.SUBMITTED,
+                WeeklyLogStatus.UNDER_REVIEW,
+                WeeklyLogStatus.APPROVED,
+                WeeklyLogStatus.REJECTED,
             ]
         )
 
@@ -754,6 +824,7 @@ class GeneratedReportSerializer(FullCleanModelSerializer):
         queryset=ReportDefinition.objects.all(),
         write_only=True,
     )
+
     generated_by_id = serializers.PrimaryKeyRelatedField(
         source="generated_by",
         queryset=User.objects.filter(role=UserRole.ADMINISTRATOR),

@@ -42,8 +42,14 @@ function App() {
     const savedUser = localStorage.getItem("iles_user");
 
     if (savedUser) {
-      setLoggedInUser(JSON.parse(savedUser));
-      setCurrentView("app");
+      try {
+        setLoggedInUser(JSON.parse(savedUser));
+        setCurrentView("app");
+      } catch {
+        localStorage.removeItem("iles_user");
+        setLoggedInUser(null);
+        setCurrentView("home");
+      }
     }
   }, []);
 
@@ -99,16 +105,20 @@ function App() {
     }
 
     if (activePage === "placement") {
-      return <StudentPlacementPage />;
+      if (isStudent) return <StudentPlacementPage />;
+      if (isAdmin) return <AdminAssessmentsPage />;
+      return <SupervisorDashboard />;
     }
 
     if (activePage === "placementRequest") {
-      return <StudentPlacementRequestPage />;
+      if (isStudent) return <StudentPlacementRequestPage />;
+      return <StudentDashboard />;
     }
 
     if (activePage === "weeklyLogs") {
+      if (isStudent) return <StudentsWeeklyLogsPage />;
       if (isSupervisor) return <SupervisorWeeklyLogsPage />;
-      return <StudentsWeeklyLogsPage />;
+      if (isAdmin) return <AdminAssessmentsPage />;
     }
 
     if (activePage === "supervisors") {
@@ -129,16 +139,17 @@ function App() {
     if (activePage === "results") {
       if (isStudent) return <StudentsResultsPage />;
       if (isAdmin) return <AdminResultsPage />;
-
       return <StudentsResultsPage />;
     }
 
     if (activePage === "users") {
-      return <AdminUsersPage />;
+      if (isAdmin) return <AdminUsersPage />;
+      return <SupervisorDashboard />;
     }
 
     if (activePage === "assessments") {
-      return <AdminAssessmentsPage />;
+      if (isAdmin) return <AdminAssessmentsPage />;
+      return <SupervisorDashboard />;
     }
 
     if (isStudent) return <StudentDashboard />;
@@ -196,8 +207,6 @@ function App() {
               Companies
             </button>
 
-            
-
             <button onClick={() => setActivePage("weeklyLogs")}>
               Student Weekly Logs
             </button>
@@ -209,8 +218,6 @@ function App() {
             <button onClick={() => setActivePage("evaluations")}>
               Evaluations
             </button>
-
-            
           </>
         )}
 
@@ -221,8 +228,6 @@ function App() {
             <button onClick={() => setActivePage("companies")}>
               Companies
             </button>
-
-            
 
             <button onClick={() => setActivePage("supervisors")}>
               Supervisor Assignments
