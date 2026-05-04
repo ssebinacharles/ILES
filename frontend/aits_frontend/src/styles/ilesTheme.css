@@ -17,26 +17,34 @@
   --border: #e5e7eb;
 
   --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --strong-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
   --radius: 16px;
 }
 
-/* Whole app */
+/* ============================================================
+   GLOBAL APP STYLING
+   ============================================================ */
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial,
+    sans-serif;
 }
 
 .app-shell {
   min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 30%),
-    radial-gradient(circle at top right, rgba(30, 58, 138, 0.10), transparent 28%),
+    radial-gradient(circle at top right, rgba(30, 58, 138, 0.1), transparent 28%),
     var(--bg);
 }
 
-/* Top navigation */
+/* ============================================================
+   TOP NAVIGATION
+   ============================================================ */
+
 .app-nav {
   display: flex;
   flex-wrap: wrap;
@@ -82,7 +90,10 @@ body {
   color: #ffffff;
 }
 
-/* General page layout */
+/* ============================================================
+   GENERAL PAGE LAYOUT
+   ============================================================ */
+
 .page,
 main,
 section {
@@ -110,13 +121,12 @@ p {
   line-height: 1.6;
 }
 
-/* Apply modern spacing to page content */
 .app-shell > div:not(.app-nav),
 .app-shell > div > div {
   box-sizing: border-box;
 }
 
-/* Most pages currently use plain divs. This gives them spacing. */
+/* Page spacing for existing inline-styled pages */
 .app-shell > div > h1,
 .app-shell > div > h2,
 .app-shell > div > p,
@@ -129,14 +139,18 @@ p {
   margin-right: 28px;
 }
 
-/* Cards */
+/* ============================================================
+   CARDS AND DASHBOARDS
+   ============================================================ */
+
 .card,
 .dashboard-card,
 .stat-card,
 .info-card,
 .feedback-card,
 .placement-card,
-.result-card {
+.result-card,
+.login-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -145,15 +159,14 @@ p {
   margin-bottom: 20px;
 }
 
-/* Any plain direct card-like divs inside pages */
-div[style*="border"] {
+/* Card-like inline styled divs inside dashboards */
+.app-shell div[style*="border"] {
   border-color: var(--border) !important;
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow);
   background: var(--card);
 }
 
-/* Dashboard statistic cards */
 .dashboard-grid,
 .stats-grid,
 .summary-grid {
@@ -190,7 +203,22 @@ div[style*="border"] {
   font-weight: 600;
 }
 
-/* Buttons */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 28px;
+  margin-bottom: 10px;
+}
+
+.dashboard-header h1 {
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
 button {
   border: none;
   border-radius: 10px;
@@ -213,7 +241,17 @@ button:disabled {
   transform: none;
 }
 
-/* Forms */
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+
 form {
   background: var(--card);
   border: 1px solid var(--border);
@@ -252,7 +290,16 @@ textarea:focus {
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
 
-/* Tables */
+.form-card {
+  display: grid;
+  gap: 12px;
+  max-width: 850px;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
 table {
   width: calc(100% - 56px);
   border-collapse: collapse;
@@ -280,7 +327,10 @@ tr:hover td {
   background: #f8fafc;
 }
 
-/* Status labels */
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+
 .status,
 .badge {
   display: inline-block;
@@ -320,8 +370,11 @@ tr:hover td {
   color: #92400e;
 }
 
-/* Alerts and error messages */
-p[style*="red"],
+/* ============================================================
+   ALERTS
+   ============================================================ */
+
+.app-shell p[style*="red"],
 .error,
 .alert-error {
   background: #fee2e2;
@@ -342,17 +395,10 @@ p[style*="red"],
   font-weight: 600;
 }
 
-/* Home and login pages */
-.login-card,
-.home-card {
-  background: var(--card);
-  border-radius: 22px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  padding: 32px;
+.muted {
+  color: var(--muted);
 }
 
-/* Page section headers */
 .section-title {
   display: flex;
   align-items: center;
@@ -365,12 +411,587 @@ p[style*="red"],
   margin: 0;
 }
 
-/* Small muted text */
-.muted {
-  color: var(--muted);
+.info-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
 }
 
-/* Mobile */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.details-grid > div {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+/* ============================================================
+   MODERN LOGIN INTERFACE
+   Targets only LoginPage.jsx.
+   Does not affect homepage or dashboards.
+   ============================================================ */
+
+.iles-login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 36px 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(5, 20, 30, 0.42), rgba(5, 20, 30, 0.52)),
+    url("../assets/internship-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.iles-login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(20, 184, 166, 0.24), transparent 28%),
+    radial-gradient(circle at 84% 20%, rgba(245, 158, 11, 0.18), transparent 30%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.28), rgba(15, 118, 110, 0.2));
+  pointer-events: none;
+}
+
+.iles-login-background-shape {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.iles-login-background-shape.shape-one {
+  width: 280px;
+  height: 280px;
+  left: -90px;
+  top: 90px;
+  background: rgba(20, 184, 166, 0.32);
+}
+
+.iles-login-background-shape.shape-two {
+  width: 240px;
+  height: 240px;
+  right: -70px;
+  bottom: 70px;
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.iles-login-shell {
+  width: min(980px, 100%);
+  min-height: 590px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  position: relative;
+  z-index: 1;
+  border-radius: 34px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: var(--strong-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.iles-login-info {
+  padding: 38px;
+  background:
+    linear-gradient(145deg, rgba(8, 47, 73, 0.94), rgba(15, 118, 110, 0.9)),
+    radial-gradient(circle at top right, rgba(245, 158, 11, 0.32), transparent 38%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.iles-login-info::after {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -90px;
+  top: -80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.iles-login-brand,
+.iles-register-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 850;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 54px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-weight: 950;
+  letter-spacing: 1.4px;
+}
+
+.iles-login-role-icon {
+  width: 82px;
+  height: 82px;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  font-size: 2.6rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.iles-login-info h2 {
+  color: #ffffff;
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  line-height: 1.03;
+  margin: 18px 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-login-info p {
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 380px;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-login-progress {
+  display: grid;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-login-progress div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.iles-login-progress strong {
+  color: #facc15;
+}
+
+.iles-login-progress span {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+}
+
+.iles-login-card {
+  padding: 54px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.iles-auth-badge {
+  width: fit-content;
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #0f766e;
+  font-weight: 950;
+  background: rgba(204, 251, 241, 0.7);
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  margin-bottom: 16px;
+}
+
+.iles-login-card h1,
+.iles-register-card h1 {
+  margin: 0 0 12px;
+  color: #102a63;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  line-height: 1.02;
+  letter-spacing: -1.8px;
+}
+
+.iles-login-card h1::after,
+.iles-register-card h1::after {
+  content: "";
+  display: block;
+  width: 88px;
+  height: 5px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f59e0b, #14b8a6, #1e3a8a);
+}
+
+.iles-auth-subtitle {
+  color: #64748b;
+  margin: 0 0 24px;
+}
+
+.iles-login-form {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  display: grid;
+  gap: 16px;
+}
+
+.iles-login-form label,
+.iles-register-form label {
+  color: #102033;
+  font-weight: 900;
+  margin: 0;
+}
+
+.iles-login-form input,
+.iles-register-form input {
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 15px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 61, 62, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  color: #102033;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.iles-login-form input:focus,
+.iles-register-form input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 5px rgba(15, 118, 110, 0.14);
+}
+
+.iles-auth-primary-button,
+.iles-auth-secondary-button {
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-weight: 950;
+}
+
+.iles-auth-primary-button {
+  background: linear-gradient(135deg, #14b8a6, #0f766e, #1e3a8a);
+  box-shadow: 0 14px 30px rgba(15, 118, 110, 0.22);
+}
+
+.iles-auth-primary-button:hover {
+  background: linear-gradient(135deg, #0f766e, #115e59, #1e3a8a);
+  transform: translateY(-2px);
+}
+
+.iles-auth-secondary-button {
+  background: rgba(15, 61, 62, 0.9);
+}
+
+.iles-auth-secondary-button:hover {
+  background: #0f3d3e;
+}
+
+.iles-auth-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 13px 16px;
+  border-radius: 16px;
+  font-weight: 850;
+  margin-bottom: 18px;
+}
+
+/* ============================================================
+   MODERN ACCOUNT CREATION INTERFACE
+   Targets only RegisterPage.jsx.
+   Does not affect homepage or dashboards.
+   ============================================================ */
+
+.iles-register-page {
+  min-height: 100vh;
+  width: 100%;
+  padding: 36px 20px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(20, 184, 166, 0.16), transparent 28%),
+    radial-gradient(circle at 90% 5%, rgba(245, 158, 11, 0.14), transparent 28%),
+    linear-gradient(135deg, #eef8f5 0%, #f8fafc 45%, #eaf3ff 100%);
+}
+
+.iles-register-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(15, 61, 62, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 61, 62, 0.045) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 86%);
+}
+
+.iles-register-background-shape {
+  position: fixed;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.iles-register-background-shape.shape-one {
+  width: 260px;
+  height: 260px;
+  left: -80px;
+  top: 80px;
+  background: rgba(20, 184, 166, 0.22);
+}
+
+.iles-register-background-shape.shape-two {
+  width: 250px;
+  height: 250px;
+  right: -90px;
+  bottom: 70px;
+  background: rgba(30, 58, 138, 0.12);
+}
+
+.iles-register-shell {
+  width: min(1180px, 100%);
+  min-height: 720px;
+  display: grid;
+  grid-template-columns: 0.78fr 1.22fr;
+  border-radius: 34px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(15, 61, 62, 0.12);
+  box-shadow: var(--strong-shadow);
+  backdrop-filter: blur(18px);
+  position: relative;
+  z-index: 1;
+}
+
+.iles-register-side-panel {
+  padding: 38px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(145deg, rgba(8, 47, 73, 0.96), rgba(15, 118, 110, 0.9)),
+    radial-gradient(circle at top right, rgba(245, 158, 11, 0.28), transparent 38%);
+  position: relative;
+  overflow: hidden;
+}
+
+.iles-register-side-panel::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -95px;
+  top: -95px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.iles-register-icon {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  font-size: 2.7rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.iles-register-side-panel h2 {
+  color: #ffffff;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.03;
+  margin: 18px 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-register-side-panel p {
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 390px;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-register-steps {
+  display: grid;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.iles-register-steps div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.iles-register-steps strong {
+  color: #facc15;
+}
+
+.iles-register-steps span {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+}
+
+.iles-register-card {
+  padding: 42px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.iles-register-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.iles-register-card::-webkit-scrollbar-thumb {
+  background: rgba(15, 61, 62, 0.35);
+  border-radius: 999px;
+}
+
+.iles-register-form {
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: grid;
+  gap: 20px;
+}
+
+.iles-form-section {
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(15, 61, 62, 0.1);
+  box-shadow: 0 12px 28px rgba(15, 61, 62, 0.06);
+}
+
+.iles-form-section h2 {
+  margin: 0 0 16px;
+  padding: 0;
+  border: none;
+  color: #0f3d3e;
+  font-size: 1.25rem;
+}
+
+.iles-register-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.iles-register-form input:disabled {
+  background: #e2e8f0;
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.iles-register-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ============================================================
+   RESPONSIVE AUTH PAGES
+   ============================================================ */
+
+@media (max-width: 960px) {
+  .iles-login-shell,
+  .iles-register-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .iles-login-info,
+  .iles-register-side-panel {
+    min-height: 330px;
+  }
+
+  .iles-login-card,
+  .iles-register-card {
+    padding: 34px 24px;
+  }
+
+  .iles-register-card {
+    max-height: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .iles-login-page,
+  .iles-register-page {
+    padding: 22px 14px;
+  }
+
+  .iles-login-info,
+  .iles-register-side-panel {
+    padding: 28px 22px;
+  }
+
+  .iles-login-card h1,
+  .iles-register-card h1 {
+    font-size: 2.15rem;
+  }
+
+  .iles-register-grid,
+  .iles-register-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   MOBILE APP RESPONSIVENESS
+   ============================================================ */
+
 @media (max-width: 768px) {
   h1 {
     font-size: 28px;
@@ -401,80 +1022,4 @@ p[style*="red"],
     width: calc(100% - 28px);
     font-size: 13px;
   }
-}
-.button-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.form-card {
-  display: grid;
-  gap: 12px;
-  max-width: 850px;
-}
-
-.info-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 14px;
-}
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 28px;
-  margin-bottom: 10px;
-}
-
-.dashboard-header h1 {
-  margin-bottom: 6px;
-}
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 28px;
-  margin-bottom: 10px;
-}
-
-.dashboard-header h1 {
-  margin-bottom: 6px;
-}
-
-.button-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.form-card {
-  display: grid;
-  gap: 12px;
-  max-width: 850px;
-}
-
-.info-card {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 14px;
-}
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  margin-top: 14px;
-}
-
-.details-grid > div {
-  background: #f8fafc;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
 }

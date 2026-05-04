@@ -39,28 +39,65 @@ function RegisterPage({
     }));
   }
 
-  function getTitle() {
-    if (registerRole === "STUDENT") return "Create Student Account";
+  function getRegisterDetails() {
+    if (registerRole === "STUDENT") {
+      return {
+        title: "Create Student Account",
+        badge: "Student Registration",
+        icon: "🎓",
+        roleName: "Student Account",
+        subtitle:
+          "Create your student account to submit placement details, weekly logs, view feedback, evaluations, and final results.",
+      };
+    }
 
     if (
       registerRole === "SUPERVISOR" &&
       registerSupervisorType === "ACADEMIC"
     ) {
-      return "Create Academic Supervisor Account";
+      return {
+        title: "Create Academic Supervisor Account",
+        badge: "Academic Supervisor Registration",
+        icon: "📘",
+        roleName: "Academic Supervisor Account",
+        subtitle:
+          "Create an academic supervisor account to review assigned students, assess weekly logs, and submit academic feedback.",
+      };
     }
 
     if (
       registerRole === "SUPERVISOR" &&
       registerSupervisorType === "WORKPLACE"
     ) {
-      return "Create Workplace Supervisor Account";
+      return {
+        title: "Create Workplace Supervisor Account",
+        badge: "Workplace Supervisor Registration",
+        icon: "🏢",
+        roleName: "Workplace Supervisor Account",
+        subtitle:
+          "Create a workplace supervisor account to review interns, assess weekly logs, and provide workplace feedback.",
+      };
     }
 
     if (registerRole === "ADMINISTRATOR") {
-      return "Create Internship Administrator Account";
+      return {
+        title: "Create Internship Administrator Account",
+        badge: "Administrator Registration",
+        icon: "🛡️",
+        roleName: "Administrator Account",
+        subtitle:
+          "Create an administrator account to manage users, placements, supervisor assignments, assessments, and final results.",
+      };
     }
 
-    return "Create Account";
+    return {
+      title: "Create Account",
+      badge: "ILES Registration",
+      icon: "⚙️",
+      roleName: "System Account",
+      subtitle:
+        "Create an account for the Internship Logging and Evaluation System.",
+    };
   }
 
   async function handleSubmit(event) {
@@ -108,143 +145,222 @@ function RegisterPage({
     }
   }
 
+  const registerDetails = getRegisterDetails();
+
   return (
-    <div style={pageStyle}>
-      <div style={cardStyle}>
-        <h1>{getTitle()}</h1>
+    <div className="iles-register-page">
+      <div className="iles-register-background-shape shape-one"></div>
+      <div className="iles-register-background-shape shape-two"></div>
 
-        {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      <main className="iles-register-shell">
+        <aside className="iles-register-side-panel">
+          <div className="iles-register-brand">
+            <span className="iles-brand-mark">ILES</span>
+            <span>Internship Logging & Evaluation System</span>
+          </div>
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          <Input
-            label="Username"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
+          <div className="iles-register-icon">{registerDetails.icon}</div>
 
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
+          <h2>{registerDetails.roleName}</h2>
 
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <p>{registerDetails.subtitle}</p>
 
-          <Input
-            label="First Name"
-            name="first_name"
-            value={form.first_name}
-            onChange={handleChange}
-          />
+          <div className="iles-register-steps">
+            <div>
+              <strong>01</strong>
+              <span>Create Account</span>
+            </div>
 
-          <Input
-            label="Last Name"
-            name="last_name"
-            value={form.last_name}
-            onChange={handleChange}
-          />
+            <div>
+              <strong>02</strong>
+              <span>Login Automatically</span>
+            </div>
 
-          <Input
-            label="Phone Number"
-            name="phone_number"
-            value={form.phone_number}
-            onChange={handleChange}
-          />
+            <div>
+              <strong>03</strong>
+              <span>Access Your Dashboard</span>
+            </div>
+          </div>
+        </aside>
 
-          {registerRole === "STUDENT" && (
-            <>
-              <Input
-                label="Registration Number"
-                name="registration_number"
-                value={form.registration_number}
-                onChange={handleChange}
-                required
-              />
+        <section className="iles-register-card">
+          <span className="iles-auth-badge">{registerDetails.badge}</span>
 
-              <Input
-                label="Course"
-                name="course"
-                value={form.course}
-                onChange={handleChange}
-                required
-              />
+          <h1>{registerDetails.title}</h1>
 
-              <Input
-                label="Year of Study"
-                name="year_of_study"
-                type="number"
-                min="1"
-                max="10"
-                value={form.year_of_study}
-                onChange={handleChange}
-                required
-              />
+          <p className="iles-auth-subtitle">
+            Fill in the details below to create your ILES account.
+          </p>
 
-              <Input
-                label="Department"
-                name="department"
-                value={form.department}
-                onChange={handleChange}
-                required
-              />
-            </>
-          )}
+          {error && <p className="iles-auth-error">Error: {error}</p>}
 
-          {registerRole === "SUPERVISOR" && (
-            <>
-              <Input
-                label="Supervisor Type"
-                name="supervisor_type"
-                value={registerSupervisorType}
-                disabled
-              />
+          <form onSubmit={handleSubmit} className="iles-register-form">
+            <div className="iles-form-section">
+              <h2>Account Details</h2>
 
-              <Input
-                label="Organization Name"
-                name="organization_name"
-                value={form.organization_name}
-                onChange={handleChange}
-              />
+              <div className="iles-register-grid">
+                <Input
+                  label="Username"
+                  name="username"
+                  value={form.username}
+                  onChange={handleChange}
+                  required
+                />
 
-              <Input
-                label="Title"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-              />
-            </>
-          )}
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
 
-          {registerRole === "ADMINISTRATOR" && (
-            <Input
-              label="Office Name"
-              name="office_name"
-              value={form.office_name}
-              onChange={handleChange}
-            />
-          )}
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                />
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"}
-          </button>
+                <Input
+                  label="Phone Number"
+                  name="phone_number"
+                  value={form.phone_number}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
 
-          <button type="button" onClick={onBack}>
-            Back
-          </button>
-        </form>
-      </div>
+            <div className="iles-form-section">
+              <h2>Personal Details</h2>
+
+              <div className="iles-register-grid">
+                <Input
+                  label="First Name"
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                />
+
+                <Input
+                  label="Last Name"
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {registerRole === "STUDENT" && (
+              <div className="iles-form-section">
+                <h2>Student Profile</h2>
+
+                <div className="iles-register-grid">
+                  <Input
+                    label="Registration Number"
+                    name="registration_number"
+                    value={form.registration_number}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Input
+                    label="Course"
+                    name="course"
+                    value={form.course}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Input
+                    label="Year of Study"
+                    name="year_of_study"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={form.year_of_study}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Input
+                    label="Department"
+                    name="department"
+                    value={form.department}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {registerRole === "SUPERVISOR" && (
+              <div className="iles-form-section">
+                <h2>Supervisor Profile</h2>
+
+                <div className="iles-register-grid">
+                  <Input
+                    label="Supervisor Type"
+                    name="supervisor_type"
+                    value={registerSupervisorType}
+                    disabled
+                  />
+
+                  <Input
+                    label="Organization Name"
+                    name="organization_name"
+                    value={form.organization_name}
+                    onChange={handleChange}
+                  />
+
+                  <Input
+                    label="Title"
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            )}
+
+            {registerRole === "ADMINISTRATOR" && (
+              <div className="iles-form-section">
+                <h2>Administrator Profile</h2>
+
+                <div className="iles-register-grid">
+                  <Input
+                    label="Office Name"
+                    name="office_name"
+                    value={form.office_name}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="iles-register-actions">
+              <button
+                type="submit"
+                disabled={loading}
+                className="iles-auth-primary-button"
+              >
+                {loading ? "Creating Account..." : "Create Account"}
+              </button>
+
+              <button
+                type="button"
+                onClick={onBack}
+                className="iles-auth-secondary-button"
+              >
+                Back
+              </button>
+            </div>
+          </form>
+        </section>
+      </main>
     </div>
   );
 }
@@ -253,39 +369,9 @@ function Input({ label, ...props }) {
   return (
     <label>
       {label}
-      <input {...props} style={inputStyle} />
+      <input {...props} />
     </label>
   );
 }
-
-const pageStyle = {
-  minHeight: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "#f5f5f5",
-  padding: "30px",
-};
-
-const cardStyle = {
-  width: "460px",
-  background: "white",
-  padding: "30px",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-};
-
-const formStyle = {
-  display: "grid",
-  gap: "15px",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "5px",
-  border: "1px solid #ccc",
-  borderRadius: "5px",
-};
 
 export default RegisterPage;

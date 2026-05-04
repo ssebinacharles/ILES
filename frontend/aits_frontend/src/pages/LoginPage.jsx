@@ -31,93 +31,154 @@ function LoginPage({ loginRole, supervisorType, onLoginSuccess, onBack }) {
     }
   }
 
-  function getTitle() {
-    if (loginRole === "STUDENT") return "Student Login";
+  function getLoginDetails() {
+    if (loginRole === "STUDENT") {
+      return {
+        title: "Student Login",
+        badge: "Student Portal",
+        icon: "🎓",
+        roleName: "Student",
+        subtitle:
+          "Access your internship placement, weekly logs, supervisor feedback, evaluations, and final results.",
+      };
+    }
 
     if (loginRole === "SUPERVISOR" && supervisorType === "ACADEMIC") {
-      return "Academic Supervisor Login";
+      return {
+        title: "Academic Supervisor Login",
+        badge: "Academic Review Portal",
+        icon: "📘",
+        roleName: "Academic Supervisor",
+        subtitle:
+          "Review assigned students, assess weekly logs, provide academic feedback, and monitor internship progress.",
+      };
     }
 
     if (loginRole === "SUPERVISOR" && supervisorType === "WORKPLACE") {
-      return "Workplace Supervisor Login";
+      return {
+        title: "Workplace Supervisor Login",
+        badge: "Workplace Review Portal",
+        icon: "🏢",
+        roleName: "Workplace Supervisor",
+        subtitle:
+          "Review intern weekly logs, provide workplace feedback, and support internship assessment.",
+      };
     }
 
     if (loginRole === "ADMINISTRATOR") {
-      return "Internship Administrator Login";
+      return {
+        title: "Internship Administrator Login",
+        badge: "Administrator Portal",
+        icon: "🛡️",
+        roleName: "Internship Administrator",
+        subtitle:
+          "Manage placement requests, users, supervisor assignments, assessments, reports, and final results.",
+      };
     }
 
-    return "System Admin Login";
+    return {
+      title: "System Admin Login",
+      badge: "System Access",
+      icon: "⚙️",
+      roleName: "System Admin",
+      subtitle:
+        "Access system-level administration tools for managing ILES records and configurations.",
+    };
   }
 
+  const loginDetails = getLoginDetails();
+
   return (
-    <div style={pageStyle}>
-      <div style={cardStyle}>
-        <h1>{getTitle()}</h1>
+    <div className="iles-login-page">
+      <div className="iles-login-background-shape shape-one"></div>
+      <div className="iles-login-background-shape shape-two"></div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+      <main className="iles-login-shell">
+        <section className="iles-login-info">
+          <div className="iles-login-brand">
+            <span className="iles-brand-mark">ILES</span>
+            <span>Internship Logging & Evaluation System</span>
+          </div>
 
-        <form onSubmit={handleSubmit} style={formStyle}>
-          <label>
-            Username
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              style={inputStyle}
-              required
-            />
-          </label>
+          <div className="iles-login-role-icon">{loginDetails.icon}</div>
 
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              style={inputStyle}
-              required
-            />
-          </label>
+          <h2>{loginDetails.roleName}</h2>
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
+          <p>{loginDetails.subtitle}</p>
 
-          <button type="button" onClick={onBack}>
-            Back
-          </button>
-        </form>
-      </div>
+          <div className="iles-login-progress">
+            <div>
+              <strong>01</strong>
+              <span>Login</span>
+            </div>
+
+            <div>
+              <strong>02</strong>
+              <span>Access Dashboard</span>
+            </div>
+
+            <div>
+              <strong>03</strong>
+              <span>Manage Internship Work</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="iles-login-card">
+          <span className="iles-auth-badge">{loginDetails.badge}</span>
+
+          <h1>{loginDetails.title}</h1>
+
+          <p className="iles-auth-subtitle">
+            Enter your username and password to continue.
+          </p>
+
+          {error && <p className="iles-auth-error">{error}</p>}
+
+          <form onSubmit={handleSubmit} className="iles-login-form">
+            <label>
+              Username
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="Enter username"
+                autoComplete="username"
+                required
+              />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter password"
+                autoComplete="current-password"
+                required
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="iles-auth-primary-button"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+            <button
+              type="button"
+              onClick={onBack}
+              className="iles-auth-secondary-button"
+            >
+              Back
+            </button>
+          </form>
+        </section>
+      </main>
     </div>
   );
 }
-
-const pageStyle = {
-  minHeight: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  background: "#f5f5f5",
-};
-
-const cardStyle = {
-  width: "420px",
-  background: "white",
-  padding: "30px",
-  borderRadius: "10px",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-};
-
-const formStyle = {
-  display: "grid",
-  gap: "15px",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "5px",
-  border: "1px solid #ccc",
-  borderRadius: "5px",
-};
 
 export default LoginPage;
