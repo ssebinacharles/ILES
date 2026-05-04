@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8000/api";
 
 function getCookie(name) {
   const cookieString = document.cookie || "";
@@ -141,7 +142,7 @@ async function apiRequest(endpoint, options = {}) {
     });
   } catch {
     throw new Error(
-      "Cannot connect to the backend server. Make sure Django is running on http://localhost:8000."
+      `Cannot connect to the backend server. Make sure the backend is running at ${API_BASE_URL}.`
     );
   }
 
