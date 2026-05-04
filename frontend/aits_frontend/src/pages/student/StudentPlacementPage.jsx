@@ -72,7 +72,6 @@ function StudentPlacementRequestPage() {
         student_notes: form.student_notes,
         status: "PENDING",
       });
-
       setMessage("Placement details submitted to internship administrator.");
     } catch (err) {
       setError(err.message || "Failed to submit placement details.");
@@ -86,21 +85,16 @@ function StudentPlacementRequestPage() {
       <p>
         Submit your company and workplace supervisor details for administrator approval.
       </p>
-
       {message && <p style={{ color: "green" }}>{message}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
-
       <form onSubmit={handleSubmit} style={formStyle}>
         <h2>Company Details</h2>
-
         <Input label="Company Name" name="company_name" value={form.company_name} onChange={handleChange} required />
         <Input label="Location" name="location" value={form.location} onChange={handleChange} required />
         <Input label="Company Email" name="contact_email" value={form.contact_email} onChange={handleChange} />
         <Input label="Company Phone" name="contact_phone" value={form.contact_phone} onChange={handleChange} />
         <Input label="Contact Person" name="contact_person_name" value={form.contact_person_name} onChange={handleChange} />
-
         <h2>Workplace Supervisor Details</h2>
-
         <Input label="Supervisor Name" name="workplace_supervisor_name" value={form.workplace_supervisor_name} onChange={handleChange} required />
         <Input label="Supervisor Email" name="workplace_supervisor_email" value={form.workplace_supervisor_email} onChange={handleChange} />
         <Input label="Supervisor Phone" name="workplace_supervisor_phone" value={form.workplace_supervisor_phone} onChange={handleChange} />
