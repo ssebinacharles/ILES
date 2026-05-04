@@ -1,8 +1,6 @@
 import ApiListPage from "../../components/common/ApiListPage";
-
 import { getFeedback } from "../../api/feedbackApi";
 import { displayScore, formatDateTime } from "../../utils/dashboardHelpers";
-
 function SupervisorFeedbackPage() {
   return (
     <ApiListPage
@@ -13,21 +11,18 @@ function SupervisorFeedbackPage() {
       renderItem={(feedback) => (
         <div>
           <h2>{feedback.decision || "Feedback"}</h2>
-
           <p>
             <strong>Weekly Log:</strong>{" "}
             {feedback.weekly_log
               ? `Week ${feedback.weekly_log.week_number} - ${feedback.weekly_log.title}`
               : "-"}
           </p>
-
           <p>
             <strong>Weekly Log Submitted At:</strong>{" "}
             {feedback.weekly_log?.submitted_at
               ? formatDateTime(feedback.weekly_log.submitted_at)
               : "Not submitted yet"}
           </p>
-
           <p>
             <strong>Student:</strong>{" "}
             {feedback.weekly_log?.student_name || "-"}{" "}
