@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { getCompanies, createCompany } from "../../api/companiesApi";
 import { createPlacement } from "../../api/placementsApi";
 import { asArray } from "../../utils/dashboardHelpers";
-
 function StudentPlacementRequestPage() {
   const [companies, setCompanies] = useState([]);
   const [form, setForm] = useState({
@@ -22,33 +20,27 @@ function StudentPlacementRequestPage() {
     end_date: "",
     student_notes: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
   useEffect(() => {
     getCompanies()
       .then((data) => setCompanies(asArray(data)))
       .catch(() => setCompanies([]));
   }, []);
-
   function handleChange(event) {
     const { name, value } = event.target;
-
     setForm((previous) => ({
       ...previous,
       [name]: value,
     }));
   }
-
   async function getOrCreateCompany() {
     const existing = companies.find(
       (company) =>
         company.company_name.toLowerCase().trim() ===
         form.company_name.toLowerCase().trim()
     );
-
     if (existing) return existing;
 
     return createCompany({
@@ -59,13 +51,11 @@ function StudentPlacementRequestPage() {
       contact_person_name: form.contact_person_name,
     });
   }
-
   async function handleSubmit(event) {
     event.preventDefault();
     setLoading(true);
     setMessage("");
     setError("");
-
     try {
       const company = await getOrCreateCompany();
 
@@ -90,7 +80,6 @@ function StudentPlacementRequestPage() {
       setLoading(false);
     }
   }
-
   return (
     <div style={{ padding: "30px" }}>
       <h1>Submit Internship Placement Details</h1>
@@ -117,13 +106,10 @@ function StudentPlacementRequestPage() {
         <Input label="Supervisor Phone" name="workplace_supervisor_phone" value={form.workplace_supervisor_phone} onChange={handleChange} />
         <Input label="Supervisor Title" name="workplace_supervisor_title" value={form.workplace_supervisor_title} onChange={handleChange} />
         <Input label="Department in Organization" name="workplace_supervisor_department" value={form.workplace_supervisor_department} onChange={handleChange} />
-
         <h2>Internship Period</h2>
-
         <Input label="Organization Department" name="org_department" value={form.org_department} onChange={handleChange} />
         <Input label="Start Date" type="date" name="start_date" value={form.start_date} onChange={handleChange} required />
         <Input label="End Date" type="date" name="end_date" value={form.end_date} onChange={handleChange} required />
-
         <label>
           Notes
           <textarea
@@ -133,7 +119,6 @@ function StudentPlacementRequestPage() {
             style={inputStyle}
           />
         </label>
-
         <button type="submit" disabled={loading}>
           {loading ? "Submitting..." : "Submit Placement Details"}
         </button>
@@ -141,7 +126,6 @@ function StudentPlacementRequestPage() {
     </div>
   );
 }
-
 function Input({ label, ...props }) {
   return (
     <label>
@@ -150,13 +134,11 @@ function Input({ label, ...props }) {
     </label>
   );
 }
-
 const formStyle = {
   display: "grid",
   gap: "14px",
   maxWidth: "700px",
 };
-
 const inputStyle = {
   width: "100%",
   padding: "10px",
