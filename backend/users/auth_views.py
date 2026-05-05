@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from django.db import transaction, IntegrityError
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.middleware.csrf import get_token
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -17,6 +19,7 @@ from .models import (
     AdministratorProfile,
     SupervisorType,
 )
+
 
 def build_user_payload(user):
     payload = {
@@ -66,6 +69,20 @@ def build_user_payload(user):
 
     return payload
 
+
+def build_auth_response(user, message, response_status=status.HTTP_200_OK):
+    token, created = Token.objects.get_or_create(user=user)
+
+    return Response(
+        {
+            "message": message,
+            "token": token.key,
+            "user": build_user_payload(user),
+        },
+        status=response_status,
+    )
+
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -80,9 +97,7 @@ def register_view(request):
 
     if not username or not email or not password or not role:
         return Response(
-            {
-                "detail": "Username, email, password, and role are required."
-            },
+            {"detail": "Username, email, password, and role are required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -92,9 +107,7 @@ def register_view(request):
         UserRole.ADMINISTRATOR,
     ]:
         return Response(
-            {
-                "detail": "Invalid role for self-registration."
-            },
+            {"detail": "Invalid role for self-registration."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -119,7 +132,12 @@ def register_view(request):
                 year_of_study = request.data.get("year_of_study")
                 department = request.data.get("department")
 
-                if not registration_number or not course or not year_of_study or not department:
+                if (
+                    not registration_number
+                    or not course
+                    or not year_of_study
+                    or not department
+                ):
                     return Response(
                         {
                             "detail": "Registration number, course, year of study, and department are required for students."
@@ -172,23 +190,15 @@ def register_view(request):
                 profile.full_clean()
                 profile.save()
 
-            login(request, user)
-            csrf_token = get_token(request)
-
-            return Response(
-                {
-                    "message": "Account created successfully.",
-                    "csrfToken": csrf_token,
-                    "user": build_user_payload(user),
-                },
-                status=status.HTTP_201_CREATED,
+            return build_auth_response(
+                user,
+                "Account created successfully.",
+                response_status=status.HTTP_201_CREATED,
             )
 
     except IntegrityError:
         return Response(
-            {
-                "detail": "Username, email, or registration number already exists."
-            },
+            {"detail": "Username, email, or registration number already exists."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -197,11 +207,10 @@ def register_view(request):
             return Response(exc.message_dict, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(
-            {
-                "detail": exc.messages
-            },
+            {"detail": exc.messages},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -249,25 +258,18 @@ def login_view(request):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-    login(request, user)
-
-    csrf_token = get_token(request)
-
-    return Response(
-        {
-            "message": "Login successful.",
-            "csrfToken": csrf_token,
-            "user": build_user_payload(user),
-        }
-    )
-    
+    return build_auth_response(user, "Login successful.")
 
 
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
+    if request.auth:
+        request.auth.delete()
+
     logout(request)
+
     return Response({"message": "Logout successful."})
 
 
