@@ -1,0 +1,95 @@
+import React from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+
+const DashboardLayout = () => {
+
+  const linkStyle = ({ isActive }) => ({
+    display: 'block',
+    padding: '10px 12px',
+    marginBottom: '6px',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.95rem',
+    color: isActive ? '#fff' : '#333',
+    backgroundColor: isActive ? '#007bff' : 'transparent',
+    transition: 'all 0.2s ease'
+  });
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+      
+      {/* Sidebar */}
+      <aside
+        style={{
+          width: '200px',
+          background: '#f8f9fa',
+          padding: '1.2rem',
+          borderRight: '1px solid #ddd',
+          position: 'sticky',
+          top: 0,
+          height: '100vh'
+        }}
+      >
+        <h3 style={{ marginBottom: '1.5rem', color: '#007bff' }}>
+          Student Portal
+        </h3>
+
+        <nav>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li>
+              <NavLink to="/student/dashboard" style={linkStyle}>
+                Dashboard
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/student/placements" style={linkStyle}>
+                Placements
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/student/logs" style={linkStyle}>
+                Weekly Logs
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/student/results" style={linkStyle}>
+                Results
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main */}
+      <main style={{ flex: 1, background: '#f5f7fa' }}>
+        
+        {/* Header */}
+        <header
+          style={{
+            padding: '1rem 1.5rem',
+            background: '#fff',
+            borderBottom: '1px solid #eee',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#444' }}>
+            Internship Learning Evaluation System
+          </h2>
+
+          <span style={{ fontSize: '0.9rem', color: '#666' }}>
+            Welcome, Student
+          </span>
+        </header>
+
+        {/* Content */}
+        <section style={{ padding: '1.5rem' }}>
+          <Outlet />
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default DashboardLayout;
