@@ -2,18 +2,15 @@ export function asArray(data) {
   if (Array.isArray(data)) {
     return data;
   }
-
   if (data && Array.isArray(data.results)) {
     return data.results;
   }
-
   if (data && typeof data === "object") {
     return [data];
   }
 
   return [];
 }
-
 export function getStoredUser() {
   try {
     const savedUser = localStorage.getItem("iles_user");
@@ -21,82 +18,64 @@ export function getStoredUser() {
     if (!savedUser) {
       return null;
     }
-
     return JSON.parse(savedUser);
   } catch {
     return null;
   }
 }
-
 export function getCount(data) {
   return asArray(data).length;
 }
-
 export function formatDate(value, emptyText = "-") {
   if (!value) {
     return emptyText;
   }
-
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-
   return date.toLocaleDateString();
 }
-
 export function formatDateTime(value, emptyText = "Not submitted yet") {
   if (!value) {
     return emptyText;
   }
-
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
-
   return date.toLocaleString();
 }
-
 export function getPlacementIdFromItem(item) {
   if (!item) {
     return null;
   }
-
   if (item.placement_id) {
     return item.placement_id;
   }
-
   if (item.placement && typeof item.placement === "object") {
     return item.placement.id || null;
   }
-
   if (item.placement) {
     return item.placement;
   }
-
   return null;
 }
-
 export function uniqueById(records) {
   const map = new Map();
-
   asArray(records).forEach((record) => {
     if (record && record.id !== undefined && record.id !== null) {
       map.set(record.id, record);
     }
   });
-
   return Array.from(map.values());
 }
-
 export function getUserProfileId(user) {
   if (!user) {
     return null;
   }
-
   return (
     user.profile?.profile_id ||
     user.profile?.id ||
@@ -106,35 +85,28 @@ export function getUserProfileId(user) {
     null
   );
 }
-
 export function isMySupervisorAssignment(assignment, user, expectedRole = "") {
   if (!assignment || !user) {
     return false;
   }
-
   const supervisor = assignment.supervisor;
   const profileId = getUserProfileId(user);
-
   const matchesSupervisor =
     supervisor?.id === profileId ||
     supervisor?.user?.id === user.id ||
     supervisor?.user?.username === user.username ||
     supervisor?.user?.email === user.email;
-
   if (!matchesSupervisor) {
     return false;
   }
-
   if (!expectedRole) {
     return true;
   }
-
   return (
     assignment.assignment_role === expectedRole ||
     supervisor?.supervisor_type === expectedRole
   );
 }
-
 export function countByStatus(records, field = "status") {
   const counts = {};
 
