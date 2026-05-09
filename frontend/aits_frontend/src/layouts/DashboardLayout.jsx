@@ -1,6 +1,5 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-
 const DashboardLayout = () => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -25,5 +24,4 @@ const DashboardLayout = () => {
     </div>
   );
 };
-
 export default DashboardLayout;
