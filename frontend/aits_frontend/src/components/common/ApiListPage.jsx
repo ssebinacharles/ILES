@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
-
 function normalizeData(data) {
   if (Array.isArray(data)) {
     return data;
   }
-
   if (data && Array.isArray(data.results)) {
     return data.results;
   }
-
   if (data && typeof data === "object") {
     return [data];
   }
-
   return [];
 }
-
 function ApiListPage({
   title,
   description,
@@ -45,7 +40,6 @@ function ApiListPage({
         setLoading(false);
       });
   }
-
   useEffect(() => {
     loadData();
   }, [fetchData]);
@@ -58,7 +52,6 @@ function ApiListPage({
       </div>
     );
   }
-
   if (error) {
     return (
       <div style={pageStyle}>
@@ -72,7 +65,6 @@ function ApiListPage({
       </div>
     );
   }
-
   return (
     <div style={pageStyle}>
       <h1>{title}</h1>
@@ -96,7 +88,6 @@ function ApiListPage({
           ))}
         </div>
       )}
-
       {showRawResponse && (
         <details style={{ marginTop: "25px" }}>
           <summary>View raw API response</summary>
@@ -107,11 +98,9 @@ function ApiListPage({
     </div>
   );
 }
-
 const pageStyle = {
   padding: "30px",
 };
-
 const itemBoxStyle = {
   border: "1px solid #ddd",
   borderRadius: "8px",
@@ -119,16 +108,13 @@ const itemBoxStyle = {
   marginBottom: "12px",
   background: "#fff",
 };
-
 const errorStyle = {
   color: "red",
 };
-
 const preStyle = {
   background: "#f5f5f5",
   padding: "12px",
   overflowX: "auto",
   borderRadius: "6px",
 };
-
 export default ApiListPage;
