@@ -8,13 +8,11 @@ export function asArray(data) {
   if (data && typeof data === "object") {
     return [data];
   }
-
   return [];
 }
 export function getStoredUser() {
   try {
     const savedUser = localStorage.getItem("iles_user");
-
     if (!savedUser) {
       return null;
     }
@@ -31,7 +29,6 @@ export function formatDate(value, emptyText = "-") {
     return emptyText;
   }
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return value;
   }
@@ -42,7 +39,6 @@ export function formatDateTime(value, emptyText = "Not submitted yet") {
     return emptyText;
   }
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return value;
   }
@@ -109,7 +105,6 @@ export function isMySupervisorAssignment(assignment, user, expectedRole = "") {
 }
 export function countByStatus(records, field = "status") {
   const counts = {};
-
   asArray(records).forEach((record) => {
     const value = record?.[field] || "UNKNOWN";
     counts[value] = (counts[value] || 0) + 1;
@@ -117,42 +112,34 @@ export function countByStatus(records, field = "status") {
 
   return counts;
 }
-
 export function averageFinalMark(finalResults) {
   const records = asArray(finalResults);
 
   if (records.length === 0) {
     return "0.00";
   }
-
   const total = records.reduce((sum, result) => {
     return sum + Number(result.final_mark || 0);
   }, 0);
 
   return (total / records.length).toFixed(2);
 }
-
 export function displayScore(value, emptyText = "Not available") {
   if (value === null || value === undefined || value === "") {
     return emptyText;
   }
-
   return `${value}%`;
 }
-
 export function getFeedbackCount(log) {
   return asArray(log?.feedback_entries).length;
 }
-
 export function getSubmissionTime(log) {
   if (!log) {
     return "Not submitted yet";
   }
-
   if (log.submitted_at) {
     return formatDateTime(log.submitted_at);
   }
-
   if (log.status !== "DRAFT" && log.updated_at) {
     return formatDateTime(log.updated_at);
   }
