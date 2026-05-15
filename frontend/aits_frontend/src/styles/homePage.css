@@ -10,7 +10,6 @@
   background-position: center;
   background-repeat: no-repeat;
 }
-
 .home-overlay {
   min-height: 100vh;
   padding: 45px 55px;
@@ -18,7 +17,6 @@
   display: flex;
   flex-direction: column;
 }
-
 /* Heading area */
 .home-header {
   max-width: 1000px;
@@ -26,7 +24,6 @@
   margin: 0 auto 90px;
   text-align: center;
 }
-
 .home-header h1 {
   color: white;
   font-size: 46px;
@@ -36,7 +33,6 @@
   text-align: center;
   text-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
-
 .home-header p {
   font-size: 18px;
   line-height: 1.6;
@@ -45,7 +41,6 @@
   color: #eefdfb;
   font-weight: 600;
 }
-
 /* Login cards */
 .home-cards {
   display: grid;
@@ -55,7 +50,6 @@
   width: 100%;
   margin: auto auto 35px;
 }
-
 .home-card {
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(7px);
@@ -65,17 +59,14 @@
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
   border: 1px solid rgba(255, 255, 255, 0.6);
   transition: 0.25s ease;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
 .home-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 24px 55px rgba(0, 0, 0, 0.32);
 }
-
 .home-icon {
   width: 43px;
   height: 43px;
@@ -88,14 +79,12 @@
   font-size: 23px;
   margin-bottom: 12px;
 }
-
 .home-card h2 {
   margin: 0 0 8px;
   color: #0f172a;
   font-size: 24px;
   line-height: 1.15;
 }
-
 .home-card p {
   color: #475569;
   line-height: 1.45;
@@ -103,7 +92,6 @@
   margin: 0 0 14px;
   min-height: auto;
 }
-
 .home-card button {
   width: 100%;
   margin-top: 8px;
@@ -117,12 +105,10 @@
   cursor: pointer;
   transition: 0.2s ease;
 }
-
 .home-card button:hover {
   background: #115e59;
   transform: translateY(-1px);
 }
-
 .home-card .outline-button {
   background: transparent;
   color: #0f766e;
