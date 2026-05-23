@@ -33,3 +33,15 @@ export function updateFeedback(id, data) {
     body: JSON.stringify(data),
   });
 }
+export function patchFeedback(id, data) {
+  return apiRequest(`${FEEDBACK_ENDPOINT}${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteFeedback(id) {
+  return apiRequest(`${FEEDBACK_ENDPOINT}${id}/`, {
+    method: "DELETE",
+  });
+}
