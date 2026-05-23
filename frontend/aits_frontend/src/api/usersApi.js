@@ -26,3 +26,33 @@ export function updateUser(id, data) {
     body: JSON.stringify(data),
   });
 }
+export function patchUser(id, data) {
+  return apiRequest(`${USERS_ENDPOINT}${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getStudents() {
+  return apiRequest(STUDENTS_ENDPOINT);
+}
+
+export function getStudent(id) {
+  return apiRequest(`${STUDENTS_ENDPOINT}${id}/`);
+}
+
+export function getSupervisors() {
+  return apiRequest(SUPERVISORS_ENDPOINT);
+}
+
+export function getSupervisor(id) {
+  return apiRequest(`${SUPERVISORS_ENDPOINT}${id}/`);
+}
+
+export function getAdministrators() {
+  return apiRequest(ADMINISTRATORS_ENDPOINT);
+}
+
+export function getAdministrator(id) {
+  return apiRequest(`${ADMINISTRATORS_ENDPOINT}${id}/`);
+}
