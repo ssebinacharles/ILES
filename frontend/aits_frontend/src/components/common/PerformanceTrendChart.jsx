@@ -154,3 +154,25 @@ function PerformanceTrendChart({
     </div>
   );
 }
+
+const chartBoxStyle = {
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  padding: "16px",
+  marginBottom: "18px",
+  backgroundColor: "#fff",
+};
+
+const svgStyle = {
+  width: "100%",
+  maxWidth: "850px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  background: "white",
+};
+
+const descriptionStyle = {
+  marginTop: "10px",
+};
+
+export default PerformanceTrendChart;
