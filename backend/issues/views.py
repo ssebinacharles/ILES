@@ -889,3 +889,55 @@ class FinalResultViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
         return Response(self.get_serializer(final_result).data)
 
 
+class AuditLogViewSet(SearchOrderingMixin, viewsets.ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.select_related("actor", "content_type").all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [AllowAny]
+
+    search_fields = ("action", "model_label", "object_id", "actor__username")
+    ordering = ("-created_at",)
+
+
+class ReportDefinitionViewSet(SearchOrderingMixin, viewsets.ModelViewSet):
+    queryset = ReportDefinition.objects.select_related("created_by").all()
+    serializer_class = ReportDefinitionSerializer
+    permission_classes = [AllowAny]
+
+    search_fields = ("name", "report_type", "frequency")
+    ordering = ("name",)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["post"])
+    def run_now(self, request, pk=None):
+        report_definition = self.get_object()
+
+        generated_report = GeneratedReport.objects.create(
+            report_definition=report_definition,
+            generated_by=request.user,
+            status=ReportStatus.COMPLETED,
+            output_format=request.data.get("output_format", "PDF"),
+            summary={"message": "Manual report trigger recorded from API."},
+            generated_at=timezone.now(),
+        )
+
+        serializer = GeneratedReportSerializer(
+            generated_report,
+            context=self.get_serializer_context(),
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class GeneratedReportViewSet(SearchOrderingMixin, viewsets.ReadOnlyModelViewSet):
+    queryset = GeneratedReport.objects.select_related(
+        "report_definition",
+        "generated_by",
+    ).all()
+
+    serializer_class = GeneratedReportSerializer
+    permission_classes = [AllowAny]
+
+    search_fields = ("report_definition__name", "status", "output_format")
+    ordering = ("-created_at",)
