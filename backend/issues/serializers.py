@@ -781,3 +781,77 @@ class AuditLogSerializer(serializers.ModelSerializer):
 # REPORTING
 # ============================================================
 
+class ReportDefinitionSerializer(FullCleanModelSerializer):
+    created_by = UserSummarySerializer(read_only=True)
+
+    created_by_id = serializers.PrimaryKeyRelatedField(
+        source="created_by",
+        queryset=User.objects.filter(role=UserRole.ADMINISTRATOR),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = ReportDefinition
+        fields = (
+            "id",
+            "name",
+            "report_type",
+            "frequency",
+            "filters",
+            "is_active",
+            "next_run_at",
+            "last_run_at",
+            "created_by",
+            "created_by_id",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
+
+
+class GeneratedReportSerializer(FullCleanModelSerializer):
+    report_definition = ReportDefinitionSerializer(read_only=True)
+    generated_by = UserSummarySerializer(read_only=True)
+
+    report_definition_id = serializers.PrimaryKeyRelatedField(
+        source="report_definition",
+        queryset=ReportDefinition.objects.all(),
+        write_only=True,
+    )
+
+    generated_by_id = serializers.PrimaryKeyRelatedField(
+        source="generated_by",
+        queryset=User.objects.filter(role=UserRole.ADMINISTRATOR),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = GeneratedReport
+        fields = (
+            "id",
+            "report_definition",
+            "report_definition_id",
+            "generated_by",
+            "generated_by_id",
+            "status",
+            "output_format",
+            "output_path",
+            "summary",
+            "generated_at",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = (
+            "id",
+            "generated_at",
+            "created_at",
+            "updated_at",
+        )
